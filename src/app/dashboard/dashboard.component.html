@@ -1,8 +1,23 @@
 <div class="grid grid-flow-col grid-rows-3 gap-4">
-  <div class="row-span-full">
-    <!-- <app-progress-component></app-progress-component> -->
+  <div class="row">
+    <app-progress></app-progress>
   </div>
-  <div class=""></div>
+  <div class="">
+    <nb-chat title="Nebular Conversational UI" size="large">
+  <nb-chat-message *ngFor="let msg of messages"
+                   [type]="msg.type"
+                   [message]="msg.text"
+                   [reply]="msg.reply"
+                   [sender]="msg.user.name"
+                   [date]="msg.date"
+                   [files]="msg.files"
+                   [quote]="msg.quote"
+                   [latitude]="msg.latitude"
+                   [longitude]="msg.longitude"
+                   [avatar]="msg.user.avatar">
+  </nb-chat-message>
+  <!-- <nb-chat-form (send)="sendMessage($event)" [dropFiles]="true">
+  </nb-chat-form> -->
+</nb-chat>
+  </div>
 </div>
-
-<p>dashboard works!</p>

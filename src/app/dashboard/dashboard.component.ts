@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ProgressComponent } from '../progress/progress.component';
+import { NbChatComponent } from '@nebular/theme';
 
 @Component({
   selector: 'app-dashboard',

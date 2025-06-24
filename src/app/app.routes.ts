@@ -1,15 +1,10 @@
 import { Routes } from '@angular/router';
 import { ProgressComponent } from './progress/progress.component';
+import { NbThemeModule } from '@nebular/theme';
 
 export const routes: Routes = [
-     {
+    {
         path: '',
-        loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
-        children: [
-            {
-                path: '',
-                component: ProgressComponent
-            }
-        ]
-      }
+        loadChildren: () => import('@nebular/theme').then(m => m.NbThemeModule)
+    },
 ];
