@@ -1,1 +1,16 @@
-<p>chat-showcase works!</p>
+<nb-chat title="" size="large">
+  <nb-chat-message *ngFor="let msg of messages"
+                   [type]="msg.type"
+                   [message]="msg.text"
+                   [reply]="msg.reply"
+                   [sender]="msg.user.name"
+                   [date]="msg.date"
+                   [files]="msg.files"
+                   [quote]="msg.quote"
+                   [latitude]="msg.latitude"
+                   [longitude]="msg.longitude"
+                   [avatar]="msg.user.avatar">
+  </nb-chat-message>
+  <nb-chat-form (send)="sendMessage($event)" >
+  </nb-chat-form>
+</nb-chat>

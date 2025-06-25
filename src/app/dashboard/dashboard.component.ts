@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { ProgressComponent } from '../progress/progress.component';
-import { NbChatComponent } from '@nebular/theme';
+import { NbChatComponent, NbChatModule, NbThemeModule } from '@nebular/theme';
+import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
 
 @Component({
   selector: 'app-dashboard',
-
-  imports: [],
+  standalone: true,
+  imports: [ChatShowcaseComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })

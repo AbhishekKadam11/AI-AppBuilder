@@ -1,9 +1,12 @@
 import { Component } from '@angular/core';
 import { ChatShowcaseService } from '../services/chat-showcase.service';
+import { NbChatModule } from '@nebular/theme';
+import { NgFor } from '@angular/common';
 
 @Component({
   selector: 'app-chat-showcase',
-  imports: [],
+  standalone: true,
+  imports: [NbChatModule, NgFor],
   templateUrl: './chat-showcase.component.html',
   styleUrl: './chat-showcase.component.scss'
 })
