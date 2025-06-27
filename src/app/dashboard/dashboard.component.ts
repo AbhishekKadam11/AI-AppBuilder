@@ -6,7 +6,7 @@ import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component'
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [ChatShowcaseComponent, NbLayoutModule],
+  imports: [ChatShowcaseComponent, NbLayoutModule, ProgressComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
