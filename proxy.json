@@ -1,0 +1,10 @@
+{
+ "/socket.io": {
+        "target": "http://localhost:8001",
+        "secure": false,
+        "ws": true,
+        "changeOrigin": true,
+        "logLevel": "debug",
+        "pathRewrite": { }
+    }
+}
