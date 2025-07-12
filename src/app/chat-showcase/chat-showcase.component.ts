@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, Inject, inject } from '@angular/core';
 import { ChatShowcaseService } from '../services/chat-showcase.service';
 import { NbChatModule } from '@nebular/theme';
 import { NgFor } from '@angular/common';
@@ -11,13 +11,20 @@ import { SocketService } from '../services/socket.service';
   templateUrl: './chat-showcase.component.html',
   styleUrl: './chat-showcase.component.scss'
 })
-export class ChatShowcaseComponent {
-messages: any[];
+export class ChatShowcaseComponent implements AfterViewInit {
+  messages: any[];
+  // private socketService: SocketService | any;
 
   // constructor(protected chatShowcaseService: ChatShowcaseService, private socketService: SocketService) {
-  constructor(protected chatShowcaseService: ChatShowcaseService, private socketService: SocketService) {
+  constructor(protected chatShowcaseService: ChatShowcaseService,  @Inject(SocketService) private socketService: SocketService,) {
     this.messages = this.chatShowcaseService.loadMessages();
   }
+
+  ngAfterViewInit() {
+    // this.socketService = inject(SocketService);
+    this.socketService?.loadSocket();
+  }
+
 
   sendMessage(event: any) {
     const files = !event.files ? [] : event.files.map((file: { src: string; type: string; }) => {
@@ -39,7 +46,7 @@ messages: any[];
         avatar: 'https://i.gifer.com/no.gif',
       },
     });
-    this.socketService.sendMessage('sendMessage', this.messages);
+   // this.socketService.sendMessage('sendMessage', this.messages);
     // const botReply = this.chatShowcaseService.reply(event.message);
     // if (botReply) {
     //   setTimeout(() => { this.messages.push(botReply) }, 500);

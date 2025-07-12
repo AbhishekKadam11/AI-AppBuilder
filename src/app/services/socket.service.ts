@@ -11,14 +11,41 @@ export class SocketService {
     constructor(private socket: Socket) {
         // Initialize the Socket.IO connection with the server address
         //this.socket = io('http://localhost:8001/projectId'); // Replace with your server address
-        socket.connect()
+     //   socket.connect()
 
-        this.socket.of('/projectId').on('connect', () => {
+        // this.socket.of('/projectId').on('connect', () => {
+        //     console.log('socket_ONE connected');
+        //     this.socket.emit('SOURCE', 'SESSION');
+        // })
+
+        // this.socket.of('/projectId').on("connect_error", (err) => {
+        //     // the reason of the error, for example "xhr poll error"
+        //     console.log(err.message);
+
+        //     // some additional description, for example the status code of the initial HTTP response
+        //     //@ts-ignore
+        //     console.log(err?.description);
+
+        //     // some additional context, for example the XMLHttpRequest object
+        //     // console.log(err.context);
+        // });
+        // this.socket.of('/projectId').on("disconnect", (reason, details) => {
+        //     // the reason of the disconnection, for example "transport error"
+        //     console.log(reason);
+
+        //     // the low-level reason of the disconnection, for example "xhr post error"
+        //     //@ts-ignore
+        //     console.log(details.message);
+        // });
+    }
+
+    public loadSocket() {
+         this.socket.of('/projectId').on('connect', () => {
             console.log('socket_ONE connected');
             this.socket.emit('SOURCE', 'SESSION');
         })
 
-        this.socket.on("connect_error", (err) => {
+        this.socket.of('/projectId').on("connect_error", (err) => {
             // the reason of the error, for example "xhr poll error"
             console.log(err.message);
 
@@ -29,7 +56,7 @@ export class SocketService {
             // some additional context, for example the XMLHttpRequest object
             // console.log(err.context);
         });
-        this.socket.on("disconnect", (reason, details) => {
+        this.socket.of('/projectId').on("disconnect", (reason, details) => {
             // the reason of the disconnection, for example "transport error"
             console.log(reason);
 
