@@ -13,6 +13,7 @@ import { ThemeService } from '../themes/theme.service';
 })
 export class AppComponent {
   title = 'AI-AppBuilder';
+  readonly themeColor = 'dark';
 
   constructor(public themeService: ThemeService) {
 
