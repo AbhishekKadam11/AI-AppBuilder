@@ -27,12 +27,12 @@ export class SocketService {
             this.socket.nsp = projectId; //'/projectId';
             this.socket.on('connect', () => {
                 console.log('socket_ONE connected');
-                this.socket.emit('SOURCE', `Client sending data from ${projectId}`);
+                // this.socket.emit('SOURCE', `${projectId}`);
             });
 
             this.socket.on('connect_error', (err: any) => {
                 console.log("connect_error=>", err.message);
-                console.log("connect_error_description=>",err?.description);
+                console.log("connect_error_description=>", err?.description);
             });
 
             this.socket.on('disconnect', (reason: any, details: any) => {
@@ -45,15 +45,27 @@ export class SocketService {
 
     // Method to send a message to the server
     public sendMessage(event: string, message: any) {
-        // this.socket.emit(event, message);
+        this.socket.emit(event, message);
     }
 
     // Method to listen for incoming messages from the server
-    public onEvent(event: string): Observable<any> {
-        return new Observable((observer) => {
-            // this.socket.on(event, (data: any) => {
-            //     observer.next(data);
-            // });
-        });
+    // public onEvent(event: string): Observable<any> {
+    //     return new Observable((observer) => {
+    //         this.socket.on(event, (data: any) => {
+    //             observer.next(data);
+    //         });
+    //     });
+    // }
+
+    // Method to listen for an event
+    on(eventName: string): Observable<any> | undefined {
+        if (this.isBrowser && this.socket) {
+            return new Observable((observer) => {
+                this.socket.on(eventName, (data: any) => {
+                    observer.next(data);
+                });
+            });
+        }
+        return undefined;
     }
 }

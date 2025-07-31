@@ -8,7 +8,7 @@ export class ChatShowcaseService {
   constructor() { }
 
   loadMessages() {
-    return [{type: 'text', text: "testing", reply: '', user: {name: "abhi", avatar:''}, date: '', files: '', quote: '', latitude: '', logitude: ''}];
+    return [{type: 'text', text: "testing", reply: false, user: {name: "abhi", avatar:''}, date: '', files: '', quote: '', latitude: '', logitude: ''}];
   }
 
   reply(message: string) {

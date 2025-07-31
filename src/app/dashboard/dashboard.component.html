@@ -14,7 +14,8 @@
 
   </div>
 </div> -->
-<nb-layout>
+
+<!-- <nb-layout>
   <nb-layout-header></nb-layout-header>
   <nb-layout-footer></nb-layout-footer>
   <nb-layout-column>
@@ -23,13 +24,39 @@
   <nb-layout-column>
 
   </nb-layout-column>
-  <nb-sidebar>
+  <nb-sidebar state="compacted">
     <nb-sidebar-header>
-      <nb-icon icon="menu-2-outline"></nb-icon>
+      <nb-icon icon="menu-2-outline" (click)="toggleSidebar()"></nb-icon>
     </nb-sidebar-header>
 
-
+<nb-menu [items]="menuItems"></nb-menu>
 
 
   </nb-sidebar>
+</nb-layout> -->
+
+<nb-layout>
+  <nb-layout-header>
+    <p class="logo-text">
+      AI-AppBuilder
+    </p>
+  </nb-layout-header>
+
+  <nb-sidebar>
+
+
+    <!-- Main Sidebar Content (e.g., navigation menu) -->
+    <!-- <nb-menu [items]="menuItems"></nb-menu> -->
+
+    <nb-sidebar-footer>
+      <!-- Sidebar Footer Content -->
+    </nb-sidebar-footer>
+  </nb-sidebar>
+
+  <nb-layout-column>
+    <app-chat-showcase />
+  </nb-layout-column>
+
+  <nb-layout-column>
+  </nb-layout-column>
 </nb-layout>
