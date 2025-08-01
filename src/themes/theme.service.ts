@@ -25,7 +25,6 @@ export class ThemeService {
     toggleDarkMode(themeColor: string = 'default') {
         //@ts-ignore
         const themeColr = this.nbThemeMode[themeColor] === 'dark' ? 'dark' : 'default';
-        debugger
         this.isDarkMode.update(value => !value);
         this.themeService.changeTheme(themeColr);
     }
