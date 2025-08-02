@@ -42,15 +42,16 @@
     </p>
   </nb-layout-header>
 
-  <nb-sidebar state="compacted">
+  <nb-sidebar state="compacted" tag="primarySidebar">
     <nb-menu [items]="SideItems" tag="sideMenu"></nb-menu>
   </nb-sidebar>
 
+
   <nb-sidebar tag="dynamicSidebar">
-    <nb-sidebar-header>
+    <!-- <nb-sidebar-header>
       <nb-icon icon="menu-2-outline" (click)="toggleSidebar()"></nb-icon>
       <span class="sidebar-title">Menu</span>
-    </nb-sidebar-header>
+    </nb-sidebar-header> -->
     <!-- Main Sidebar Content (e.g., navigation menu) -->
     <!-- <nb-menu [items]="menuItems"></nb-menu> -->
     <nb-menu [items]="items" ></nb-menu>

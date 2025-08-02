@@ -4,11 +4,14 @@ import { NbChatComponent, NbChatModule, NbIconModule, NbLayoutComponent, NbLayou
 import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
 import { Subject } from 'rxjs/internal/Subject';
 import { takeUntil } from 'rxjs/internal/operators/takeUntil';
+import { filter } from 'rxjs/internal/operators/filter';
+import { map } from 'rxjs/internal/operators/map';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule,],
+  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule, CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -73,26 +76,41 @@ export class DashboardComponent {
 
   constructor(private sidebarService: NbSidebarService, private menuService: NbMenuService) {
     // Initialization logic can go here if needed
+    this.menuService.onItemClick()
+      .pipe(
+        filter(({ tag }) => tag === 'sideMenu'), // Optional: filter by menu tag if multiple menus exist
+        map(({ item }) => item.title),
+      )
+      .subscribe(title => {
+        this.selectedItem = title;
+        console.log(`Menu item clicked: ${title}`);
+        if(title === 'File Explorer') {
+  
+          this.toggleSidebar();
+        }
+        // Add your custom logic here, e.g., navigate, open a dialog, etc.
+      });
   }
 
   ngOnInit() {
-      this.menuService?.onItemSelect().subscribe((event) => {
-        // Handle the menu item click event here
-        console.log('Menu item clicked:', event.item.title);
+      // this.menuService?.onItemSelect().subscribe((event) => {
+      //   // Handle the menu item click event here
+      //   debugger
+      //   console.log('Menu item clicked:', event.item.title);
 
-        // You can access properties of the clicked item, such as:
-        // event.item.title
-        // event.item.link
-        // event.item.tag (if a tag was assigned to the menu)
-        // event.item.data (if custom data was added to the item)
+      //   // You can access properties of the clicked item, such as:
+      //   // event.item.title
+      //   // event.item.link
+      //   // event.item.tag (if a tag was assigned to the menu)
+      //   // event.item.data (if custom data was added to the item)
 
-        // Example: Perform an action based on the clicked item's title
-        if (event.item.title === 'Log out') {
-          // Perform logout logic
-        } else if (event.item.link) {
-          // Navigate to the specified link
-        }
-      });
+      //   // Example: Perform an action based on the clicked item's title
+      //   if (event.item.title === 'Log out') {
+      //     // Perform logout logic
+      //   } else if (event.item.link) {
+      //     // Navigate to the specified link
+      //   }
+      // });
     }
 
   ngOnDestroy() {
@@ -101,7 +119,7 @@ export class DashboardComponent {
   }
 
   toggleSidebar() {
-    this.sidebarService.toggle(true);
+    this.sidebarService.toggle(false, 'dynamicSidebar');
   }
 
   
