@@ -3,11 +3,12 @@ import { RouterOutlet } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../themes/theme.service';
+import { NbLayoutModule } from '@nebular/theme';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, DashboardComponent],
+  imports: [RouterOutlet, CommonModule, DashboardComponent, NbLayoutModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

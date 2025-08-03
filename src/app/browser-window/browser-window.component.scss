@@ -1,0 +1,24 @@
+.browser-window {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  position: absolute; /* or fixed, depending on your needs */
+  background-color: #fff;
+  overflow: hidden;
+}
+
+.title-bar {
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.window-title {
+  font-weight: bold;
+}
+
+
+.content {
+  padding: 10px;
+}
