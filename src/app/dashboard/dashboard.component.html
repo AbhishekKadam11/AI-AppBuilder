@@ -54,17 +54,19 @@
     </nb-sidebar-header> -->
     <!-- Main Sidebar Content (e.g., navigation menu) -->
     <!-- <nb-menu [items]="menuItems"></nb-menu> -->
-    <nb-menu [items]="items" ></nb-menu>
+    <nb-menu [items]="items"></nb-menu>
     <nb-sidebar-footer>
       <!-- Sidebar Footer Content -->
     </nb-sidebar-footer>
   </nb-sidebar>
 
-  <nb-layout-column>
+  <nb-layout-column style="display: grid;">
     <app-chat-showcase />
+    <app-browser-window />
   </nb-layout-column>
 
   <nb-layout-column>
     <app-browser-window></app-browser-window>
   </nb-layout-column>
+
 </nb-layout>
