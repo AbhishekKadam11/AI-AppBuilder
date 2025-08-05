@@ -1,45 +1,19 @@
-<!-- <div class="grid grid-cols-2 gap-4 ">
-  <div class="grid-rows-3 border-r-4 border-gray-500">
-
-    <div class="row">
-      <app-progress></app-progress>
-    </div>
-    <nb-layout>
-      <nb-layout-column>
-        <app-chat-showcase />
-      </nb-layout-column>
-    </nb-layout>
-  </div>
-  <div class="">
-
-  </div>
-</div> -->
-
-<!-- <nb-layout>
-  <nb-layout-header></nb-layout-header>
-  <nb-layout-footer></nb-layout-footer>
-  <nb-layout-column>
-    <app-chat-showcase />
-  </nb-layout-column>
-  <nb-layout-column>
-
-  </nb-layout-column>
-  <nb-sidebar state="compacted">
-    <nb-sidebar-header>
-      <nb-icon icon="menu-2-outline" (click)="toggleSidebar()"></nb-icon>
-    </nb-sidebar-header>
-
-<nb-menu [items]="menuItems"></nb-menu>
-
-
-  </nb-sidebar>
-</nb-layout> -->
-
 <nb-layout>
-  <nb-layout-header>
-    <p class="logo-text">
-      AI-AppBuilder
-    </p>
+  <!-- <nb-layout-header class="my-custom-header">
+    <nav>
+    <nb-layout-column >
+      <p class="logo-text">
+        AI-AppBuilder
+      </p>
+    </nb-layout-column>
+     </nav>
+    <nb-layout-column class="notification-menu">
+      <app-notification-control />
+    </nb-layout-column>
+   
+  </nb-layout-header> -->
+ <nb-layout-header fixed>
+        <app-header></app-header>
   </nb-layout-header>
 
   <nb-sidebar state="compacted" tag="primarySidebar">
@@ -48,25 +22,19 @@
 
 
   <nb-sidebar tag="dynamicSidebar">
-    <!-- <nb-sidebar-header>
-      <nb-icon icon="menu-2-outline" (click)="toggleSidebar()"></nb-icon>
-      <span class="sidebar-title">Menu</span>
-    </nb-sidebar-header> -->
-    <!-- Main Sidebar Content (e.g., navigation menu) -->
-    <!-- <nb-menu [items]="menuItems"></nb-menu> -->
     <nb-menu [items]="items"></nb-menu>
     <nb-sidebar-footer>
       <!-- Sidebar Footer Content -->
     </nb-sidebar-footer>
   </nb-sidebar>
 
-  <nb-layout-column style="display: grid;">
+  <nb-layout-column>
     <app-chat-showcase />
-    <app-browser-window />
+    <app-console-window />
   </nb-layout-column>
 
   <nb-layout-column>
-    <app-browser-window></app-browser-window>
+    <app-browser-window />
   </nb-layout-column>
 
 </nb-layout>

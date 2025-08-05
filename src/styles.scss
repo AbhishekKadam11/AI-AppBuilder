@@ -1,6 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
- /* src/styles.css */
+/* src/styles.css */
 
 @use "themes/tailwind";
+@use '@nebular/theme/styles/theming';
+@use './themes/styles/themes' as *;
+// framework component styles
+@use '@nebular/theme/styles/globals' as *;
+
+// install the framework styles
+@include nb-install() {
+  @include nb-theme-global();
+}
 
 @custom-variant dark (&:where(.dark, .dark *));
