@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ProgressComponent } from '../progress/progress.component';
-import { NbChatComponent, NbChatModule, NbIconModule, NbLayoutComponent, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbSidebarModule, NbSidebarService, NbWindowModule, NbWindowService } from '@nebular/theme';
+import { NbActionsModule, NbChatComponent, NbChatModule, NbIconModule, NbLayoutComponent, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbSidebarModule, NbSidebarService, NbWindowModule, NbWindowService } from '@nebular/theme';
 import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
 import { Subject } from 'rxjs/internal/Subject';
 import { takeUntil } from 'rxjs/internal/operators/takeUntil';
@@ -8,11 +8,14 @@ import { filter } from 'rxjs/internal/operators/filter';
 import { map } from 'rxjs/internal/operators/map';
 import { CommonModule } from '@angular/common';
 import { BrowserWindowComponent } from '../browser-window/browser-window.component';
+import { ConsoleWindowComponent } from '../console-window/console-window.component';
+import { NotificationControlComponent } from "../notification-control/notification-control.component";
+import { HeaderComponent } from "../common/header/header.component";
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule, CommonModule, NbWindowModule, BrowserWindowComponent],
+  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule, CommonModule, NbWindowModule, BrowserWindowComponent, ConsoleWindowComponent, NbActionsModule, HeaderComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
