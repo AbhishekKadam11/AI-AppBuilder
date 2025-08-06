@@ -5,6 +5,8 @@ import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { NbLayoutModule, NbMenuModule, NbSidebarModule, NbThemeModule, NbWindowModule, } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
+import { UserData } from './core/users';
+import { UserService } from './services/users.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,6 +18,7 @@ export const appConfig: ApplicationConfig = {
       NbEvaIconsModule,
     ),
     provideAnimations(),
-    provideClientHydration(withEventReplay())
+    provideClientHydration(withEventReplay()),
+    { provide: UserData, useClass: UserService }
   ]
 };
