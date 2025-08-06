@@ -1,8 +1,7 @@
-import { Component, HostBinding } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CommonModule } from '@angular/common';
-import { ThemeService } from '../themes/theme.service';
 import { NbLayoutModule } from '@nebular/theme';
 
 @Component({
@@ -14,13 +13,10 @@ import { NbLayoutModule } from '@nebular/theme';
 })
 export class AppComponent {
   title = 'AI-AppBuilder';
-  readonly themeColor = 'dark';
 
-  constructor(public themeService: ThemeService) {
+  constructor() {
 
   }
 
-  @HostBinding('class.dark') get isDark() {
-    return this.themeService.isDarkMode();
-  }
+
 }
