@@ -11,6 +11,8 @@ import { BrowserWindowComponent } from '../browser-window/browser-window.compone
 import { ConsoleWindowComponent } from '../console-window/console-window.component';
 import { NotificationControlComponent } from "../notification-control/notification-control.component";
 import { HeaderComponent } from "../common/header/header.component";
+import { SocketService } from '../services/socket.service';
+import { Subscription } from 'rxjs/internal/Subscription';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,6 +23,10 @@ import { HeaderComponent } from "../common/header/header.component";
 })
 
 export class DashboardComponent {
+
+  private readonly directoryManager = 'DirectoryManager';
+  private directorySubscription: Subscription | undefined;
+  messages: any = { "action": "getAll", "path": "newTech" };
 
   //  menuItems: NbMenuItem[] = [
   //   { title: 'Dashboard', link: '/dashboard', icon: 'home-outline' },
@@ -77,8 +83,9 @@ export class DashboardComponent {
 
   private destroy$ = new Subject<void>();
   selectedItem: string | undefined;
+  private socketSubscription!: Subscription;
 
-  constructor(private sidebarService: NbSidebarService, private menuService: NbMenuService) {
+  constructor(private sidebarService: NbSidebarService, private menuService: NbMenuService, private socketService: SocketService) {
     // Initialization logic can go here if needed
     this.menuService.onItemClick()
       .pipe(
@@ -88,8 +95,8 @@ export class DashboardComponent {
       .subscribe(title => {
         this.selectedItem = title;
         console.log(`Menu item clicked: ${title}`);
-        if(title === 'File Explorer') {
-  
+        if (title === 'File Explorer') {
+
           this.toggleSidebar();
         }
         // Add your custom logic here, e.g., navigate, open a dialog, etc.
@@ -97,35 +104,54 @@ export class DashboardComponent {
 
   }
 
+  ngAfterViewInit() {
+    this.socketService.connectSocket('/projectId');
+    this.socketSubscription = this.socketService?.socketStatus.subscribe((message) => {
+      if (message.connected) {
+        this.socketService.sendMessage(this.directoryManager, this.messages);
+        const serverReply$ = this.socketService?.on(this.directoryManager);
+        if (serverReply$) {
+          this.directorySubscription = serverReply$.subscribe((response: any) => {
+            console.log('Received directorySubscription from server:', response);
+          });
+        }
+      }
+    });
+  }
+
   ngOnInit() {
-      // this.menuService?.onItemSelect().subscribe((event) => {
-      //   // Handle the menu item click event here
-      //   debugger
-      //   console.log('Menu item clicked:', event.item.title);
+    // this.menuService?.onItemSelect().subscribe((event) => {
+    //   // Handle the menu item click event here
+    //   debugger
+    //   console.log('Menu item clicked:', event.item.title);
 
-      //   // You can access properties of the clicked item, such as:
-      //   // event.item.title
-      //   // event.item.link
-      //   // event.item.tag (if a tag was assigned to the menu)
-      //   // event.item.data (if custom data was added to the item)
+    //   // You can access properties of the clicked item, such as:
+    //   // event.item.title
+    //   // event.item.link
+    //   // event.item.tag (if a tag was assigned to the menu)
+    //   // event.item.data (if custom data was added to the item)
 
-      //   // Example: Perform an action based on the clicked item's title
-      //   if (event.item.title === 'Log out') {
-      //     // Perform logout logic
-      //   } else if (event.item.link) {
-      //     // Navigate to the specified link
-      //   }
-      // });
-    }
+    //   // Example: Perform an action based on the clicked item's title
+    //   if (event.item.title === 'Log out') {
+    //     // Perform logout logic
+    //   } else if (event.item.link) {
+    //     // Navigate to the specified link
+    //   }
+    // });
+  }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.socketSubscription) {
+      this.socketSubscription.unsubscribe();
+    }
+    // this.socketService.close();
   }
 
   toggleSidebar() {
     this.sidebarService.toggle(false, 'dynamicSidebar');
   }
 
-  
+
 }
