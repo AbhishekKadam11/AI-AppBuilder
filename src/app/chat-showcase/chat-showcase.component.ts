@@ -33,21 +33,25 @@ export class ChatShowcaseComponent implements AfterViewInit {
 
   messages: IMessage[] = [];
   private messageSubscription: Subscription | undefined;
+  private readonly chatSource = 'Source';
+  
   
   constructor(protected chatShowcaseService: ChatShowcaseService, private socketService: SocketService) {
    // this.messages = this.chatShowcaseService.loadMessages();
   }
 
   ngAfterViewInit() {
-    this.socketService?.connectSocket('/projectId');
-    const serverReply$ = this.socketService?.on('Source');
-    if (serverReply$) {
-      this.messageSubscription = serverReply$.subscribe((response: any) => {
-        console.log('Received message from server:', response);
-        // Assuming data is an object with a 'text' property
-        this.messages.push(response.data);
-      });
-    }
+    // this.socketService?.connectSocket('/projectId');
+    // const serverReply$ = this.socketService?.on(this.chatSource);
+    // if (serverReply$) {
+    //   this.messageSubscription = serverReply$.subscribe((response: any) => {
+    //     console.log('Received message from server:', response);
+    //     // Assuming data is an object with a 'text' property
+    //     this.messages.push(response.data);
+    //   });
+    // }
+
+    // this.socketService.connect('http://localhost:8001');
   }
 
   ngOnInit(): void {
@@ -79,7 +83,7 @@ export class ChatShowcaseComponent implements AfterViewInit {
       latitude: 0,
       longitude: 0,
     });
-    this.socketService.sendMessage('Source', this.messages);
+    // this.socketService.sendMessage(this.chatSource, this.messages);
     //  this.socketService.onEvent('sendMessage').subscribe((data: any) => {
     //   console.log('Received message from server:', data) ;
     //  })

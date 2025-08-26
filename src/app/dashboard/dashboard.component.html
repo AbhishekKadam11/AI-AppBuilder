@@ -12,8 +12,8 @@
     </nb-layout-column>
    
   </nb-layout-header> -->
- <nb-layout-header fixed>
-        <app-header></app-header>
+  <nb-layout-header fixed>
+    <app-header></app-header>
   </nb-layout-header>
 
   <nb-sidebar state="compacted" tag="primarySidebar">
@@ -22,10 +22,11 @@
 
 
   <nb-sidebar tag="dynamicSidebar">
-    <nb-menu [items]="items"></nb-menu>
-    <nb-sidebar-footer>
-      <!-- Sidebar Footer Content -->
-    </nb-sidebar-footer>
+    <nb-sidebar-header>
+      <strong> Files List </strong>
+    </nb-sidebar-header>
+    <app-directory-list ngSkipHydration />
+
   </nb-sidebar>
 
   <nb-layout-column>
