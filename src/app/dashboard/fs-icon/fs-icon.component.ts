@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { NbIconModule, NbTreeGridModule } from '@nebular/theme';
+import { NbIconModule } from '@nebular/theme';
 
 @Component({
   selector: 'app-fs-icon',
-  imports: [NbIconModule, CommonModule, NbTreeGridModule],
+  imports: [NbIconModule, CommonModule],
   standalone: true,
   templateUrl: './fs-icon.component.html',
   styleUrl: './fs-icon.component.scss'
@@ -16,6 +16,6 @@ export class FsIconComponent {
   expanded!: boolean;
 
   isDir(): boolean {
-    return this.kind === 'dir';
+    return this.kind === "directory";
   }
 }

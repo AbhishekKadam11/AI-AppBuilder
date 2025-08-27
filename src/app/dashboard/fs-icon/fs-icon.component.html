@@ -1,5 +1,12 @@
-<nb-tree-grid-row-toggle [expanded]="expanded" *ngIf="isDir(); else fileIcon">
-</nb-tree-grid-row-toggle>
+<span *ngIf="isDir(); else fileIcon">
+    <button nbTreeGridRowToggle class="icon-button">
+        <nb-icon [icon]="expanded ? 'chevron-down-outline' : 'chevron-right-outline'" aria-hidden="true">
+        </nb-icon>
+    </button>
+</span>
 <ng-template #fileIcon>
     <nb-icon icon="file-text-outline"></nb-icon>
+</ng-template>
+<ng-template #folderIcon>
+    <nb-icon icon="folder-outline"></nb-icon>
 </ng-template>

@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { NbCardModule, NbIconModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule } from '@nebular/theme';
 import { FsIconComponent } from '../fs-icon/fs-icon.component';
+import { SocketService } from '../../services/socket.service';
+import { Subscription } from 'rxjs/internal/Subscription';
 
 interface TreeNode<T> {
   data: T;
@@ -66,18 +68,39 @@ export class DirectoryListComponent {
     {
       data: { name: 'Other', kind: 'dir', items: 2 },
       children: [
-        { data: { name: 'backup.bkp', kind: 'bkp'} },
+        { data: { name: 'backup.bkp', kind: 'bkp' } },
         { data: { name: 'secret-note.txt', kind: 'txt' } },
       ],
     },
   ];
 
-  dataSource: NbTreeGridDataSource<FSEntry>;
+  dataSource!: NbTreeGridDataSource<FSEntry>;
   sortColumn!: string;
   sortDirection: NbSortDirection = NbSortDirection.NONE;
+  private socketSubscription!: Subscription;
+  private readonly directoryManager = 'DirectoryManager';
+  private readonly readFileContent = 'ReadFileContent';
+  private directorySubscription: Subscription | undefined;
+  messages: any = { "action": "getAll", "path": "newTech" };
 
-  constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>) {
-    this.dataSource = this.dataSourceBuilder.create(this.data);
+  constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>, private socketService: SocketService) {
+    // this.dataSource = this.dataSourceBuilder.create(this.data);
+  }
+
+  ngAfterViewInit() {
+    this.socketService.connectSocket('/projectId');
+    this.socketSubscription = this.socketService?.socketStatus.subscribe((message) => {
+      if (message.connected) {
+        this.socketService.sendMessage(this.directoryManager, this.messages);
+        const serverReply$ = this.socketService?.on(this.directoryManager);
+        if (serverReply$) {
+          this.directorySubscription = serverReply$.subscribe((response: any) => {
+            console.log('Received directorySubscription from server:', response);
+            this.dataSource = this.dataSourceBuilder.create(response.data);
+          });
+        }
+      }
+    });
   }
 
   updateSort(sortRequest: NbSortRequest): void {
@@ -96,6 +119,19 @@ export class DirectoryListComponent {
     const minWithForMultipleColumns = 400;
     const nextColumnStep = 100;
     return minWithForMultipleColumns + (nextColumnStep * index);
+  }
+
+  onRowClick(row: any) {
+    if (row && row.data && row.data.kind !== 'directory') {
+      this.messages = { "action": "get", "path": row.data.path };
+      this.socketService.sendMessage(this.directoryManager, this.messages);
+      const serverReply$ = this.socketService?.on(this.readFileContent);
+      if (serverReply$) {
+        this.directorySubscription = serverReply$.subscribe((response: any) => {
+          console.log('Received file content from server:', response);
+        });
+      }
+    }
   }
 }
 

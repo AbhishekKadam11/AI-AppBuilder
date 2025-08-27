@@ -1,0 +1,7 @@
+@use '../../../themes/styles/themes' as *;
+
+button[nbTreeGridRowToggle] {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
