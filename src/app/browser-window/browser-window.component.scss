@@ -28,3 +28,54 @@
   height: 100%;
   width: 100%;
 }
+
+// webcontainer css
+.webcontainer-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: sans-serif;
+}
+
+.header {
+  padding: 1rem;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ccc;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+}
+
+.iframe-pane {
+  flex: 2;
+  border-right: 1px solid #ccc;
+  position: relative;
+}
+
+.log-pane {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  background-color: #333;
+  color: #fff;
+  font-family: monospace;
+}
+
+.loading-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.log-output {
+  white-space: pre-wrap;
+}
+
+iframe {
+  border: none;
+}

@@ -40,7 +40,7 @@
             "scripts": [],
             "server": "src/main.server.ts",
             "outputMode": "server",
-            "ssr": {
+           "ssr": {
               "entry": "src/server.ts"
             }
           },
@@ -77,6 +77,12 @@
             "development": {
               "buildTarget": "AI-AppBuilder:build:development"
             }
+          },
+          "options": {
+            "headers": {
+                  "Cross-Origin-Opener-Policy": "same-origin",
+                  "Cross-Origin-Embedder-Policy": "require-corp"
+                }
           },
           "defaultConfiguration": "development"
         },

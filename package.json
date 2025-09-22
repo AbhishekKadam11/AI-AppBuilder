@@ -25,6 +25,7 @@
     "@nebular/eva-icons": "^15.0.0",
     "@nebular/theme": "^15.0.0",
     "@tailwindcss/postcss": "^4.1.10",
+    "@webcontainer/api": "^1.6.1",
     "eva-icons": "^1.1.3",
     "express": "^4.18.2",
     "rxjs": "~7.8.0",

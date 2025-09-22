@@ -19,6 +19,20 @@
         <nb-card-body>
             <!-- Content to be displayed within the window -->
             <!-- <ng-content></ng-content> -->
+            <div class="content">
+                <div class="iframe-pane">
+                    <iframe *ngIf="iframeUrl" [src]="iframeUrl" width="100%" height="100%"></iframe>
+                    <div *ngIf="!iframeUrl" class="loading-message">
+                        Booting WebContainer...
+                    </div>
+                </div>
+                <!-- <div class="log-pane">
+                    <h2>WebContainer Logs</h2>
+                    <div class="log-output">
+                        <p *ngFor="let log of outputLogs">{{ log }}</p>
+                    </div>
+                </div> -->
+            </div>
         </nb-card-body>
     </nb-card>
 </div>

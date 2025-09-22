@@ -1,8 +1,7 @@
 <div class="card-window">
-    <nb-card>
+    <nb-card [size]="'large'">
         <nb-card-header>
             <div class="title-bar">
-         
                 <span class="window-title">
                     Console Window
                 </span>
@@ -16,6 +15,14 @@
         <nb-card-body>
             <!-- Content to be displayed within the window -->
             <!-- <ng-content></ng-content> -->
+            <div class="log-pane">
+                <div class="log-output">
+                    <!-- <p *ngFor="let log of outputLogs">{{ log }}</p> -->
+                    <p *ngFor="let log of collectionLogs">{{ log }}</p>
+                    <!-- <p *ngFor="let log of samelineLogs">{{ log }}</p> -->
+                     <p>{{ samelineLogs }}</p>
+                </div>
+            </div>
         </nb-card-body>
     </nb-card>
 </div>

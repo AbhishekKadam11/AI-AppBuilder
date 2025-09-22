@@ -78,10 +78,11 @@ export class DirectoryListComponent {
   sortColumn!: string;
   sortDirection: NbSortDirection = NbSortDirection.NONE;
   private socketSubscription!: Subscription;
-  private readonly directoryManager = 'DirectoryManager';
-  private readonly readFileContent = 'ReadFileContent';
+  private readonly directoryManager: string = 'DirectoryManager';
+  private readonly readFileContent: string = 'ReadFileContent';
+  private readonly readDirectoryContent: string = 'ReadDirectoryContent';
   private directorySubscription: Subscription | undefined;
-  messages: any = { "action": "getAll", "path": "newTech" };
+  messages: any = { "action": "getAll", "path": "newApp" };
 
   constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>, private socketService: SocketService) {
     // this.dataSource = this.dataSourceBuilder.create(this.data);
@@ -99,6 +100,13 @@ export class DirectoryListComponent {
             this.dataSource = this.dataSourceBuilder.create(response.data);
           });
         }
+        // const readDirectoryContent$ = this.socketService?.on(this.readDirectoryContent);
+        // if (readDirectoryContent$) {
+        //   this.directorySubscription = readDirectoryContent$.subscribe((response: any) => {
+        //     console.log('Received directorySubscription from server:', response);
+        //     // this.dataSource = this.dataSourceBuilder.create(response.data);
+        //   });
+        // }
       }
     });
   }

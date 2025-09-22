@@ -28,3 +28,15 @@
   height: 100%;
   width: 100%;
 }
+
+.log-pane {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  color: #fff;
+  font-family: monospace;
+}
+
+.log-output {
+  white-space: pre-wrap;
+}
