@@ -23,7 +23,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   title = 'My Browser Window';
   isMinimized = false;
   isMaximized = false;
-  iframeUrl: SafeResourceUrl | null = null;
+  iframeUrl: SafeResourceUrl | string = "";
   outputLogs: string[] = [];
   private subscriptions: Subscription = new Subscription();
   private webContainerSubscription: Subscription | undefined;

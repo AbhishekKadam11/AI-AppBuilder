@@ -19,9 +19,7 @@
 }
 
 
-.content {
-  padding: 10px;
-}
+
 
 .card-window {
   display: grid;
@@ -44,13 +42,13 @@
 }
 
 .content {
-  display: flex;
   flex: 1;
+  height: 100%;
+  width: 100%;
 }
 
 .iframe-pane {
   flex: 2;
-  border-right: 1px solid #ccc;
   position: relative;
 }
 

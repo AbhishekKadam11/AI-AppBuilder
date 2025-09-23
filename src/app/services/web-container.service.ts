@@ -31,9 +31,8 @@ export class WebContainerService {
       this.outputSubject.next('WebContainer booted successfully.');
       await this.mountFiles(files);
       await this.runCommands(['npm', 'install', '--legacy-peer-deps']);
-      await this.runCommands(['npm', 'run', 'start']);
       this.listenForServerReady();
-
+      await this.runCommands(['npm', 'run', 'start']);
     } catch (error) {
       console.error('Failed to boot and run WebContainer:', error);
       this.outputSubject.next(`Error: ${error}`);
@@ -51,7 +50,6 @@ export class WebContainerService {
     const process = await this.webcontainerInstance.spawn(commands[0], commands.slice(1));
 
     // Pipe the process output to the output subject for real-time logs
-    
     process.output.pipeTo(
       new WritableStream({
         write: (data) =>{ 
@@ -68,37 +66,6 @@ export class WebContainerService {
     // return exitCode;
 
   }
-
-  // private async runCommands(commands: string[]): Promise<void> {
-  //   const commandString = commands.join(' ');
-  //   this.outputSubject.next(`Running command: ${commandString}\n`);
-
-  //   const process: WebContainerProcess = await this.webcontainerInstance.spawn(commands[0], commands.slice(1));
-
-  //   // Create a TextDecoder instance to convert chunks manually
-  //   const decoder = new TextDecoder();
-  //   const reader = process.output.getReader();
-
-  //   // Read and process the stream chunks
-  //   while (true) {
-  //     const { value, done } = await reader.read();
-  //     if (done) break;
-  //     // Decode the Uint8Array chunk to a string
-  //     if (value) {
-  //       // const buffer = Buffer.from(value, 'ascii');
-  //       // const decodedString = buffer.toString('utf8');
-  //       const asniDecodedString = this.ansiStrip.transform(value.toString());
-  //       //@ts-ignore
-  //       this.outputSubject.next(asniDecodedString);
-  //     }
-  //   }
-
-  //   const exitCode = await process.exit;
-  //   if (exitCode !== 0) {
-  //     throw new Error(`Command "${commandString}" failed with exit code ${exitCode}`);
-  //   }
-  //   this.outputSubject.next(`Command "${commandString}" completed with exit code ${exitCode}\n`);
-  // }
 
   private listenForServerReady(): void {
     this.webcontainerInstance.on('server-ready', (port: number, url: string) => {
