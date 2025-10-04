@@ -4,6 +4,9 @@ import { NbChatMessageFile, NbChatModule } from '@nebular/theme';
 import { NgFor } from '@angular/common';
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
+import { MessageSchema } from '../core/message-schema';
+import { ProgressControlService } from '../services/progress-control.service';
+import { AppWorkflowService } from '../services/app-workflow.service';
 
 interface IUser {
   name: string;
@@ -16,7 +19,7 @@ interface IMessage {
   reply: boolean;
   user: IUser;
   date: Date;
-  files: NbChatMessageFile[];
+  files: NbChatMessageFile[] ;
   quote: string;
   latitude: number;
   longitude: number;
@@ -32,35 +35,43 @@ interface IMessage {
 export class ChatShowcaseComponent implements AfterViewInit {
 
   messages: IMessage[] = [];
-  private messageSubscription: Subscription | undefined;
-  private readonly chatSource = 'Source';
+  private readonly chatSource = 'chatSource';
+  private socketSubscription!: Subscription;
+  private chatSubscription!: Subscription;
+  messageSchema: MessageSchema;
   
-  
-  constructor(protected chatShowcaseService: ChatShowcaseService, private socketService: SocketService) {
-   // this.messages = this.chatShowcaseService.loadMessages();
+  constructor(protected chatShowcaseService: ChatShowcaseService, 
+    private socketService: SocketService,
+    private progressControlService: ProgressControlService,
+    private appWorkflowService: AppWorkflowService,
+  ) {
+   this.messageSchema = new MessageSchema();
   }
 
   ngAfterViewInit() {
-    // this.socketService?.connectSocket('/projectId');
-    // const serverReply$ = this.socketService?.on(this.chatSource);
-    // if (serverReply$) {
-    //   this.messageSubscription = serverReply$.subscribe((response: any) => {
-    //     console.log('Received message from server:', response);
-    //     // Assuming data is an object with a 'text' property
-    //     this.messages.push(response.data);
-    //   });
-    // }
-
-    // this.socketService.connect('http://localhost:8001');
+    this.socketSubscription = this.socketService?.socketStatus.subscribe((message) => {
+      if (message.connected) {
+        const serverReply$ = this.socketService?.on(this.chatSource);
+        if (serverReply$) {
+          this.chatSubscription = serverReply$.subscribe((response: any) => {
+            console.log('Received chatSource from server:', response);
+            this.appWorkflowService.processState('appRecived', response);
+            const serverMessage: MessageSchema = new MessageSchema();
+            serverMessage.setServerMessage(response);
+            this.messages.push(serverMessage.getMessage());
+          });
+        }
+      }
+    });
   }
 
   ngOnInit(): void {
-    // this.messageSubscription = this.socketService.on('server_reply').subscribe((data: string) => {
-    //   this.messages.push(data);
-    // });
+
   }
 
   sendMessage(event: any) {
+
+    this.progressControlService.showProgressGif('reseacrhing');
     const files = !event.files ? [] : event.files.map((file: { src: string; type: string; }) => {
       return {
         url: file.src,
@@ -69,24 +80,23 @@ export class ChatShowcaseComponent implements AfterViewInit {
       };
     });
 
-    this.messages.push({
+    this.messageSchema.setMessage({
       text: event.message,
       date: new Date(),
       reply: true,
       type: files.length ? 'file' : 'text',
       files: files,
       user: {
-        name: 'Jonh Doe',
-        avatar: 'https://i.gifer.com/no.gif',
+        name: 'Creator',
+        avatar: 'assets/images/admin.png',
       },
       quote: '',
       latitude: 0,
       longitude: 0,
     });
-    // this.socketService.sendMessage(this.chatSource, this.messages);
-    //  this.socketService.onEvent('sendMessage').subscribe((data: any) => {
-    //   console.log('Received message from server:', data) ;
-    //  })
+    this.messages.push(this.messageSchema.getMessage());
+    this.socketService.sendMessage(this.chatSource, this.messages);
+
     // const botReply = this.chatShowcaseService.reply(event.message);
     // if (botReply) {
     //   setTimeout(() => { this.messages.push(botReply) }, 500);

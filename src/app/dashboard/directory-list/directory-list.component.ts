@@ -4,6 +4,7 @@ import { NbCardModule, NbIconModule, NbSortDirection, NbSortRequest, NbTreeGridD
 import { FsIconComponent } from '../fs-icon/fs-icon.component';
 import { SocketService } from '../../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
+import { AppWorkflowService } from '../../services/app-workflow.service';
 
 interface TreeNode<T> {
   data: T;
@@ -77,38 +78,42 @@ export class DirectoryListComponent {
   dataSource!: NbTreeGridDataSource<FSEntry>;
   sortColumn!: string;
   sortDirection: NbSortDirection = NbSortDirection.NONE;
-  private socketSubscription!: Subscription;
   private readonly directoryManager: string = 'DirectoryManager';
   private readonly readFileContent: string = 'ReadFileContent';
   private readonly readDirectoryContent: string = 'ReadDirectoryContent';
   private directorySubscription: Subscription | undefined;
-  messages: any = { "action": "getAll", "path": "newApp" };
+  messages: any = { "action": "getAll", "path": "" };
+  private subscriptions: Subscription = new Subscription();
 
-  constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>, private socketService: SocketService) {
+  constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>, private socketService: SocketService, private appWorkflowService: AppWorkflowService) {
     // this.dataSource = this.dataSourceBuilder.create(this.data);
   }
 
   ngAfterViewInit() {
-    this.socketService.connectSocket('/projectId');
-    this.socketSubscription = this.socketService?.socketStatus.subscribe((message) => {
-      if (message.connected) {
-        this.socketService.sendMessage(this.directoryManager, this.messages);
-        const serverReply$ = this.socketService?.on(this.directoryManager);
-        if (serverReply$) {
-          this.directorySubscription = serverReply$.subscribe((response: any) => {
-            console.log('Received directorySubscription from server:', response);
-            this.dataSource = this.dataSourceBuilder.create(response.data);
-          });
+
+    // const readDirectoryContent$ = this.socketService?.on(this.readDirectoryContent);
+    // if (readDirectoryContent$) {
+    //   this.directorySubscription = readDirectoryContent$.subscribe((response: any) => {
+    //     console.log('Received directorySubscription from server:', response);
+    //     // this.dataSource = this.dataSourceBuilder.create(response.data);
+    //   });
+    // }
+
+    this.subscriptions.add(
+      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
+        if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
+          this.messages = { "action": "getAll", "path": appDetails.projectName };
+          this.socketService.sendMessage(this.directoryManager, this.messages);
+          const serverReply$ = this.socketService?.on(this.directoryManager);
+          if (serverReply$) {
+            this.directorySubscription = serverReply$.subscribe((response: any) => {
+              console.log('Received directorySubscription from server:', response);
+              this.dataSource = this.dataSourceBuilder.create(response.data);
+            });
+          }
         }
-        // const readDirectoryContent$ = this.socketService?.on(this.readDirectoryContent);
-        // if (readDirectoryContent$) {
-        //   this.directorySubscription = readDirectoryContent$.subscribe((response: any) => {
-        //     console.log('Received directorySubscription from server:', response);
-        //     // this.dataSource = this.dataSourceBuilder.create(response.data);
-        //   });
-        // }
-      }
-    });
+      })
+    );
   }
 
   updateSort(sortRequest: NbSortRequest): void {

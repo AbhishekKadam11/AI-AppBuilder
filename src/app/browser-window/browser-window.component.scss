@@ -14,12 +14,12 @@
   align-items: center;
 }
 
-.window-title {
-  font-weight: bold;
+.window-url {
+  font-weight: normal;
+  display: flex;
+  padding: 5px;
+  width: 50%;
 }
-
-
-
 
 .card-window {
   display: grid;
@@ -50,6 +50,8 @@
 .iframe-pane {
   flex: 2;
   position: relative;
+  height: 100%;
+  width: 100%;
 }
 
 .log-pane {
@@ -76,4 +78,12 @@
 
 iframe {
   border: none;
+}
+
+.progress-gif {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }

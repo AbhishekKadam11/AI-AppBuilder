@@ -11,6 +11,7 @@ import { HeaderComponent } from "../common/header/header.component";
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { DirectoryListComponent } from './directory-list/directory-list.component';
+import { ProgressControlService } from '../services/progress-control.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -83,7 +84,7 @@ export class DashboardComponent {
   selectedItem: string | undefined;
   private socketSubscription!: Subscription;
 
-  constructor(private sidebarService: NbSidebarService, private menuService: NbMenuService, private socketService: SocketService) {
+  constructor(private sidebarService: NbSidebarService, private menuService: NbMenuService, private socketService: SocketService, private progressControlService: ProgressControlService) {
     // Initialization logic can go here if needed
     this.menuService.onItemClick()
       .pipe(
@@ -104,20 +105,23 @@ export class DashboardComponent {
 
   ngAfterViewInit() {
     this.socketService.connectSocket('/projectId');
-    this.socketSubscription = this.socketService?.socketStatus.subscribe((message) => {
-      if (message.connected) {
-        this.socketService.sendMessage(this.directoryManager, this.messages);
-        const serverReply$ = this.socketService?.on(this.directoryManager);
-        if (serverReply$) {
-          this.directorySubscription = serverReply$.subscribe((response: any) => {
-            console.log('Received directorySubscription from server:', response);
-          });
-        }
-      }
-    });
+    // this.socketSubscription = this.socketService?.socketStatus.subscribe((message) => {
+    //   if (message.connected) {
+    //     this.socketService.sendMessage(this.directoryManager, this.messages);
+    //     const serverReply$ = this.socketService?.on(this.directoryManager);
+    //     if (serverReply$) {
+    //       this.directorySubscription = serverReply$.subscribe((response: any) => {
+    //         console.log('Received directorySubscription from server:', response);
+    //       });
+    //     }
+    //   }
+    // });
   }
 
   ngOnInit() {
+
+    this.progressControlService.showProgressGif('init');
+
     // this.menuService?.onItemSelect().subscribe((event) => {
     //   // Handle the menu item click event here
     //   debugger

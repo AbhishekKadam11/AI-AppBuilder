@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { WebContainer, FileSystemTree, WebContainerProcess } from '@webcontainer/api';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AnsiStripPipe } from './ansi-strip.pipe';
+import { ProgressControlService } from './progress-control.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ export class WebContainerService {
   private ansiStrip: AnsiStripPipe
   private isWebContainerBooted = false;
 
-  constructor() { 
+  constructor(private progressControlService: ProgressControlService) { 
     this.ansiStrip = new AnsiStripPipe();
   }
 
@@ -30,8 +31,10 @@ export class WebContainerService {
       this.isWebContainerBooted = true;
       this.outputSubject.next('WebContainer booted successfully.');
       await this.mountFiles(files);
+      this.progressControlService.showProgressGif('dependency');
       await this.runCommands(['npm', 'install', '--legacy-peer-deps']);
       this.listenForServerReady();
+      this.progressControlService.showProgressGif('templating');
       await this.runCommands(['npm', 'run', 'start']);
     } catch (error) {
       console.error('Failed to boot and run WebContainer:', error);
@@ -69,6 +72,7 @@ export class WebContainerService {
 
   private listenForServerReady(): void {
     this.webcontainerInstance.on('server-ready', (port: number, url: string) => {
+      this.progressControlService.showProgressGif('');
       this.iframeUrlSubject.next(url);
       this.outputSubject.next(`Server ready on port ${port} at ${url}`);
     });

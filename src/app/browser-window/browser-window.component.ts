@@ -4,22 +4,21 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NbButtonModule, NbCardModule, NbIconModule, NbInputModule, NbLayoutModule } from "@nebular/theme";
 import { Subscription } from 'rxjs/internal/Subscription';
 import { WebContainerService } from '../services/web-container.service';
-
-//@ts-ignore
-import files from '../../assets/fs-tree';
+import { FormsModule } from '@angular/forms';
 import { SocketService } from '../services/socket.service';
-import { FileSystemTreeGeneratorService } from '../services/file-system-tree-generator.service';
-import { FileSystemTree } from '@webcontainer/api';
+import { ProgressControlService } from '../services/progress-control.service';
+import { AppWorkflowService } from '../services/app-workflow.service';
 
 @Component({
   selector: 'app-browser-window',
-  imports: [NbLayoutModule, NbCardModule, NbIconModule, NbButtonModule, NbInputModule, CommonModule],
+  imports: [NbLayoutModule, NbCardModule, NbIconModule, NbButtonModule, NbInputModule, CommonModule, FormsModule],
   templateUrl: './browser-window.component.html',
   styleUrl: './browser-window.component.scss'
 })
 
 export class BrowserWindowComponent implements OnInit, AfterViewInit {
-  // @ViewChild('browserWindow') browserWindow: ElementRef | undefined;
+
+  @ViewChild('webcontainerIframe') iframe!: ElementRef<HTMLIFrameElement>;
   title = 'My Browser Window';
   isMinimized = false;
   isMaximized = false;
@@ -27,16 +26,22 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   outputLogs: string[] = [];
   private subscriptions: Subscription = new Subscription();
   private webContainerSubscription: Subscription | undefined;
-  private socketSubscription!: Subscription;
   private readonly readDirectoryContent: string = 'ReadDirectoryContent';
   private readonly webContainerFiles: string = 'WebContainerFiles';
   private readonly directoryManager: string = 'DirectoryManager';
-  messages: any = { "action": "geContinerFiles", "path": "newApp" };
+  messages: any = { "action": "geContinerFiles", "path": "newApp1" };
   private fileSystemTree: any | null = null;
   private isWebContainerActive: boolean = false;
+  progressGifUrl: string = '';
+  public appUrl: string | null = null;
+  placeholderUrl: string = 'https://webcontainer.io';
+  private containerUrl: string = '';
+
 
   constructor(private webContainerService: WebContainerService,
+    private progressControlService: ProgressControlService,
     private socketService: SocketService,
+    private appWorkflowService: AppWorkflowService,
     private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
@@ -45,6 +50,8 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     this.subscriptions.add(
       this.webContainerService.iframeUrl$.subscribe(url => {
         if (url) {
+          this.containerUrl = url;
+          this.appUrl = this.placeholderUrl;
           this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
         }
       })
@@ -57,24 +64,33 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
       })
     );
 
-    this.socketService.connectSocket('/projectId');
-    this.socketSubscription = this.socketService?.socketStatus.subscribe((message) => {
-      if (message.connected) {
-        this.socketService.sendMessage(this.directoryManager, this.messages);
-        const webContainerFiles$ = this.socketService?.on(this.webContainerFiles);
-        if (webContainerFiles$) {
-          this.webContainerSubscription = webContainerFiles$.subscribe((response: any) => {
-            console.log('Received webContainerFiles from server:', response);
-            this.fileSystemTree = this.webContainerService.buildWebContainerFileTree(response.data['newApp']['directory']) as any;
-            // console.log('Constructed FileSystemTree:', this.fileSystemTree);
-            if (this.fileSystemTree && !this.isWebContainerActive) {
-             this.webContainerService.bootAndRun(response.data['newApp']['directory']);
-              this.isWebContainerActive = true;
-            }
-          });
+    // Subscribe to progress GIF updates
+    this.subscriptions.add(
+      this.progressControlService.progresGif$.subscribe(gifUrl => {
+        this.progressGifUrl = gifUrl;
+      })
+    );
+
+    this.subscriptions.add(
+      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
+        if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
+          this.messages = { "action": "geContinerFiles", "path": appDetails.projectName };
+          this.socketService.sendMessage(this.directoryManager, this.messages);
+          const webContainerFiles$ = this.socketService?.on(this.webContainerFiles);
+          if (webContainerFiles$) {
+            this.webContainerSubscription = webContainerFiles$.subscribe((response: any) => {
+              console.log('Received webContainerFiles from server:', response);
+              this.fileSystemTree = this.webContainerService.buildWebContainerFileTree(response.data[appDetails.projectName]['directory']) as any;
+              // console.log('Constructed FileSystemTree:', this.fileSystemTree);
+              if (this.fileSystemTree && !this.isWebContainerActive) {
+                this.webContainerService.bootAndRun(response.data[appDetails.projectName]['directory']);
+                this.isWebContainerActive = true;
+              }
+            });
+          }
         }
-      }
-    });
+      })
+    );
   }
 
   ngOnDestroy(): void {
@@ -98,5 +114,21 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
 
   close(): void {
     // Emit an event or trigger a service to close the window
+  }
+
+  openUrl(): void {
+
+  }
+
+  navigateToUrl(): void {
+    if (this.appUrl && this.iframe) {
+      this.appUrl = this.appUrl.replace(this.placeholderUrl, this.containerUrl);
+      const newUrl = new URL(this.appUrl);
+      const iframeWindow = this.iframe.nativeElement.contentWindow;
+      if (iframeWindow) {
+        iframeWindow.postMessage({ type: 'navigate', url: newUrl.href }, '*');
+      }
+      this.appUrl = this.appUrl.replace(this.containerUrl, this.placeholderUrl);
+    }
   }
 }
