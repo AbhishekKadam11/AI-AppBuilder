@@ -25,7 +25,7 @@
     <nb-sidebar-header>
       <strong> Files List </strong>
     </nb-sidebar-header>
-    <app-directory-list ngSkipHydration />
+    <app-directory-list (openFile)="onFileClick($event)" ngSkipHydration />
 
   </nb-sidebar>
 

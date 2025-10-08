@@ -14,6 +14,7 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(
       NbThemeModule.forRoot({ name: 'default' }),
       NbSidebarModule.forRoot(),
+      NbWindowModule.forRoot(),
       NbMenuModule.forRoot(),
       NbEvaIconsModule,
     ),

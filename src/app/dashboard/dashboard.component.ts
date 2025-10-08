@@ -12,11 +12,17 @@ import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { DirectoryListComponent } from './directory-list/directory-list.component';
 import { ProgressControlService } from '../services/progress-control.service';
+import { CodeEditorComponent } from '../code-display/code-editor.component';
+
+type FileEvent = {
+  data: string;
+  success: boolean
+};
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule, CommonModule, NbWindowModule, BrowserWindowComponent, ConsoleWindowComponent, NbActionsModule, HeaderComponent, DirectoryListComponent],
+  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule, CommonModule, BrowserWindowComponent, ConsoleWindowComponent, NbActionsModule, HeaderComponent, DirectoryListComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -83,8 +89,14 @@ export class DashboardComponent {
   private destroy$ = new Subject<void>();
   selectedItem: string | undefined;
   private socketSubscription!: Subscription;
+  
+  
 
-  constructor(private sidebarService: NbSidebarService, private menuService: NbMenuService, private socketService: SocketService, private progressControlService: ProgressControlService) {
+  constructor(private sidebarService: NbSidebarService, 
+    private menuService: NbMenuService, 
+    private socketService: SocketService,
+    private windowService: NbWindowService,
+    private progressControlService: ProgressControlService) {
     // Initialization logic can go here if needed
     this.menuService.onItemClick()
       .pipe(
@@ -155,5 +167,8 @@ export class DashboardComponent {
     this.sidebarService.toggle(false, 'dynamicSidebar');
   }
 
-
+  onFileClick(event: any) {
+    console.log("event", event);
+    this.windowService.open(CodeEditorComponent, { title: 'File Editor' });
+  }
 }

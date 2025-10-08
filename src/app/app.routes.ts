@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { ProgressComponent } from './progress/progress.component';
 import { NbThemeModule } from '@nebular/theme';
 
 export const routes: Routes = [
