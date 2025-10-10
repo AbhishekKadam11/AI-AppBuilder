@@ -1,15 +1,44 @@
-/* You can add global styles to this file, and also import other style files */
-/* src/styles.css */
-
-@use "themes/tailwind";
-@use '@nebular/theme/styles/theming';
-@use './themes/styles/themes' as *;
-// framework component styles
+@use 'themes/styles/themes' as *;
 @use '@nebular/theme/styles/globals' as *;
 
-// install the framework styles
 @include nb-install() {
   @include nb-theme-global();
 }
 
-@custom-variant dark (&:where(.dark, .dark *));
+.custom-code-editor {
+    // height: 100vh;
+    width: 41vw;
+
+}
+
+.monaco-code-editor {
+    // .editor-container {
+        height: calc(100vh - 100px);
+    // }
+}
+
+.resizable-window {
+  // Standard styles for the resizable window
+  position: relative;
+  // You can add other properties like max-width or initial dimensions
+  // For example, to set an initial size:
+  // width: 800px;
+  // height: 600px;
+}
+
+/* Style for the resize handle */
+.resizable-window .resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  right: 0;
+  bottom: 0;
+  background: #ccc;
+  cursor: nwse-resize;
+  z-index: 100;
+}
+
+.monaco-editor-container {
+  height: 500px !important;
+  width: 40vw;
+}
