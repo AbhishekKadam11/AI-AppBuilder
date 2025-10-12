@@ -1,0 +1,62 @@
+@use '../../../themes/styles/themes' as *;
+
+@include nb-install-component {
+  // background: nb-theme(background-basic-color-1);
+
+  .window {
+    position: absolute;
+    top: 80px;
+    left: 60px;
+    width: 50%;
+    height: 96%;
+    background-color: nb-theme(background-basic-color-1);
+    border: 1px dashed nb-theme(color-basic-700);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease-in-out, top 0.3s ease-in-out, left 0.3s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out;
+    z-index: 1000;
+  }
+
+  .window.minimized {
+    width: 500px;
+    height: 60px;
+    bottom: 0;
+    left: 60px;
+    top: auto;
+    transform: translateY(0);
+  }
+
+  .window.maximized {
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .window-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: nb-theme(background-basic-color-1);
+    cursor: move;
+  }
+
+  .window-controls button {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-left: 5px;
+  }
+
+  .window-content {
+    flex-grow: 1;
+    padding: 10px;
+    height: 100% !important;
+    width: 100% !important;
+    overflow: auto;
+  }
+}

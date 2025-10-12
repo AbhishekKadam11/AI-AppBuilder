@@ -20,10 +20,9 @@
     <nb-menu [items]="SideItems" tag="sideMenu"></nb-menu>
   </nb-sidebar>
 
-
-  <nb-sidebar tag="dynamicSidebar">
+  <nb-sidebar tag="dynamicSidebar" *ngIf="isExplorerReady">
     <nb-sidebar-header>
-      <strong> Files List </strong>
+      <strong>File Explorer</strong>
     </nb-sidebar-header>
     <app-directory-list (openFile)="onFileClick($event)" ngSkipHydration />
 
@@ -32,6 +31,11 @@
   <nb-layout-column>
     <app-chat-showcase />
     <app-console-window />
+      <div class="dashboard-area">
+      @for (window of windowService.getWindows()(); track window.id) {
+      <app-window [window]="window"></app-window>
+      }
+    </div>
   </nb-layout-column>
 
   <nb-layout-column>

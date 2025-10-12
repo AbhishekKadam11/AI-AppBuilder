@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NbActionsModule, NbChatComponent, NbChatModule, NbIconModule, NbLayoutComponent, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbSidebarModule, NbSidebarService, NbWindowModule, NbWindowService } from '@nebular/theme';
+import { NbActionsModule, NbChatComponent, NbChatModule, NbIconModule, NbLayoutComponent, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbSidebarModule, NbSidebarService, NbWindowControlButtonsConfig, NbWindowModule, NbWindowService } from '@nebular/theme';
 import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
 import { Subject } from 'rxjs/internal/Subject';
 import { filter } from 'rxjs/internal/operators/filter';
@@ -12,7 +12,9 @@ import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { DirectoryListComponent } from './directory-list/directory-list.component';
 import { ProgressControlService } from '../services/progress-control.service';
-import { CodeEditorComponent } from '../code-display/code-editor.component';
+import { AppWorkflowService } from '../services/app-workflow.service';
+import { WindowService } from '../services/window.service';
+import { WindowComponent } from '../window/window/window.component';
 
 type FileEvent = {
   data: string;
@@ -22,7 +24,7 @@ type FileEvent = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule, CommonModule, BrowserWindowComponent, ConsoleWindowComponent, NbActionsModule, HeaderComponent, DirectoryListComponent],
+  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule, CommonModule, BrowserWindowComponent, ConsoleWindowComponent, NbActionsModule, HeaderComponent, DirectoryListComponent, WindowComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -32,12 +34,16 @@ export class DashboardComponent {
   private readonly directoryManager = 'DirectoryManager';
   private directorySubscription: Subscription | undefined;
   messages: any = { "action": "getAll", "path": "newTech" };
-
+  minimize = true;
+  maximize = true;
+  fullScreen = true;
+  close = true;
   //  menuItems: NbMenuItem[] = [
   //   { title: 'Dashboard', link: '/dashboard', icon: 'home-outline' },
   //   { title: 'Users', link: '/users', icon: 'people-outline' },
   //   { title: 'Settings', link: '/settings', icon: 'settings-2-outline' },
   // ];
+  isExplorerReady: boolean = false;
 
   SideItems: NbMenuItem[] = [
     {
@@ -89,13 +95,14 @@ export class DashboardComponent {
   private destroy$ = new Subject<void>();
   selectedItem: string | undefined;
   private socketSubscription!: Subscription;
-  
-  
+  private subscriptions: Subscription = new Subscription();
 
-  constructor(private sidebarService: NbSidebarService, 
-    private menuService: NbMenuService, 
+  constructor(private sidebarService: NbSidebarService,
+    private menuService: NbMenuService,
     private socketService: SocketService,
-    private windowService: NbWindowService,
+    // private windowService: NbWindowService,
+    private appWorkflowService: AppWorkflowService,
+    public windowService: WindowService,
     private progressControlService: ProgressControlService) {
     // Initialization logic can go here if needed
     this.menuService.onItemClick()
@@ -112,6 +119,15 @@ export class DashboardComponent {
         }
         // Add your custom logic here, e.g., navigate, open a dialog, etc.
       });
+
+    this.subscriptions.add(
+      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
+        if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
+          // this.messages = { "action": "getAll", "path": appDetails.projectName };
+          this.isExplorerReady = true;
+        }
+      })
+    );
 
   }
 
@@ -169,6 +185,5 @@ export class DashboardComponent {
 
   onFileClick(event: any) {
     console.log("event", event);
-    this.windowService.open(CodeEditorComponent, { title: 'File Editor' });
   }
 }

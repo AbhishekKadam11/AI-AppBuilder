@@ -29,7 +29,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   private readonly readDirectoryContent: string = 'ReadDirectoryContent';
   private readonly webContainerFiles: string = 'WebContainerFiles';
   private readonly directoryManager: string = 'DirectoryManager';
-  messages: any = { "action": "geContinerFiles", "path": "newApp1" };
+  messages: any = { "action": "getContinerFiles", "path": "" };
   private fileSystemTree: any | null = null;
   private isWebContainerActive: boolean = false;
   progressGifUrl: string = '';
@@ -51,7 +51,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     this.subscriptions.add(
       this.webContainerService.iframeUrl$.subscribe(url => {
         if (url) {
-          this.containerUrl = url+'/'+ this.appObject.path;
+          this.containerUrl = url + '/' + this.appObject.path;
           this.appUrl = this.placeholderUrl;
           this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
         }
@@ -76,16 +76,15 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
         if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
           this.appObject = appDetails;
-          this.messages = { "action": "geContinerFiles", "path": this.appObject.projectName };
+          this.messages = { "action": "getContinerFiles", "path": this.appObject.projectName };
           this.socketService.sendMessage(this.directoryManager, this.messages);
           const webContainerFiles$ = this.socketService?.on(this.webContainerFiles);
           if (webContainerFiles$) {
             this.webContainerSubscription = webContainerFiles$.subscribe((response: any) => {
               console.log('Received webContainerFiles from server:', response);
               this.fileSystemTree = this.webContainerService.buildWebContainerFileTree(response.data[this.appObject.projectName]['directory']) as any;
-              // console.log('Constructed FileSystemTree:', this.fileSystemTree);
               if (this.fileSystemTree && !this.isWebContainerActive) {
-              //  this.webContainerService.bootAndRun(response.data[this.appObject.projectName]['directory']);
+                this.webContainerService.bootAndRun(response.data[this.appObject.projectName]['directory']);
                 this.isWebContainerActive = true;
               }
             });

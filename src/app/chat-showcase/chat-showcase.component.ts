@@ -52,7 +52,7 @@ export class ChatShowcaseComponent implements AfterViewInit {
     this.socketSubscription = this.socketService?.socketStatus.subscribe((message) => {
       if (message.connected) {
         const serverReply$ = this.socketService?.on(this.chatSource);
-        if (serverReply$) {
+        if (serverReply$ && !this.socketService?.socketStatus.closed) {
           this.chatSubscription = serverReply$.subscribe((response: any) => {
             console.log('Received chatSource from server:', response);
             this.appWorkflowService.processState('appRecived', response);

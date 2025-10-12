@@ -32,10 +32,10 @@ export class WebContainerService {
       this.outputSubject.next('WebContainer booted successfully.');
       await this.mountFiles(files);
       this.progressControlService.showProgressGif('dependency');
-      await this.runCommands(['npm', 'install', '--legacy-peer-deps']);
+     await this.runCommands(['npm', 'install', '--legacy-peer-deps']);
       this.listenForServerReady();
       this.progressControlService.showProgressGif('templating');
-      await this.runCommands(['npm', 'run', 'start']);
+     await this.runCommands(['npm', 'run', 'start']);
     } catch (error) {
       console.error('Failed to boot and run WebContainer:', error);
       this.outputSubject.next(`Error: ${error}`);
@@ -81,5 +81,12 @@ export class WebContainerService {
   public buildWebContainerFileTree(fsTree: string): string {
     const content = `import { FileSystemTree } from '@webcontainer/api';\n\n/** @satisfies {FileSystemTree} */\nexport const files = ${JSON.stringify(fsTree, null, 2)};`;
     return content;
+  }
+
+  public async webContainerFileContent(fileName: string): Promise<string> {
+      if (!this.webcontainerInstance) {
+      return Promise.reject('WebContainer not initialized.');
+    }
+    return this.webcontainerInstance.fs.readFile(fileName, 'utf8');
   }
 }

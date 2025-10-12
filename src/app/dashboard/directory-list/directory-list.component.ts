@@ -1,10 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NbCardModule, NbIconModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule } from '@nebular/theme';
 import { FsIconComponent } from '../fs-icon/fs-icon.component';
 import { SocketService } from '../../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { AppWorkflowService } from '../../services/app-workflow.service';
+import { WebContainerService } from '../../services/web-container.service';
+import { WindowService } from '../../services/window.service';
+import { CodeEditorComponent } from '../../code-display/code-editor.component';
 
 interface TreeNode<T> {
   data: T;
@@ -79,25 +82,35 @@ export class DirectoryListComponent {
   sortColumn!: string;
   sortDirection: NbSortDirection = NbSortDirection.NONE;
   private readonly directoryManager: string = 'DirectoryManager';
-  private readonly readFileContent: string = 'ReadFileContent';
-  private readonly readDirectoryContent: string = 'ReadDirectoryContent';
   private directorySubscription: Subscription | undefined;
   messages: any = { "action": "getAll", "path": "" };
   private subscriptions: Subscription = new Subscription();
+  @Output() openFile = new EventEmitter<any>();
+  private readonly webContainerFiles: string = 'WebContainerFiles';
+  private isWebContainerActive: boolean = false;
 
-  constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>, private socketService: SocketService, private appWorkflowService: AppWorkflowService) {
-    // this.dataSource = this.dataSourceBuilder.create(this.data);
+  constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>,
+    private socketService: SocketService,
+    private webContainerService: WebContainerService,
+    private windowService: WindowService,
+    private appWorkflowService: AppWorkflowService) {
   }
 
   ngAfterViewInit() {
 
-    // const readDirectoryContent$ = this.socketService?.on(this.readDirectoryContent);
-    // if (readDirectoryContent$) {
-    //   this.directorySubscription = readDirectoryContent$.subscribe((response: any) => {
+    // Test. Hardcoded project path
+    // this.messages = { "action": "getAll", "path": "newApp1" };
+    // this.socketService.sendMessage(this.directoryManager, this.messages);
+    // const serverReply$ = this.socketService?.on(this.directoryManager);
+    // if (serverReply$) {
+    //   this.directorySubscription = serverReply$.subscribe((response: any) => {
     //     console.log('Received directorySubscription from server:', response);
-    //     // this.dataSource = this.dataSourceBuilder.create(response.data);
+    //     this.dataSource = this.dataSourceBuilder.create(response.data);
     //   });
     // }
+
+
+    //1. Required server side directory fetch
 
     this.subscriptions.add(
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
@@ -135,15 +148,43 @@ export class DirectoryListComponent {
   }
 
   onRowClick(row: any) {
-    if (row && row.data && row.data.kind !== 'directory') {
-      this.messages = { "action": "get", "path": row.data.path };
-      this.socketService.sendMessage(this.directoryManager, this.messages);
-      const serverReply$ = this.socketService?.on(this.readFileContent);
-      if (serverReply$) {
-        this.directorySubscription = serverReply$.subscribe((response: any) => {
-          console.log('Received file content from server:', response);
+    if (row && row.data && row.data.kind !== 'directory' && this.isWebContainerActive) {
+      //Test. Hardcoded access webcontainer file
+      // this.messages = { "action": "getContinerFiles", "path": "newApp1" };
+      // this.socketService.sendMessage(this.directoryManager, this.messages);
+      // const webContainerFiles$ = this.socketService?.on(this.webContainerFiles);
+      // if (webContainerFiles$) {
+      //   webContainerFiles$.subscribe((response: any) => {
+      //     console.log('Mod webContainerFiles from server:', response);
+      //     if (!this.isWebContainerActive) {
+      //       this.webContainerService.bootAndRun(response.data['newApp1']['directory']);
+      //       this.isWebContainerActive = true;
+      //     }
+
+      //     this.webContainerService.webContainerFileContent(row.data.path.replace(/\\/g, '/')).then((fileData: string) => {
+      //       this.windowService.openWindow({
+      //         title: row.data.name,
+      //         contentComponent: CodeEditorComponent, // Pass the component class to render
+      //         data: { fileContent: fileData }
+      //       });
+      //     }, error => {
+      //       console.log('error', error);
+      //     });
+
+      //   });
+      // }
+
+
+      this.webContainerService.webContainerFileContent(row.data.path.replace(/\\/g, '/')).then((fileData: string) => {
+        this.windowService.openWindow({
+          title: row.data.name,
+          contentComponent: CodeEditorComponent, // Pass the component class to render
+          data: { fileContent: fileData }
         });
-      }
+      }, error => {
+        console.log('error', error);
+      });
+
     }
   }
 }

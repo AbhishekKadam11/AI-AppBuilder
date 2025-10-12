@@ -7,6 +7,7 @@ import { NbLayoutModule, NbMenuModule, NbSidebarModule, NbThemeModule, NbWindowM
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { UserData } from './core/users';
 import { UserService } from './services/users.service';
+import { provideMonacoEditor } from 'ngx-monaco-editor-v2';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -20,6 +21,7 @@ export const appConfig: ApplicationConfig = {
     ),
     provideAnimations(),
     provideClientHydration(withEventReplay()),
-    { provide: UserData, useClass: UserService }
+    { provide: UserData, useClass: UserService },
+     provideMonacoEditor(),
   ]
 };
