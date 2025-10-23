@@ -1,12 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NbActionsModule, NbIconModule, NbMediaBreakpointsService, NbMenuService, NbOptionModule, NbSelectModule, NbSidebarService, NbThemeService, NbUserModule } from '@nebular/theme';
-
 import { UserData } from '../../../app/core/users';
-// import { LayoutService } from '../../../@core/utils';
 import { map, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { NgFor } from '@angular/common';
 import { StorageService } from '../../services/storage.service';
+import { AppWorkflowService } from '../../services/app-workflow.service';
 
 @Component({
   selector: 'app-header',
@@ -33,6 +32,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   currentTheme = 'default';
 
   userMenu = [{ title: 'Profile' }, { title: 'Log out' }];
+  appList: any[] = [];
+  selectedApp: string = '';
 
   constructor(private sidebarService: NbSidebarService,
     private menuService: NbMenuService,
@@ -40,6 +41,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private userService: UserData,
     // private layoutService: LayoutService,
     private storageService: StorageService,
+    private appWorkflowService: AppWorkflowService,
     private breakpointService: NbMediaBreakpointsService) {
   }
 
@@ -66,6 +68,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .subscribe(themeName => this.currentTheme = themeName);
 
     this.themePreference();
+    this.appList = this.appWorkflowService.fetchAppObjFromLocalStorage();
   }
 
   ngOnDestroy() {
@@ -98,5 +101,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     }
     return;
+  }
+
+  appObjectFromLocalStorage() {
+    const appObject = this.storageService.getItem('appObject');
+    if (appObject) {
+      const appList = JSON.parse(appObject);
+    }
+    return null;
+  }
+
+  changeAppObj(appObject: any) {
+    console.log("seleced appObject", appObject);
+    this.appWorkflowService.processState('appRecived', appObject);
   }
 }

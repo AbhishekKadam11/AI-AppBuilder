@@ -19,7 +19,7 @@ interface IMessage {
   reply: boolean;
   user: IUser;
   date: Date;
-  files: NbChatMessageFile[] ;
+  files: NbChatMessageFile[];
   quote: string;
   latitude: number;
   longitude: number;
@@ -39,13 +39,13 @@ export class ChatShowcaseComponent implements AfterViewInit {
   private socketSubscription!: Subscription;
   private chatSubscription!: Subscription;
   messageSchema: MessageSchema;
-  
-  constructor(protected chatShowcaseService: ChatShowcaseService, 
+
+  constructor(protected chatShowcaseService: ChatShowcaseService,
     private socketService: SocketService,
     private progressControlService: ProgressControlService,
     private appWorkflowService: AppWorkflowService,
   ) {
-   this.messageSchema = new MessageSchema();
+    this.messageSchema = new MessageSchema();
   }
 
   ngAfterViewInit() {
@@ -53,11 +53,16 @@ export class ChatShowcaseComponent implements AfterViewInit {
       if (message.connected) {
         const serverReply$ = this.socketService?.on(this.chatSource);
         if (serverReply$ && !this.socketService?.socketStatus.closed) {
+          const serverMessage: MessageSchema = new MessageSchema();
           this.chatSubscription = serverReply$.subscribe((response: any) => {
             console.log('Received chatSource from server:', response);
             this.appWorkflowService.processState('appRecived', response);
-            const serverMessage: MessageSchema = new MessageSchema();
+
             serverMessage.setServerMessage(response);
+            this.messages.push(serverMessage.getMessage());
+          }, (error) => {
+            console.error("Received chatSource error from server:", error)
+            serverMessage.setServerMessage(error);
             this.messages.push(serverMessage.getMessage());
           });
         }

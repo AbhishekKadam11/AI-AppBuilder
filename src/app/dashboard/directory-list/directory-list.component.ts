@@ -34,50 +34,6 @@ export class DirectoryListComponent {
   defaultColumns = ['kind', 'items'];
   allColumns = [this.customColumn];
 
-  data: TreeNode<FSEntry>[] = [
-    {
-      data: { name: 'Projects', items: 5, kind: 'dir' },
-      children: [
-        { data: { name: 'project-1.doc', kind: 'doc' } },
-        { data: { name: 'project-2.doc', kind: 'doc' } },
-        {
-          data: { name: 'project-3', kind: 'dir', items: 3 },
-          children: [
-            { data: { name: 'project-3A.doc', kind: 'doc' } },
-            { data: { name: 'project-3B.doc', kind: 'doc' } },
-            { data: { name: 'project-3C.doc', kind: 'doc' } },
-          ],
-        },
-        { data: { name: 'project-4.docx', kind: 'docx' } },
-      ],
-    },
-    {
-      data: { name: 'Reports', kind: 'dir', items: 2 },
-      children: [
-        {
-          data: { name: 'Report 1', kind: 'dir', items: 1 },
-          children: [
-            { data: { name: 'report-1.doc', kind: 'doc' } },
-          ],
-        },
-        {
-          data: { name: 'Report 2', kind: 'dir', items: 2 },
-          children: [
-            { data: { name: 'report-2.doc', kind: 'doc' } },
-            { data: { name: 'report-2-note.txt', kind: 'txt' } },
-          ],
-        },
-      ],
-    },
-    {
-      data: { name: 'Other', kind: 'dir', items: 2 },
-      children: [
-        { data: { name: 'backup.bkp', kind: 'bkp' } },
-        { data: { name: 'secret-note.txt', kind: 'txt' } },
-      ],
-    },
-  ];
-
   dataSource!: NbTreeGridDataSource<FSEntry>;
   sortColumn!: string;
   sortDirection: NbSortDirection = NbSortDirection.NONE;
@@ -88,6 +44,7 @@ export class DirectoryListComponent {
   @Output() openFile = new EventEmitter<any>();
   private readonly webContainerFiles: string = 'WebContainerFiles';
   private isWebContainerActive: boolean = false;
+  private appList: any[] = [];
 
   constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>,
     private socketService: SocketService,
@@ -97,31 +54,30 @@ export class DirectoryListComponent {
   }
 
   ngAfterViewInit() {
+    //1. Required webcontainer side directory fetch
+    this.fetchDirectory("getContainerFiles");
 
-    // Test. Hardcoded project path
-    // this.messages = { "action": "getAll", "path": "newApp1" };
-    // this.socketService.sendMessage(this.directoryManager, this.messages);
-    // const serverReply$ = this.socketService?.on(this.directoryManager);
-    // if (serverReply$) {
-    //   this.directorySubscription = serverReply$.subscribe((response: any) => {
-    //     console.log('Received directorySubscription from server:', response);
-    //     this.dataSource = this.dataSourceBuilder.create(response.data);
-    //   });
-    // }
+    //Find app exist in local storage
+    this.appList = this.appWorkflowService.fetchAppObjFromLocalStorage();
+    if (this.appList && this.appList.length > 0) {
+      this.fetchDirectory("getContainerFiles");
+    }
+  }
 
-
-    //1. Required server side directory fetch
-
+  fetchDirectory(action: string) {
     this.subscriptions.add(
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
         if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
-          this.messages = { "action": "getAll", "path": appDetails.projectName };
+          this.messages = { "action": action, "path": appDetails.projectName };
           this.socketService.sendMessage(this.directoryManager, this.messages);
           const serverReply$ = this.socketService?.on(this.directoryManager);
           if (serverReply$) {
             this.directorySubscription = serverReply$.subscribe((response: any) => {
               console.log('Received directorySubscription from server:', response);
-              this.dataSource = this.dataSourceBuilder.create(response.data);
+              const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
+              console.log("formatedTree", formatedTree);
+              this.appWorkflowService.saveAppObjInLocalStorage(appDetails);
+              this.dataSource = this.dataSourceBuilder.create(formatedTree);
             });
           }
         }
@@ -148,44 +104,21 @@ export class DirectoryListComponent {
   }
 
   onRowClick(row: any) {
-    if (row && row.data && row.data.kind !== 'directory' && this.isWebContainerActive) {
-      //Test. Hardcoded access webcontainer file
-      // this.messages = { "action": "getContinerFiles", "path": "newApp1" };
-      // this.socketService.sendMessage(this.directoryManager, this.messages);
-      // const webContainerFiles$ = this.socketService?.on(this.webContainerFiles);
-      // if (webContainerFiles$) {
-      //   webContainerFiles$.subscribe((response: any) => {
-      //     console.log('Mod webContainerFiles from server:', response);
-      //     if (!this.isWebContainerActive) {
-      //       this.webContainerService.bootAndRun(response.data['newApp1']['directory']);
-      //       this.isWebContainerActive = true;
-      //     }
-
-      //     this.webContainerService.webContainerFileContent(row.data.path.replace(/\\/g, '/')).then((fileData: string) => {
-      //       this.windowService.openWindow({
-      //         title: row.data.name,
-      //         contentComponent: CodeEditorComponent, // Pass the component class to render
-      //         data: { fileContent: fileData }
-      //       });
-      //     }, error => {
-      //       console.log('error', error);
-      //     });
-
-      //   });
-      // }
-
-
+    if (row && row.data && row.data.kind !== 'directory') {
       this.webContainerService.webContainerFileContent(row.data.path.replace(/\\/g, '/')).then((fileData: string) => {
         this.windowService.openWindow({
           title: row.data.name,
           contentComponent: CodeEditorComponent, // Pass the component class to render
-          data: { fileContent: fileData }
+          data: { fileDetails: { fileContent: fileData, filePath: row.data.path.replace(/\\/g, '/') } }
         });
       }, error => {
-        console.log('error', error);
+        console.log('onRowClick error', error);
       });
-
     }
+  }
+
+   ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 }
 

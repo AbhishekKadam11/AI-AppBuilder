@@ -14,10 +14,10 @@ export class ProgressControlService {
   public showProgressGif(fact: string) {
     switch (fact) {
       case 'init':
-        this.progresGifSubject.next('assets/images/software-application.png');
+        this.progresGifSubject.next('assets/images/progress-init.png');
         break;
       case 'reseacrhing':
-        this.progresGifSubject.next('assets/images/progress-researching.gif');
+        this.progresGifSubject.next('assets/images/progress-searching.gif');
         break;
       case 'processing':
         this.progresGifSubject.next('assets/images/progress-processing.gif');

@@ -1,4 +1,5 @@
 <ngx-monaco-editor class="monaco-editor-container" 
     [options]="editorOptions"
-    [(ngModel)]="fileContent">
+    (onInit)="onEditorInit($event)"
+    [(ngModel)]="fileDetails.fileContent">
 </ngx-monaco-editor>

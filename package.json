@@ -28,7 +28,7 @@
     "@webcontainer/api": "^1.6.1",
     "eva-icons": "^1.1.3",
     "express": "^4.18.2",
-    "monaco-editor": "^0.52.2",
+    "monaco-editor": "^0.54.0",
     "ngx-monaco-editor-v2": "^20.3.0",
     "rxjs": "~7.8.0",
     "socket.io-client": "^4.8.1",

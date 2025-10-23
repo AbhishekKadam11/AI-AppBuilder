@@ -34,7 +34,7 @@ export class MessageSchema {
 
     setServerMessage(response: any) {
         console.log('Received message from server:', response); 
-        this.text = response.data.messages[response.data.messages.length - 1].kwargs.content;
+        this.text = response?.data.messages[response.data.messages.length - 1].kwargs.content || 'Unable to process your request, kindly refresh the page and try again.';
         this.date = response.date;
         this.reply = false;
         this.type = "text";

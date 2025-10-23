@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NbButtonModule, NbCardModule, NbIconModule, NbInputModule, NbLayoutModule } from "@nebular/theme";
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -18,7 +18,6 @@ import { AppWorkflowService } from '../services/app-workflow.service';
 
 export class BrowserWindowComponent implements OnInit, AfterViewInit {
 
-  @ViewChild('webcontainerIframe') iframe!: ElementRef<HTMLIFrameElement>;
   title = 'My Browser Window';
   isMinimized = false;
   isMaximized = false;
@@ -26,18 +25,14 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   outputLogs: string[] = [];
   private subscriptions: Subscription = new Subscription();
   private webContainerSubscription: Subscription | undefined;
-  private readonly readDirectoryContent: string = 'ReadDirectoryContent';
-  private readonly webContainerFiles: string = 'WebContainerFiles';
   private readonly directoryManager: string = 'DirectoryManager';
-  messages: any = { "action": "getContinerFiles", "path": "" };
-  private fileSystemTree: any | null = null;
+  messages: any = { "action": "getContainerFiles", "path": "" };
   private isWebContainerActive: boolean = false;
   progressGifUrl: string = '';
   public appUrl: string | null = null;
   placeholderUrl: string = 'https://webcontainer.io';
   private containerUrl: string = '';
   private appObject: any = {}
-
 
   constructor(private webContainerService: WebContainerService,
     private progressControlService: ProgressControlService,
@@ -51,7 +46,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     this.subscriptions.add(
       this.webContainerService.iframeUrl$.subscribe(url => {
         if (url) {
-          this.containerUrl = url + '/' + this.appObject.path;
+          this.containerUrl = url;
           this.appUrl = this.placeholderUrl;
           this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
         }
@@ -76,14 +71,13 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
         if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
           this.appObject = appDetails;
-          this.messages = { "action": "getContinerFiles", "path": this.appObject.projectName };
+          this.messages = { "action": "getContainerFiles", "path": this.appObject.projectName };
           this.socketService.sendMessage(this.directoryManager, this.messages);
-          const webContainerFiles$ = this.socketService?.on(this.webContainerFiles);
+          const webContainerFiles$ = this.socketService?.on(this.directoryManager);
           if (webContainerFiles$) {
             this.webContainerSubscription = webContainerFiles$.subscribe((response: any) => {
               console.log('Received webContainerFiles from server:', response);
-              this.fileSystemTree = this.webContainerService.buildWebContainerFileTree(response.data[this.appObject.projectName]['directory']) as any;
-              if (this.fileSystemTree && !this.isWebContainerActive) {
+              if (!this.isWebContainerActive) {
                 this.webContainerService.bootAndRun(response.data[this.appObject.projectName]['directory']);
                 this.isWebContainerActive = true;
               }
@@ -97,6 +91,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   ngOnDestroy(): void {
     // Clean up subscriptions
     this.subscriptions.unsubscribe();
+    this.webContainerSubscription?.unsubscribe();
   }
 
   ngAfterViewInit(): void {
@@ -122,14 +117,12 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   }
 
   navigateToUrl(): void {
-    if (this.appUrl && this.iframe) {
+    if (this.appUrl) {
       this.appUrl = this.appUrl.replace(this.placeholderUrl, this.containerUrl);
       const newUrl = new URL(this.appUrl);
-      const iframeWindow = this.iframe.nativeElement.contentWindow;
-      if (iframeWindow) {
-        iframeWindow.postMessage({ type: 'navigate', url: newUrl.href }, '*');
-      }
+      this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(newUrl.href);
       this.appUrl = this.appUrl.replace(this.containerUrl, this.placeholderUrl);
     }
   }
+
 }

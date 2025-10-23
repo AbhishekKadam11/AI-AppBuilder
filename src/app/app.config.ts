@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { NbLayoutModule, NbMenuModule, NbSidebarModule, NbThemeModule, NbWindowModule, } from '@nebular/theme';
+import { NbMenuModule, NbSidebarModule, NbThemeModule, NbWindowModule, } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { UserData } from './core/users';
 import { UserService } from './services/users.service';
@@ -22,6 +22,6 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideClientHydration(withEventReplay()),
     { provide: UserData, useClass: UserService },
-     provideMonacoEditor(),
+     provideMonacoEditor({ baseUrl: '/assets/monaco/min/vs' }),
   ]
 };
