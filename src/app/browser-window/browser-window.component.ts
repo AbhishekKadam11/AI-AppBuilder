@@ -29,6 +29,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   messages: any = { "action": "getContainerFiles", "path": "" };
   private isWebContainerActive: boolean = false;
   progressGifUrl: string = '';
+  progressInfo: string = '';
   public appUrl: string | null = null;
   placeholderUrl: string = 'https://webcontainer.io';
   private containerUrl: string = '';
@@ -46,9 +47,10 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     this.subscriptions.add(
       this.webContainerService.iframeUrl$.subscribe(url => {
         if (url) {
-          this.containerUrl = url;
-          this.appUrl = this.placeholderUrl;
-          this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+          const path = this.appObject.path ? `/${this.appObject.path}` : '';
+          this.containerUrl = url + path;
+          this.appUrl = this.placeholderUrl + path;
+          this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url + path);
         }
       })
     );
@@ -62,8 +64,14 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
 
     // Subscribe to progress GIF updates
     this.subscriptions.add(
-      this.progressControlService.progresGif$.subscribe(gifUrl => {
+      this.progressControlService.progresGif$.subscribe((gifUrl: string) => {
         this.progressGifUrl = gifUrl;
+      })
+    );
+
+    this.subscriptions.add(
+      this.progressControlService.progresText$.subscribe((text: string) => {
+        this.progressInfo = text;
       })
     );
 

@@ -8,7 +8,8 @@
                 </div>
                 <div class="window-url">
                     <input nbInput type="text" placeholder="http://" fullWidth [(ngModel)]="appUrl" />
-                    <button nbButton ghost (click)="navigateToUrl()"><nb-icon icon="corner-down-left-outline"></nb-icon></button>
+                    <button nbButton ghost (click)="navigateToUrl()"><nb-icon
+                            icon="corner-down-left-outline"></nb-icon></button>
                 </div>
                 <div class="">
                     <button nbButton ghost><nb-icon icon="minus-outline"></nb-icon></button>
@@ -23,8 +24,13 @@
             <div class="content">
                 <div class="iframe-pane">
                     <iframe *ngIf="iframeUrl" [src]="iframeUrl" width="100%" height="100%" #webcontainerIframe></iframe>
-                    <div class="progress-gif" *ngIf="progressGifUrl && progressGifUrl !== ''">
-                        <img [src]="progressGifUrl" />
+                    <div class="progress-container">
+                        <div class="progress-gif" *ngIf="progressGifUrl && progressGifUrl !== ''">
+                            <img [src]="progressGifUrl" />
+                        </div>
+                        <div class="progress-text" *ngIf="progressInfo && progressInfo !== ''">
+                            <span class="text-hint">{{progressInfo}}</span>
+                        </div>
                     </div>
                 </div>
             </div>

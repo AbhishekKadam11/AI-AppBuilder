@@ -2,7 +2,8 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  position: absolute; /* or fixed, depending on your needs */
+  position: absolute;
+  /* or fixed, depending on your needs */
   background-color: #fff;
   overflow: hidden;
 }
@@ -80,10 +81,23 @@ iframe {
   border: none;
 }
 
-.progress-gif {
+.progress-container {
   display: flex;
-  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.progress-gif {
   justify-content: center;
   align-items: center;
-  height: 100%;
+}
+
+.progress-text {
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 1rem;
+  color: #333;
 }
