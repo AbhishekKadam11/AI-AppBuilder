@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NbActionsModule, NbChatComponent, NbChatModule, NbIconModule, NbLayoutComponent, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbSidebarModule, NbSidebarService, NbWindowControlButtonsConfig, NbWindowModule, NbWindowService } from '@nebular/theme';
+import { NbActionsModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbSidebarModule, NbSidebarService } from '@nebular/theme';
 import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
 import { Subject } from 'rxjs/internal/Subject';
 import { filter } from 'rxjs/internal/operators/filter';
@@ -15,6 +15,7 @@ import { ProgressControlService } from '../services/progress-control.service';
 import { AppWorkflowService } from '../services/app-workflow.service';
 import { WindowService } from '../services/window.service';
 import { WindowComponent } from '../window/window/window.component';
+import { FooterComponent } from "../common/footer/footer.component";
 
 type FileEvent = {
   data: string;
@@ -24,7 +25,7 @@ type FileEvent = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule, CommonModule, BrowserWindowComponent, ConsoleWindowComponent, NbActionsModule, HeaderComponent, DirectoryListComponent, WindowComponent],
+  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule, CommonModule, BrowserWindowComponent, ConsoleWindowComponent, NbActionsModule, HeaderComponent, DirectoryListComponent, WindowComponent, FooterComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -43,7 +44,7 @@ export class DashboardComponent {
   //   { title: 'Users', link: '/users', icon: 'people-outline' },
   //   { title: 'Settings', link: '/settings', icon: 'settings-2-outline' },
   // ];
-  isExplorerReady: boolean = false;
+  isExplorerReady: boolean = true;
 
   SideItems: NbMenuItem[] = [
     {
@@ -100,7 +101,6 @@ export class DashboardComponent {
   constructor(private sidebarService: NbSidebarService,
     private menuService: NbMenuService,
     private socketService: SocketService,
-    // private windowService: NbWindowService,
     private appWorkflowService: AppWorkflowService,
     public windowService: WindowService,
     private progressControlService: ProgressControlService) {

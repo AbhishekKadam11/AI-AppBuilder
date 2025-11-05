@@ -3,18 +3,62 @@
   /* Choose a suitable font */
   font-size: 1.2rem;
   font-weight: bold;
-
   letter-spacing: 2px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   /* Optional text shadow */
   /* Add other styling for logo appearance */
 }
 
-nb-layout-column {
-  gap: 30px;
-  display: grid;
+// .app-content {
+//   // margin-top: 60px; /* Adjust based on your header's height */
+//   // margin-bottom: 60px; /* Adjust based on your footer's height */
+//   overflow-y: auto; /* Enable scrolling for content */
+//   height: calc(100vh - 120px); /* Adjust based on header/footer height */
+// }
+
+// nb-layout-column {
+//   gap: 30px;
+//   display: grid;
+// }
+
+// .dashboard-area {
+//   height: 0px;
+// }
+
+nb-layout {
+  height: 100vh; /* Viewport height */
+  display: flex;
+  flex-direction: column;
 }
 
-.dashboard-area {
-  height: 0px;
+/* Make columns fill available space and manage their height */
+nb-layout-column {
+  display: flex;
+  flex-direction: column; /* For rows within the column */
+  flex-grow: 1; /* Allows columns to take available space */
+  overflow: hidden; /* Hide overflow for the column itself */
+}
+
+/* Distribute height between rows in the right column */
+.right-column-row {
+  flex-grow: 1; /* Allow rows to grow and fill space */
+  overflow: auto; /* Enable scrolling within the row if content exceeds height */
+  /* You might want to set specific heights for rows if needed, e.g., height: 50%; */
+}
+
+/* Adjust header and footer if fixed */
+nb-layout-header, nb-layout-footer {
+  flex-shrink: 0; /* Prevent header/footer from shrinking */
+}
+
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Make both columns equal width (adjust flex value to change ratio) */
+}
+
+.browser-window {
+  height: 100% !important;
+  width: 100% !important;
 }

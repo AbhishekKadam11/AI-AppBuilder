@@ -1,17 +1,4 @@
 <nb-layout>
-  <!-- <nb-layout-header class="my-custom-header">
-    <nav>
-    <nb-layout-column >
-      <p class="logo-text">
-        AI-AppBuilder
-      </p>
-    </nb-layout-column>
-     </nav>
-    <nb-layout-column class="notification-menu">
-      <app-notification-control />
-    </nb-layout-column>
-   
-  </nb-layout-header> -->
   <nb-layout-header fixed>
     <app-header></app-header>
   </nb-layout-header>
@@ -28,18 +15,27 @@
 
   </nb-sidebar>
 
-  <nb-layout-column>
-    <app-chat-showcase />
-    <app-console-window />
-      <div class="dashboard-area">
+  <nb-layout-column class="left-column">
+    <div class="right-column-row top-row">
+      <app-chat-showcase />
+    </div>
+    <div class="right-column-row bottom-row">
+      <app-console-window />
+    </div>
+    <div class="dashboard-area">
       @for (window of windowService.getWindows()(); track window.id) {
       <app-window [window]="window"></app-window>
       }
     </div>
+
   </nb-layout-column>
 
-  <nb-layout-column>
-    <app-browser-window />
+  <nb-layout-column class="right-column">
+    <app-browser-window class="browser-window" />
   </nb-layout-column>
+
+  <nb-layout-footer fixed>
+    <app-footer></app-footer>
+  </nb-layout-footer>
 
 </nb-layout>
