@@ -22,11 +22,7 @@
     <div class="right-column-row bottom-row">
       <app-console-window />
     </div>
-    <div class="dashboard-area">
-      @for (window of windowService.getWindows()(); track window.id) {
-      <app-window [window]="window"></app-window>
-      }
-    </div>
+    
 
   </nb-layout-column>
 
@@ -34,7 +30,12 @@
     <app-browser-window class="browser-window" />
   </nb-layout-column>
 
-  <nb-layout-footer fixed>
+  <nb-layout-footer fixed >
+    <div>
+      @for (window of windowService.getWindows()(); track window.id) {
+      <app-window [window]="window"></app-window>
+      }
+    </div>
     <app-footer></app-footer>
   </nb-layout-footer>
 

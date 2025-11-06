@@ -62,3 +62,8 @@ nb-layout-header, nb-layout-footer {
   height: 100% !important;
   width: 100% !important;
 }
+
+::ng-deep nb-layout-footer nav {
+  display: flex;
+  justify-content: left !important;
+}

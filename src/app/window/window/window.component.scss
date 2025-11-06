@@ -14,17 +14,27 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease-in-out, top 0.3s ease-in-out, left 0.3s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out, top 0.3s ease-in-out, left 0.3s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out, bottom 0.3s ease-in-out;
     z-index: 1000;
   }
 
   .window.minimized {
-    width: 500px;
-    height: 60px;
-    bottom: 0;
-    left: 60px;
-    top: auto;
-    transform: translateY(0);
+    // width: 500px;
+    // height: 60px;
+    // bottom: 0;
+    // left: 60px;
+    // top: auto;
+    // transform: translateY(0);
+    position: static;
+    /* Removes absolute positioning */
+    display: inline-block;
+    width: auto;
+    bottom: 0px;
+    height: auto;
+    /* Match footer height */
+    margin-right: 10px;
+    /* Add spacing between minimized windows */
+    cursor: pointer;
   }
 
   .window.maximized {
@@ -58,5 +68,9 @@
     height: 100% !important;
     width: 100% !important;
     overflow: auto;
+  }
+
+  .window.minimized .window-content {
+    display: none;
   }
 }
