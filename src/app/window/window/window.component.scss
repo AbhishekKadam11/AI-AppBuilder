@@ -5,10 +5,10 @@
 
   .window {
     position: absolute;
-    top: 80px;
-    left: 60px;
-    width: 50%;
-    height: 96%;
+    top: 8.6%;
+    left: 13.7%;
+    width: 41%;
+    height: 83.2%;
     background-color: nb-theme(background-basic-color-1);
     border: 1px dashed nb-theme(color-basic-700);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -28,9 +28,10 @@
     position: static;
     /* Removes absolute positioning */
     display: inline-block;
-    width: auto;
+    width: 250px !important;
+    padding: 0 10px 0 15px;
     bottom: 0px;
-    height: auto;
+    height: 30px;
     /* Match footer height */
     margin-right: 10px;
     /* Add spacing between minimized windows */
@@ -41,7 +42,7 @@
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: auto;
     border-radius: 0;
   }
 
