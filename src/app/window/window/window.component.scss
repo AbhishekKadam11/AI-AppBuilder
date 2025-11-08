@@ -14,8 +14,9 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease-in-out, top 0.3s ease-in-out, left 0.3s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out, bottom 0.3s ease-in-out;
+    // transition: transform 0.3s ease-in-out, top 0.3s ease-in-out, left 0.3s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out, bottom 0.3s ease-in-out;
     z-index: 1000;
+    transition: all 0.3s ease-in-out;
   }
 
   .window.minimized {
@@ -25,17 +26,15 @@
     // left: 60px;
     // top: auto;
     // transform: translateY(0);
-    position: static;
-    /* Removes absolute positioning */
+    position: fixed;
     display: inline-block;
-    width: 250px !important;
-    padding: 0 10px 0 15px;
-    bottom: 0px;
+    width: 280px !important;
+    padding: 0 10px 0 10px;
+    bottom: calc(var(--footer-height) + 5px);
     height: 30px;
-    /* Match footer height */
     margin-right: 10px;
-    /* Add spacing between minimized windows */
     cursor: pointer;
+    right: calc(var(--window-spacing) + (var(--window-minimized-width) + var(--window-spacing)) * var(--window-index)) !important;
   }
 
   .window.maximized {
@@ -52,6 +51,7 @@
     align-items: center;
     background-color: nb-theme(background-basic-color-1);
     cursor: move;
+    padding: 10px 10px !important;
   }
 
   .window-controls button {
@@ -72,6 +72,16 @@
   }
 
   .window.minimized .window-content {
-    display: none;
+    display: none !important;
+
+  }
+
+  .window.minimized nb-card-header {
+    padding: 0px !important;
+  }
+
+  .window.minimized nb-card-body {
+    padding: 0px !important;
+    display: none !important;
   }
 }
