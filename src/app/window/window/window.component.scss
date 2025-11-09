@@ -1,7 +1,6 @@
 @use '../../../themes/styles/themes' as *;
 
 @include nb-install-component {
-  // background: nb-theme(background-basic-color-1);
 
   .window {
     position: absolute;
@@ -14,30 +13,28 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
-    // transition: transform 0.3s ease-in-out, top 0.3s ease-in-out, left 0.3s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out, bottom 0.3s ease-in-out;
     z-index: 1000;
     transition: all 0.3s ease-in-out;
   }
 
   .window.minimized {
-    // width: 500px;
-    // height: 60px;
-    // bottom: 0;
-    // left: 60px;
-    // top: auto;
-    // transform: translateY(0);
-    position: fixed;
+    position: static !important;
     display: inline-block;
     width: 280px !important;
+    min-width: 280px !important;
     padding: 0 10px 0 10px;
-    bottom: calc(var(--footer-height) + 5px);
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
     height: 30px;
     margin-right: 10px;
     cursor: pointer;
-    right: calc(var(--window-spacing) + (var(--window-minimized-width) + var(--window-spacing)) * var(--window-index)) !important;
+    flex-shrink: 0;
   }
 
   .window.maximized {
+    position: absolute;
     top: 0;
     left: 0;
     width: 100vw;

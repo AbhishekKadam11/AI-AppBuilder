@@ -15,6 +15,7 @@ import { NbButtonModule, NbCardModule, NbIconModule } from '@nebular/theme';
 })
 export class WindowComponent {
   @Input({ required: true }) window!: WindowConfig;
+  @Input({ required: true }) index!: number;
 
   constructor(private windowService: WindowService) { }
 

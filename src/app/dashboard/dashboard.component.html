@@ -1,4 +1,4 @@
-<nb-layout>
+<nb-layout [withScroll]="false" class="app-container">
   <nb-layout-header fixed>
     <app-header></app-header>
   </nb-layout-header>
@@ -9,7 +9,15 @@
 
   <nb-sidebar tag="dynamicSidebar" *ngIf="isExplorerReady">
     <nb-sidebar-header>
-      <strong>File Explorer</strong>
+      <div class="explorer-header">
+        <strong>File Explorer</strong>
+        <div class="explorer-menu-button">
+          <button nbButton ghost [nbContextMenu]="fileExplorerMenuItems" nbContextMenuTag="fileExplorerMenu" [nbContextMenuPlacement]="contextMenuPlacement"
+            nbContextMenuTrigger="click" aria-label="Open menu">
+            <nb-icon icon="more-vertical-outline"></nb-icon>
+          </button>
+        </div>
+      </div>
     </nb-sidebar-header>
     <app-directory-list (openFile)="onFileClick($event)" ngSkipHydration />
 
@@ -22,7 +30,6 @@
     <div class="right-column-row bottom-row">
       <app-console-window />
     </div>
-    
 
   </nb-layout-column>
 
@@ -30,10 +37,10 @@
     <app-browser-window class="browser-window" />
   </nb-layout-column>
 
-  <nb-layout-footer fixed >
-    <div>
-      @for (window of windowService.getWindows()(); track window.id) {
-      <app-window [window]="window"></app-window>
+  <nb-layout-footer fixed class="footer">
+    <div class="stacked-window">
+      @for (window of windowService.getWindows()(); track window.id; let i = $index) {
+      <app-window [window]="window" [index]="i" [style.--window-index]="i"></app-window>
       }
     </div>
     <app-footer></app-footer>

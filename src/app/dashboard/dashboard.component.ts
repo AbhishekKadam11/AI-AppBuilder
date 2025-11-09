@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NbActionsModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbSidebarModule, NbSidebarService } from '@nebular/theme';
+import { NbActionsModule, NbButton, NbButtonModule, NbContextMenuModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverModule, NbPosition, NbSidebarModule, NbSidebarService } from '@nebular/theme';
 import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
 import { Subject } from 'rxjs/internal/Subject';
 import { filter } from 'rxjs/internal/operators/filter';
@@ -25,7 +25,7 @@ type FileEvent = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule, CommonModule, BrowserWindowComponent, ConsoleWindowComponent, NbActionsModule, HeaderComponent, DirectoryListComponent, WindowComponent, FooterComponent],
+  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule, CommonModule, BrowserWindowComponent, ConsoleWindowComponent, NbActionsModule, HeaderComponent, DirectoryListComponent, WindowComponent, FooterComponent, NbPopoverModule, NbButtonModule, NbContextMenuModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -39,11 +39,9 @@ export class DashboardComponent {
   maximize = true;
   fullScreen = true;
   close = true;
-  //  menuItems: NbMenuItem[] = [
-  //   { title: 'Dashboard', link: '/dashboard', icon: 'home-outline' },
-  //   { title: 'Users', link: '/users', icon: 'people-outline' },
-  //   { title: 'Settings', link: '/settings', icon: 'settings-2-outline' },
-  // ];
+  fileExplorerMenuItems: NbMenuItem[] = [
+    { title: 'Download', icon: 'cloud-download-outline' },
+  ];
   isExplorerReady: boolean = true;
 
   SideItems: NbMenuItem[] = [
@@ -92,6 +90,7 @@ export class DashboardComponent {
       icon: 'unlock-outline',
     },
   ];
+  contextMenuPlacement = NbPosition.BOTTOM;
 
   private destroy$ = new Subject<void>();
   selectedItem: string | undefined;
@@ -104,7 +103,7 @@ export class DashboardComponent {
     private appWorkflowService: AppWorkflowService,
     public windowService: WindowService,
     private progressControlService: ProgressControlService) {
-    // Initialization logic can go here if needed
+    // Sidebar menu item click handling
     this.menuService.onItemClick()
       .pipe(
         filter(({ tag }) => tag === 'sideMenu'), // Optional: filter by menu tag if multiple menus exist
@@ -118,6 +117,21 @@ export class DashboardComponent {
           this.toggleSidebar();
         }
         // Add your custom logic here, e.g., navigate, open a dialog, etc.
+      });
+
+    // File Explorer menu item click handling
+    this.menuService.onItemClick()
+      .pipe(
+        filter(({ tag }) => tag === 'fileExplorerMenu'), // Optional: filter by menu tag if multiple menus exist
+        map(({ item }) => item.title),
+      )
+      .subscribe(title => {
+        this.selectedItem = title;
+        console.log(`fileExplorerMenu item clicked: ${title}`);
+        if (title === 'Download') {
+          this.downloadProject();
+        }
+
       });
 
     this.subscriptions.add(
@@ -185,5 +199,14 @@ export class DashboardComponent {
 
   onFileClick(event: any) {
     console.log("event", event);
+  }
+
+  getWindowIndex(windowId: string): number {
+    const windows = this.windowService.getWindows()();
+    return windows.findIndex(w => w.id === windowId);
+  }
+
+  downloadProject() {
+    
   }
 }

@@ -83,12 +83,64 @@ nb-layout-header {
 .footer {
   min-height: 40px;
   padding: 0px;
-  justify-content: flex-end;
 }
 
 ::ng-deep nb-layout-footer nav {
   display: flex !important;
-  justify-content: left !important;
+  justify-content: flex-end !important;
+  /* Pushes items to the right */
+  flex-direction: row-reverse !important;
+  /* Stacks new items from the right */
   height: 65px !important;
   padding: 0% !important;
+
+}
+
+.stacked-window {
+  // position: fixed;
+  // bottom: calc(var(--footer-height) + 5px);
+  right: 10px;
+  display: flex;
+  flex-direction: row;
+  // align-items: center;
+  gap: 10px;
+  // z-index: 1000; /* Ensure it stays above other content */
+  overflow-x: auto;
+  /* Adds horizontal scrollbar when content overflows */
+  overflow-y: hidden;
+  /* Hides vertical scrollbar */
+  white-space: nowrap;
+  /* Prevents windows from wrapping to a new line */
+}
+
+::-webkit-scrollbar {
+  width: nb-theme(scrollbar-width) !important;
+  height: nb-theme(scrollbar-width) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: nb-theme(scrollbar-color) !important;
+  border-radius: nb-theme(scrollbar-width) / 2 !important;
+}
+
+::-webkit-scrollbar-track {
+  background: nb-theme(scrollbar-background-color) !important;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  /* "auto" or "thin" */
+  scrollbar-color: nb-theme(scrollbar-color) nb-theme(scrollbar-background-color);
+}
+
+.explorer-menu-button {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.explorer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
