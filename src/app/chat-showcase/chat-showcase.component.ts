@@ -8,22 +8,22 @@ import { MessageSchema } from '../core/message-schema';
 import { ProgressControlService } from '../services/progress-control.service';
 import { AppWorkflowService } from '../services/app-workflow.service';
 
-interface IUser {
-  name: string;
-  avatar: string;
-}
+//interface IUser {
+//  name: string;
+//  avatar: string;
+//}
 
-interface IMessage {
-  type: string;
-  text: string;
-  reply: boolean;
-  user: IUser;
-  date: Date;
-  files: NbChatMessageFile[];
-  quote: string;
-  latitude: number;
-  longitude: number;
-}
+//interface IMessage {
+ // type: string;
+ // text: string;
+ // reply: boolean;
+ // user: IUser;
+ // date: Date;
+ // files: NbChatMessageFile[];
+ // quote: string;
+ // latitude: number;
+ // longitude: number;
+//}
 
 @Component({
   selector: 'app-chat-showcase',
@@ -34,7 +34,7 @@ interface IMessage {
 })
 export class ChatShowcaseComponent implements AfterViewInit {
 
-  messages: IMessage[] = [];
+  messages: IChatMessage[] = [];
   private readonly chatSource = 'chatSource';
   private socketSubscription!: Subscription;
   private chatSubscription!: Subscription;
