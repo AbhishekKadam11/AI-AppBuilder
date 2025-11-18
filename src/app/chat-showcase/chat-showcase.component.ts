@@ -7,23 +7,8 @@ import { Subscription } from 'rxjs/internal/Subscription';
 import { MessageSchema } from '../core/message-schema';
 import { ProgressControlService } from '../services/progress-control.service';
 import { AppWorkflowService } from '../services/app-workflow.service';
+import { IChatMessage } from '../core/common';
 
-//interface IUser {
-//  name: string;
-//  avatar: string;
-//}
-
-//interface IMessage {
- // type: string;
- // text: string;
- // reply: boolean;
- // user: IUser;
- // date: Date;
- // files: NbChatMessageFile[];
- // quote: string;
- // latitude: number;
- // longitude: number;
-//}
 
 @Component({
   selector: 'app-chat-showcase',
