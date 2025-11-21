@@ -88,6 +88,9 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
               if (!this.isWebContainerActive) {
                 this.webContainerService.bootAndRun(response.data[this.appObject.projectName]['directory']);
                 this.isWebContainerActive = true;
+              } else {
+                console.log('WebContainer is already active. Skipping boot.');
+                this.webContainerService.mountFiles(response.data[this.appObject.projectName]['directory']);
               }
             });
           }

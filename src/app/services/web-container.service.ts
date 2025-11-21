@@ -55,7 +55,7 @@ export class WebContainerService {
     }
   }
 
-  private async mountFiles(files: FileSystemTree): Promise<void> {
+  public async mountFiles(files: FileSystemTree): Promise<void> {
     this.outputSubject.next('Mounting files...');
     await this.webcontainerInstance.mount(files);
     this.outputSubject.next('Files mounted.');

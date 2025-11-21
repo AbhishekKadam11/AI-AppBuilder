@@ -9,7 +9,6 @@ import { ProgressControlService } from '../services/progress-control.service';
 import { AppWorkflowService } from '../services/app-workflow.service';
 import { IChatMessage } from '../core/common';
 
-
 @Component({
   selector: 'app-chat-showcase',
   standalone: true,
@@ -42,7 +41,6 @@ export class ChatShowcaseComponent implements AfterViewInit {
           this.chatSubscription = serverReply$.subscribe((response: any) => {
             console.log('Received chatSource from server:', response);
             this.appWorkflowService.processState('appRecived', response);
-
             serverMessage.setServerMessage(response);
             this.messages.push(serverMessage.getMessage());
           }, (error) => {

@@ -54,28 +54,17 @@ export class DirectoryListComponent {
   }
 
   ngAfterViewInit() {
-    //1. Required webcontainer side directory fetch
-    this.fetchDirectory("getContainerFiles");
 
-    //Find app exist in local storage
-    this.appList = this.appWorkflowService.fetchAppObjFromLocalStorage();
-    if (this.appList && this.appList.length > 0) {
-      this.fetchDirectory("getContainerFiles");
-    }
-  }
-
-  fetchDirectory(action: string) {
     this.subscriptions.add(
-      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
+    this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
         if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
-          this.messages = { "action": action, "path": appDetails.projectName };
+          this.messages = { "action": "getContainerFiles", "path": appDetails.projectName };
           this.socketService.sendMessage(this.directoryManager, this.messages);
           const serverReply$ = this.socketService?.on(this.directoryManager);
           if (serverReply$) {
             this.directorySubscription = serverReply$.subscribe((response: any) => {
               console.log('Received directorySubscription from server:', response);
               const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
-              console.log("formatedTree", formatedTree);
               this.appWorkflowService.saveAppObjInLocalStorage(appDetails);
               this.dataSource = this.dataSourceBuilder.create(formatedTree);
             });
