@@ -103,14 +103,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     return;
   }
 
-  appObjectFromLocalStorage() {
-    const appObject = this.storageService.getItem('appObject');
-    if (appObject) {
-      const appList = JSON.parse(appObject);
-    }
-    return null;
-  }
-
   changeAppObj(appObject: any) {
     console.log("seleced appObject", appObject);
     this.appWorkflowService.processState('appRecived', appObject);

@@ -8,7 +8,7 @@
                 </div>
                 <div class="window-url">
                     <input nbInput type="text" placeholder="http://" fullWidth [(ngModel)]="appUrl" />
-                    <button nbButton ghost (click)="navigateToUrl()"><nb-icon
+                    <button nbButton ghost (click)="navigateToUrl()" (keyup.enter)="navigateToUrl()"><nb-icon
                             icon="corner-down-left-outline"></nb-icon></button>
                 </div>
                 <div class="">

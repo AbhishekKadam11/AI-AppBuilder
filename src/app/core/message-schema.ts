@@ -1,6 +1,8 @@
 import { NbChatMessageFile } from "@nebular/theme";
 import { IChatMessage } from "./common";
 
+type PartialChatMessage = Partial<IChatMessage>;
+
 export class MessageSchema {
     // set message(arg0: { text: any; date: Date; reply: boolean; type: string; files: any; user: { name: string; avatar: string; }; quote: string; latitude: number; longitude: number; }) {
     //     throw new Error("Method not implemented.");
@@ -9,7 +11,7 @@ export class MessageSchema {
     public date: Date = new Date();
     public reply: boolean = false;
     public type: string = 'text';
-    public files!: NbChatMessageFile[];
+    public files!: NbChatMessageFile[] | undefined;
     public user!: {
         name: string;
         avatar: string;
@@ -19,17 +21,21 @@ export class MessageSchema {
     public quote: string = '';
     public latitude: number = 0;
     public longitude: number = 0;
+    public chatMessage: IChatMessage | undefined;
 
-    setMessage(message: IChatMessage) {
+    setMessage(message: IChatMessage | PartialChatMessage) {
         this.text = message.text;
-        this.date = message.date;
-        this.reply = message.reply;
-        this.type = message.type;
+        this.date = message.date || new Date();
+        this.reply = true;
+        this.type = 'text';
         this.files = message.files;
-        this.user = message.user;
-        this.quote = message.quote;
-        this.latitude = message.latitude;
-        this.longitude = message.longitude;
+        this.user = {
+        name: 'Creator',
+        avatar: 'assets/images/admin.png',
+      };
+        this.quote = message.quote || '';
+        this.latitude = message.latitude || 0;
+        this.longitude = message.longitude || 0;
     }
 
     setServerMessage(response: any) {
@@ -55,7 +61,7 @@ export class MessageSchema {
             date: this.date,
             reply: this.reply,
             type: this.type,
-            files: this.files,
+            files: this.files || [],
             user: this.user,
             quote: this.quote,
             latitude: this.latitude,

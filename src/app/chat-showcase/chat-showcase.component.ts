@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, effect, signal, WritableSignal } from '@angular/core';
 import { ChatShowcaseService } from '../services/chat-showcase.service';
 import { NbChatMessageFile, NbChatModule } from '@nebular/theme';
 import { NgFor } from '@angular/common';
@@ -18,10 +18,11 @@ import { IChatMessage } from '../core/common';
 })
 export class ChatShowcaseComponent implements AfterViewInit {
 
-  messages: IChatMessage[] = [];
+  messages: WritableSignal<IChatMessage[]> = signal([]);
   private readonly chatSource = 'chatSource';
   private socketSubscription!: Subscription;
   private chatSubscription!: Subscription;
+  private subscriptions: Subscription = new Subscription();
   messageSchema: MessageSchema;
 
   constructor(protected chatShowcaseService: ChatShowcaseService,
@@ -30,6 +31,13 @@ export class ChatShowcaseComponent implements AfterViewInit {
     private appWorkflowService: AppWorkflowService,
   ) {
     this.messageSchema = new MessageSchema();
+    // effect(() => {
+    //   const currentItems = this.messages();
+    //   console.log('Effect running: Array value is now:', currentItems);
+    //   if (currentItems.length > 0 && this.appWorkflowService.projectName) {
+    //     this.appWorkflowService.saveAppObjInLocalStorage({ data: { chatMessages: [...currentItems] } });
+    //   }
+    // });
   }
 
   ngAfterViewInit() {
@@ -40,17 +48,28 @@ export class ChatShowcaseComponent implements AfterViewInit {
           const serverMessage: MessageSchema = new MessageSchema();
           this.chatSubscription = serverReply$.subscribe((response: any) => {
             console.log('Received chatSource from server:', response);
+            response.data.uiMessages = this.messages();
             this.appWorkflowService.processState('appRecived', response);
             serverMessage.setServerMessage(response);
-            this.messages.push(serverMessage.getMessage());
+            this.messages.update(currentItems => [...new Set([...currentItems, serverMessage.getMessage()])]);
           }, (error) => {
             console.error("Received chatSource error from server:", error)
             serverMessage.setServerMessage(error);
-            this.messages.push(serverMessage.getMessage());
+            this.messages.update(currentItems => [...new Set([...currentItems, serverMessage.getMessage()])]);
           });
         }
       }
     });
+
+    this.subscriptions.add(
+      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
+        if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
+          console.log("App details received in chat showcase:", appDetails);
+          // this.messages = appDetails.data.messages || [];
+          this.messages.update(currentItems => [...new Set([...currentItems, ...appDetails.data.uiMessages])]);
+        }
+      })
+    );
   }
 
   ngOnInit(): void {
@@ -70,24 +89,14 @@ export class ChatShowcaseComponent implements AfterViewInit {
 
     this.messageSchema.setMessage({
       text: event.message,
-      date: new Date(),
-      reply: true,
-      type: files.length ? 'file' : 'text',
-      files: files,
-      user: {
-        name: 'Creator',
-        avatar: 'assets/images/admin.png',
-      },
-      quote: '',
-      latitude: 0,
-      longitude: 0,
     });
-    this.messages.push(this.messageSchema.getMessage());
-    this.socketService.sendMessage(this.chatSource, this.messages);
-
+    // this.messages.update(currentItems => [...currentItems, this.messageSchema.getMessage()]);
+    this.socketService.sendMessage(this.chatSource, this.messages());
     // const botReply = this.chatShowcaseService.reply(event.message);
     // if (botReply) {
     //   setTimeout(() => { this.messages.push(botReply) }, 500);
     // }
   }
+
+
 }
