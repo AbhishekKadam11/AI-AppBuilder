@@ -24,6 +24,7 @@ export class ChatShowcaseComponent implements AfterViewInit {
   private chatSubscription!: Subscription;
   private subscriptions: Subscription = new Subscription();
   messageSchema: MessageSchema;
+  private appObject: any;
 
   constructor(protected chatShowcaseService: ChatShowcaseService,
     private socketService: SocketService,
@@ -48,10 +49,10 @@ export class ChatShowcaseComponent implements AfterViewInit {
           const serverMessage: MessageSchema = new MessageSchema();
           this.chatSubscription = serverReply$.subscribe((response: any) => {
             console.log('Received chatSource from server:', response);
-            response.data.uiMessages = this.messages();
-            this.appWorkflowService.processState('appRecived', response);
             serverMessage.setServerMessage(response);
             this.messages.update(currentItems => [...new Set([...currentItems, serverMessage.getMessage()])]);
+            response.data.uiMessages = this.messages();
+            this.appWorkflowService.processState('appRecived', response);
           }, (error) => {
             console.error("Received chatSource error from server:", error)
             serverMessage.setServerMessage(error);
@@ -65,7 +66,7 @@ export class ChatShowcaseComponent implements AfterViewInit {
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
         if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
           console.log("App details received in chat showcase:", appDetails);
-          // this.messages = appDetails.data.messages || [];
+          this.appObject = appDetails;
           this.messages.update(currentItems => [...new Set([...currentItems, ...appDetails.data.uiMessages])]);
         }
       })
@@ -90,8 +91,16 @@ export class ChatShowcaseComponent implements AfterViewInit {
     this.messageSchema.setMessage({
       text: event.message,
     });
-    // this.messages.update(currentItems => [...currentItems, this.messageSchema.getMessage()]);
-    this.socketService.sendMessage(this.chatSource, this.messages());
+    this.messages.update(currentItems => [...currentItems, this.messageSchema.getMessage()]);
+    let payload: any = {
+      data: this.messages(),
+    };
+    if (this.appObject && this.appObject.projectName) { 
+      payload.projectName = this.appObject.projectName;
+      payload.chat_history = this.appObject.data.chat_history;
+    }
+
+    this.socketService.sendMessage(this.chatSource, payload);
     // const botReply = this.chatShowcaseService.reply(event.message);
     // if (botReply) {
     //   setTimeout(() => { this.messages.push(botReply) }, 500);
