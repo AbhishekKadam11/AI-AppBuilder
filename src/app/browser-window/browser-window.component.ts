@@ -48,9 +48,9 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
       this.webContainerService.iframeUrl$.subscribe(url => {
         if (url) {
           const path = this.appObject.path ? `/${this.appObject.path}` : '';
-          this.containerUrl = url + path;
+          this.containerUrl = url;
           this.appUrl = this.placeholderUrl + path;
-          this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url + path);
+          this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url+path);
         }
       })
     );
@@ -129,10 +129,11 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
 
   navigateToUrl(): void {
     if (this.appUrl) {
-      this.appUrl = this.appUrl.replace(this.placeholderUrl, this.containerUrl);
-      const newUrl = new URL(this.appUrl);
-      this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(newUrl.href);
-      this.appUrl = this.appUrl.replace(this.containerUrl, this.placeholderUrl);
+      const url = new URL(this.appUrl);
+      const pathName = url.pathname;
+      const containerUrl = new URL(this.containerUrl);
+      this.containerUrl = containerUrl.origin + pathName;
+      this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.containerUrl);
     }
   }
 

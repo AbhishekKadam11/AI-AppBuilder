@@ -64,10 +64,10 @@ export class ChatShowcaseComponent implements AfterViewInit {
 
     this.subscriptions.add(
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
-        if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
+        this.appObject = appDetails;
+        if (this.appObject.projectName && !this.socketService?.socketStatus.closed) {
           console.log("App details received in chat showcase:", appDetails);
-          this.appObject = appDetails;
-          this.messages.update(currentItems => [...new Set([...currentItems, ...appDetails.data.uiMessages])]);
+          this.messages.update(currentItems => [...new Set([...currentItems, ...this.appObject.data.uiMessages])]);
         }
       })
     );
