@@ -32,7 +32,7 @@ export class AppWorkflowService {
     if (appObject) {
       const appList = JSON.parse(appObject);
       if (appList && Array.isArray(appList)) {
-        const userAppIndex = appList.findIndex(app => app.projectName === appDetails.projectName);
+        const userAppIndex = appList.findIndex(app => app.data.extraConfig.projectName === appDetails.data.extraConfig.projectName);
         if (userAppIndex === -1) {
           appList.push(appDetails);
           return this.storageService.setItem('appObject', JSON.stringify(appList));

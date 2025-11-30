@@ -49,8 +49,8 @@ export class CodeEditorComponent {
   saveToRemote() {
     this.subscriptions.add(
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
-        if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
-          const messages = { "action": "save", "path": appDetails.projectName + '/' + this.fileDetails.filePath, content: this.fileDetails.fileContent };
+        if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
+          const messages = { "action": "save", "path": appDetails.data.extraConfig.projectName + '/' + this.fileDetails.filePath, content: this.fileDetails.fileContent };
           this.socketService.sendMessage(this.directoryManager, messages);
           const serverReply$ = this.socketService?.on(this.directoryManager);
           if (serverReply$) {

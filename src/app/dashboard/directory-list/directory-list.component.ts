@@ -57,8 +57,8 @@ export class DirectoryListComponent {
 
     this.subscriptions.add(
     this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
-        if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
-          this.messages = { "action": "getContainerFiles", "path": appDetails.projectName };
+        if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
+          this.messages = { "action": "getContainerFiles", "path": appDetails.data.extraConfig.projectName };
           this.socketService.sendMessage(this.directoryManager, this.messages);
           const serverReply$ = this.socketService?.on(this.directoryManager);
           if (serverReply$) {

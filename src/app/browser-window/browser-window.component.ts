@@ -47,7 +47,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     this.subscriptions.add(
       this.webContainerService.iframeUrl$.subscribe(url => {
         if (url) {
-          const path = this.appObject.path ? `/${this.appObject.path}` : '';
+          const path = this.appObject.data.extraConfig.path ? `/${this.appObject.data.extraConfig.path}` : '';
           this.containerUrl = url;
           this.appUrl = this.placeholderUrl + path;
           this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url+path);
@@ -77,20 +77,20 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
 
     this.subscriptions.add(
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
-        if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
+        if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
           this.appObject = appDetails;
-          this.messages = { "action": "getContainerFiles", "path": this.appObject.projectName };
+          this.messages = { "action": "getContainerFiles", "path": this.appObject.data.extraConfig.projectName };
           this.socketService.sendMessage(this.directoryManager, this.messages);
           const webContainerFiles$ = this.socketService?.on(this.directoryManager);
           if (webContainerFiles$) {
             this.webContainerSubscription = webContainerFiles$.subscribe((response: any) => {
               console.log('Received webContainerFiles from server:', response);
               if (!this.isWebContainerActive) {
-                this.webContainerService.bootAndRun(response.data[this.appObject.projectName]['directory']);
+                this.webContainerService.bootAndRun(response.data[this.appObject.data.extraConfig.projectName]['directory']);
                 this.isWebContainerActive = true;
               } else {
                 console.log('WebContainer is already active. Skipping boot.');
-                this.webContainerService.mountFiles(response.data[this.appObject.projectName]['directory']);
+                this.webContainerService.mountFiles(response.data[this.appObject.data.extraConfig.projectName]['directory']);
               }
             });
           }

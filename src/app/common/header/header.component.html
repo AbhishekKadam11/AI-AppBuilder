@@ -5,7 +5,7 @@
 
   <div class="menu-selection">
     <nb-select [selected]="selectedApp" placeholder="Create New App" (selectedChange)="changeAppObj($event)" status="primary">
-      <nb-option *ngFor="let app of appList" [value]="app"> {{ app.projectName }}</nb-option>
+      <nb-option *ngFor="let app of appList" [value]="app"> {{ app.data.extraConfig.projectName }}</nb-option>
     </nb-select>
   </div>
 </div>
