@@ -1,0 +1,32 @@
+/* Make columns fill available space and manage their height */
+nb-layout-column {
+  display: flex;
+  flex-direction: column;
+  /* For rows within the column */
+  flex-grow: 1;
+  /* Allows columns to take available space */
+  overflow: hidden;
+  /* Hide overflow for the column itself */
+}
+
+/* Distribute height between rows in the right column */
+
+.browser-window {
+  height: 90% !important;
+  width: 100% !important;
+}
+
+.column-content-wrapper {
+  display: flex;
+  flex-direction: column; /* Stacks the rows vertically */
+  height: 100%; /* Ensures the wrapper takes full height of the column */
+  gap: 35px; /* Optional: adds space between rows */
+}
+
+// .row-one,
+// .row-two {
+//   /* Define styling for your individual rows, e.g., flex-grow for distribution */
+//   flex-grow: 0.5; /* Distributes available space equally between rows */
+// //   padding: 1rem; /* Example padding */
+// }
+

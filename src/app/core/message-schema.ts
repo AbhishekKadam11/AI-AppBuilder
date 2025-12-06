@@ -40,8 +40,8 @@ export class MessageSchema {
 
     setServerMessage(response: any) {
         console.log('Received message from server:', response);
-        if (response.data && response.data.messages.length !== 0) {
-            this.text = response.data && response.data.messages[response.data.messages.length - 1].kwargs.content
+        if (response.data && response.data.supervisorMesssage.length !== 0) {
+            this.text = response.data && response.data.supervisorMesssage[response.data.supervisorMesssage.length - 1].kwargs.content
         } else {
             this.text = 'Unable to process your request, kindly refresh the page and try again.';
         }

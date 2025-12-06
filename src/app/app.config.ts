@@ -11,7 +11,8 @@ import { provideMonacoEditor } from 'ngx-monaco-editor-v2';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes),
+    provideZoneChangeDetection({ eventCoalescing: true }), 
+    provideRouter(routes),
     importProvidersFrom(
       NbThemeModule.forRoot({ name: 'default' }),
       NbSidebarModule.forRoot(),

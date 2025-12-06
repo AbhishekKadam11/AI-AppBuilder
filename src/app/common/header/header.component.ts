@@ -88,11 +88,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  navigateHome() {
-    this.menuService.navigateHome();
-    return false;
-  }
-
   themePreference() {
     const currentUser = this.storageService.getItem('user');
     if (currentUser) {

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { StorageService } from './storage.service';
+import { WebContainerService } from './web-container.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,14 +13,14 @@ export class AppWorkflowService {
   // private appObjectSubject = new BehaviorSubject<string>('');
   // public appObject$ = this.appObjectSubject.asObservable();
 
-  constructor(private storageService: StorageService) { }
+  constructor(private storageService: StorageService, private webContainerService: WebContainerService) { }
 
   processState(fact: string, appObject: any) {
     // this.appWorkflowSubject.next(state);
     switch (fact) {
       case 'appRecived':
-        this.appWorkflowSubject.next(appObject);
         this.saveAppObjInLocalStorage(appObject);
+        this.appWorkflowSubject.next(appObject);
         break;
     }
   }
@@ -52,5 +53,9 @@ export class AppWorkflowService {
       return appList;
     }
     return null;
+  }
+
+  async webContainerCommandRunner(commandArray: string[]): Promise<void> {
+    this.webContainerService.runCommands(commandArray);
   }
 }
