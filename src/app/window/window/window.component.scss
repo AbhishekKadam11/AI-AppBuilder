@@ -20,15 +20,13 @@
   .window.minimized {
     position: static !important;
     display: inline-block;
-    width: 280px !important;
-    min-width: 280px !important;
+    width: 320px !important;
+    min-width: 300px !important;
     padding: 0 10px 0 10px;
     top: auto !important;
     left: auto !important;
     right: auto !important;
     bottom: auto !important;
-    height: 30px;
-    margin-right: 10px;
     cursor: pointer;
     flex-shrink: 0;
   }
@@ -40,6 +38,11 @@
     width: 100vw;
     height: auto;
     border-radius: 0;
+  }
+
+  .header-container {
+    padding-bottom: 0px !important;
+    padding-top: 0px !important;
   }
 
   .window-header {
@@ -54,7 +57,6 @@
   .window-controls button {
     background: transparent;
     border: none;
-    color: white;
     font-size: 1rem;
     cursor: pointer;
     margin-left: 5px;
@@ -80,5 +82,13 @@
   .window.minimized nb-card-body {
     padding: 0px !important;
     display: none !important;
+  }
+
+  .window-title {
+    font-weight: bold;
+    width: 70%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
 }

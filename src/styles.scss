@@ -3,18 +3,47 @@
 
 @include nb-install() {
   @include nb-theme-global();
+
+  .scrollable-container,
+  /* Generic Nebular scroll class */
+  nb-card-body,
+  /* Nebular card bodies */
+  .nb-global-scroll,
+  /* Sometimes used for global scroll handling */
+  * {
+    /* Fallback for anything else */
+
+    /* Firefox styling (thin and themed colors) */
+    scrollbar-width: thin;
+    scrollbar-color: nb-theme(layout-scrollbar-color) nb-theme(layout-scrollbar-background-color);
+
+    /* Webkit styling (Chrome, Safari, Edge) */
+    &::-webkit-scrollbar {
+      width: nb-theme(layout-scrollbar-width);
+      /* Default is usually thin (5px) */
+      height: nb-theme(layout-scrollbar-width);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: nb-theme(layout-scrollbar-color);
+      border-radius: nb-theme(layout-scrollbar-width);
+    }
+
+    &::-webkit-scrollbar-track {
+      background: nb-theme(layout-scrollbar-background-color);
+    }
+  }
 }
 
 .custom-code-editor {
-    // height: 100vh;
-    width: 41vw;
-
+  // height: 100vh;
+  width: 41vw;
 }
 
 .monaco-code-editor {
-    // .editor-container {
-        height: calc(100vh - 100px);
-    // }
+  // .editor-container {
+  height: calc(100vh - 100px);
+  // }
 }
 
 .resizable-window {

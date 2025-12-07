@@ -1,6 +1,6 @@
 <nb-card>
-    <div class="window" [ngClass]="{'minimized': window.isMinimized(), 'maximized': window.isMaximized()}" cdkDrag>
-        <nb-card-header>
+    <div class="window" [ngClass]="{'minimized': window.isMinimized(), 'maximized': window.isMaximized()}" cdkDrag [cdkDragDisabled]="window.isMinimized()">
+        <nb-card-header class="header-container">
             <div class="window-header" cdkDragHandle>
                 <span class="window-title">{{ window.title }}</span>
                 <div class="window-controls">

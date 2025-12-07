@@ -65,7 +65,6 @@ export class DirectoryListComponent {
             this.directorySubscription = serverReply$.subscribe((response: any) => {
               console.log('Received directorySubscription from server:', response);
               const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
-              this.appWorkflowService.saveAppObjInLocalStorage(appDetails);
               this.dataSource = this.dataSourceBuilder.create(formatedTree);
             });
           }

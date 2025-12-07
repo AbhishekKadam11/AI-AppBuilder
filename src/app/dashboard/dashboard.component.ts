@@ -1,12 +1,9 @@
 import { Component } from '@angular/core';
-import { NbActionsModule, NbButton, NbButtonModule, NbContextMenuModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverModule, NbPosition, NbSidebarModule, NbSidebarService } from '@nebular/theme';
-import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
+import { NbActionsModule, NbButtonModule, NbContextMenuModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverModule, NbPosition, NbSidebarModule, NbSidebarService } from '@nebular/theme';
 import { Subject } from 'rxjs/internal/Subject';
 import { filter } from 'rxjs/internal/operators/filter';
 import { map } from 'rxjs/internal/operators/map';
 import { CommonModule } from '@angular/common';
-import { BrowserWindowComponent } from '../browser-window/browser-window.component';
-import { ConsoleWindowComponent } from '../console-window/console-window.component';
 import { HeaderComponent } from "../common/header/header.component";
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -16,6 +13,7 @@ import { AppWorkflowService } from '../services/app-workflow.service';
 import { WindowService } from '../services/window.service';
 import { WindowComponent } from '../window/window/window.component';
 import { FooterComponent } from "../common/footer/footer.component";
+import { Router, RouterModule } from '@angular/router';
 
 type FileEvent = {
   data: string;
@@ -25,7 +23,7 @@ type FileEvent = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NbLayoutModule, NbSidebarModule, ChatShowcaseComponent, NbIconModule, NbMenuModule, CommonModule, BrowserWindowComponent, ConsoleWindowComponent, NbActionsModule, HeaderComponent, DirectoryListComponent, WindowComponent, FooterComponent, NbPopoverModule, NbButtonModule, NbContextMenuModule],
+  imports: [NbLayoutModule, NbSidebarModule, NbIconModule, NbMenuModule, CommonModule, NbActionsModule, HeaderComponent, DirectoryListComponent, WindowComponent, FooterComponent, NbPopoverModule, NbButtonModule, NbContextMenuModule, RouterModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -41,8 +39,9 @@ export class DashboardComponent {
   close = true;
   fileExplorerMenuItems: NbMenuItem[] = [
     { title: 'Download', icon: 'cloud-download-outline' },
+    { title: 'Sonar', icon: 'activity-outline' },
   ];
-  isExplorerReady: boolean = true;
+  isExplorerReady: boolean = false;
 
   SideItems: NbMenuItem[] = [
     {
@@ -65,6 +64,7 @@ export class DashboardComponent {
     {
       title: 'Settings',
       icon: 'settings-2-outline',
+      link: '/settings',
     },
     {
       title: 'Logout',
@@ -97,7 +97,9 @@ export class DashboardComponent {
   private socketSubscription!: Subscription;
   private subscriptions: Subscription = new Subscription();
 
-  constructor(private sidebarService: NbSidebarService,
+  constructor(
+    private router: Router,
+    private sidebarService: NbSidebarService,
     private menuService: NbMenuService,
     private socketService: SocketService,
     private appWorkflowService: AppWorkflowService,
@@ -112,9 +114,28 @@ export class DashboardComponent {
       .subscribe(title => {
         this.selectedItem = title;
         console.log(`Menu item clicked: ${title}`);
-        if (title === 'File Explorer') {
-
-          this.toggleSidebar();
+        // if (title === 'File Explorer') {
+        //   this.toggleSidebar();
+        // }
+        switch (title) {
+          case 'Console':
+         //   this.windowService.openWindow('consoleWindow', ConsoleWindowComponent, { title: 'Console', width: '600px', height: '400px' });
+            break;
+          case 'Browser':
+           // this.windowService.openWindow('browserWindow', BrowserWindowComponent, { title: 'Browser', width: '800px', height: '600px' });
+            break;
+          case 'File Explorer':
+            this.toggleSidebar();
+            break;
+          case 'Chat':
+            // Navigate to chat - handled by link property
+            break;
+          case 'Settings':
+            this.router.navigate(['/settings']);
+          break;
+          // Add more cases as needed
+          default:
+            console.log(`No action defined for menu item: ${title}`);
         }
         // Add your custom logic here, e.g., navigate, open a dialog, etc.
       });
@@ -128,15 +149,26 @@ export class DashboardComponent {
       .subscribe(title => {
         this.selectedItem = title;
         console.log(`fileExplorerMenu item clicked: ${title}`);
-        if (title === 'Download') {
-          this.downloadProject();
+        // if (title === 'Download') {
+        //   this.downloadProject();
+        // }
+        switch (title) {
+          case 'Download':
+            this.downloadProject(); 
+            break;
+          case 'Sonar': 
+            this.executeSonar();
+          break;
+          // Add more cases as needed
+          default:
+            console.log(`No action defined for menu item: ${title}`);
         }
 
       });
 
     this.subscriptions.add(
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
-        if (appDetails.projectName && !this.socketService?.socketStatus.closed) {
+        if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
           // this.messages = { "action": "getAll", "path": appDetails.projectName };
           this.isExplorerReady = true;
         }
@@ -208,5 +240,12 @@ export class DashboardComponent {
 
   downloadProject() {
     
+  }
+
+  executeSonar() {
+   this.appWorkflowService.webContainerCommandRunner(['npm', 'run', 'test']); 
+   setTimeout(() => {
+    this.appWorkflowService.webContainerCommandRunner(['npm', 'run', 'sonar']);
+   }, 15000);
   }
 }

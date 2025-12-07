@@ -1,4 +1,4 @@
-<nb-layout [withScroll]="false" class="app-container">
+<nb-layout withScroll="false" class="app-container">
   <nb-layout-header fixed>
     <app-header></app-header>
   </nb-layout-header>
@@ -12,8 +12,8 @@
       <div class="explorer-header">
         <strong>File Explorer</strong>
         <div class="explorer-menu-button">
-          <button nbButton ghost [nbContextMenu]="fileExplorerMenuItems" nbContextMenuTag="fileExplorerMenu" [nbContextMenuPlacement]="contextMenuPlacement"
-            nbContextMenuTrigger="click" aria-label="Open menu">
+          <button nbButton ghost [nbContextMenu]="fileExplorerMenuItems" nbContextMenuTag="fileExplorerMenu"
+            [nbContextMenuPlacement]="contextMenuPlacement" nbContextMenuTrigger="click" aria-label="Open menu">
             <nb-icon icon="more-vertical-outline"></nb-icon>
           </button>
         </div>
@@ -23,22 +23,12 @@
 
   </nb-sidebar>
 
-  <nb-layout-column class="left-column">
-    <div class="right-column-row top-row">
-      <app-chat-showcase />
-    </div>
-    <div class="right-column-row bottom-row">
-      <app-console-window />
-    </div>
-
-  </nb-layout-column>
-
-  <nb-layout-column class="right-column">
-    <app-browser-window class="browser-window" />
+  <nb-layout-column class="workbench-container">
+    <router-outlet></router-outlet>
   </nb-layout-column>
 
   <nb-layout-footer fixed class="footer">
-    <div class="stacked-window">
+    <div class="stacked-window nb-global-scroll">
       @for (window of windowService.getWindows()(); track window.id; let i = $index) {
       <app-window [window]="window" [index]="i" [style.--window-index]="i"></app-window>
       }
