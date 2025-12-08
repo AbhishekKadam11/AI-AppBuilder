@@ -2,10 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { NbButtonModule, NbCardModule, NbIconModule, NbLayoutModule } from '@nebular/theme';
 import { WebContainerService } from '../services/web-container.service';
+import { AutoScrollDirective } from '../services/auto-scroll.directive';
 
 @Component({
   selector: 'app-console-window',
-  imports: [NbLayoutModule, NbCardModule, NbIconModule, NbButtonModule, CommonModule],
+  imports: [NbLayoutModule, NbCardModule, NbIconModule, NbButtonModule, CommonModule, AutoScrollDirective],
   standalone: true,
   templateUrl: './console-window.component.html',
   styleUrl: './console-window.component.scss'

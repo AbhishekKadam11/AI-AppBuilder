@@ -12,14 +12,10 @@
                 </div>
             </div>
         </nb-card-header>
-        <nb-card-body>
-            <!-- Content to be displayed within the window -->
-            <!-- <ng-content></ng-content> -->
+        <nb-card-body [appAutoScroll]="true">
             <div class="log-pane">
                 <div class="log-output">
-                    <!-- <p *ngFor="let log of outputLogs">{{ log }}</p> -->
                     <p *ngFor="let log of collectionLogs">{{ log }}</p>
-                    <!-- <p *ngFor="let log of samelineLogs">{{ log }}</p> -->
                     <p>{{ samelineLogs }}</p>
                 </div>
             </div>
