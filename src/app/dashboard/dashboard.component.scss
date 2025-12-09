@@ -9,28 +9,19 @@
   /* Add other styling for logo appearance */
 }
 
-// .app-content {
-//   // margin-top: 60px; /* Adjust based on your header's height */
-//   // margin-bottom: 60px; /* Adjust based on your footer's height */
-//   overflow-y: auto; /* Enable scrolling for content */
-//   height: calc(100vh - 120px); /* Adjust based on header/footer height */
-// }
-
-// nb-layout-column {
-//   gap: 30px;
-//   display: grid;
-// }
-
-// .dashboard-area {
-//   height: 0px;
-// }
-
 nb-layout {
-  // height: 100vh;
-  /* Viewport height */
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.header-layout {
+  height: 5rem;
+  flex-shrink: 0;
+}
+
+::ng-deep nb-layout-header nav {
+  width: 100%;
 }
 
 .app-container {

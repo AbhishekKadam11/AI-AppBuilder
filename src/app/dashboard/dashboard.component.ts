@@ -93,7 +93,6 @@ export class DashboardComponent {
   contextMenuPlacement = NbPosition.BOTTOM;
 
   private destroy$ = new Subject<void>();
-  selectedItem: string | undefined;
   private socketSubscription!: Subscription;
   private subscriptions: Subscription = new Subscription();
 
@@ -112,7 +111,6 @@ export class DashboardComponent {
         map(({ item }) => item.title),
       )
       .subscribe(title => {
-        this.selectedItem = title;
         console.log(`Menu item clicked: ${title}`);
         // if (title === 'File Explorer') {
         //   this.toggleSidebar();
@@ -147,7 +145,6 @@ export class DashboardComponent {
         map(({ item }) => item.title),
       )
       .subscribe(title => {
-        this.selectedItem = title;
         console.log(`fileExplorerMenu item clicked: ${title}`);
         // if (title === 'Download') {
         //   this.downloadProject();

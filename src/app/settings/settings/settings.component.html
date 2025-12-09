@@ -1,4 +1,17 @@
-<p>settings works!</p>
+<nb-layout withScroll="false" class="app-container">
+
+<nb-sidebar tag="settingDynamicSidebar" *ngIf="isExplorerReady">
+  <!-- <nb-sidebar-header>
+    <div class="explorer-header">
 
 
-testing settings component
+    </div>
+  </nb-sidebar-header> -->
+  <nb-menu [items]="SideItems" tag="settingSideMenu"></nb-menu>
+</nb-sidebar>
+
+<nb-layout-column>
+<router-outlet />
+</nb-layout-column>
+
+</nb-layout>

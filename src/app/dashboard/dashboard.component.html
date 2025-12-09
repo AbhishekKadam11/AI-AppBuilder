@@ -1,5 +1,5 @@
 <nb-layout withScroll="false" class="app-container">
-  <nb-layout-header fixed>
+  <nb-layout-header fixed class="header-layout">
     <app-header></app-header>
   </nb-layout-header>
 
@@ -20,7 +20,6 @@
       </div>
     </nb-sidebar-header>
     <app-directory-list (openFile)="onFileClick($event)" ngSkipHydration />
-
   </nb-sidebar>
 
   <nb-layout-column class="workbench-container">

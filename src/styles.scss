@@ -1,5 +1,6 @@
 @use 'themes/styles/themes' as *;
 @use '@nebular/theme/styles/globals' as *;
+@use "tailwindcss";
 
 @include nb-install() {
   @include nb-theme-global();
