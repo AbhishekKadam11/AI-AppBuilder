@@ -6,8 +6,10 @@ import { takeWhile } from 'rxjs/internal/operators/takeWhile';
 
 interface CardSettings {
   title: string;
+  description: string;
   iconClass: string;
   type: string;
+  status: boolean;
 }
 
 @Component({
@@ -19,32 +21,33 @@ interface CardSettings {
 export class ExtensionsComponent implements OnDestroy {
 
   private alive = true;
-
-  // statusCardsByThemes: any = {
-  //   default: ['lightCard', 'rollerShadesCard', 'wirelessAudioCard', 'coffeeMakerCard'],
-  //   cosmic: ['lightCard', 'rollerShadesCard', 'wirelessAudioCard', 'coffeeMakerCard'],
-  //   corporate: ['lightCard', 'rollerShadesCard', 'wirelessAudioCard', 'coffeeMakerCard'],
-  //   dark: ['lightCard', 'rollerShadesCard', 'wirelessAudioCard', 'coffeeMakerCard'],
-  // };
- lightCard: CardSettings = {
-    title: 'Light',
+  lightCard: CardSettings = {
+    title: 'Angular',
+    description: 'App builder will create app using Angular framework. this extension is mandatory and cannot be turned off.',
     iconClass: 'angular-icon',
     type: 'primary',
+    status: false,
   };
   rollerShadesCard: CardSettings = {
-    title: 'Roller Shades',
-    iconClass: 'nb-roller-shades',
-    type: 'success',
+    title: 'SonarQube',
+    description: 'SonarQube extension for code quality analysis',
+    iconClass: 'sonarqube-icon',
+    type: 'primary',
+    status: true,
   };
   wirelessAudioCard: CardSettings = {
-    title: 'Wireless Audio',
-    iconClass: 'nb-audio',
-    type: 'info',
+    title: 'Docker',
+    description: 'Docker extension for containerization',
+    iconClass: 'docker-icon',
+    type: 'primary',
+    status: true,
   };
   coffeeMakerCard: CardSettings = {
     title: 'Coffee Maker',
+    description: 'Coffee Maker',
     iconClass: 'nb-coffee-maker',
-    type: 'warning',
+    type: 'primary',
+    status: true,
   };
 
   statusCards: any = {};
@@ -79,16 +82,17 @@ export class ExtensionsComponent implements OnDestroy {
     ],
     dark: this.commonStatusCardsSet,
   };
+  isGrayscale = true;
 
   constructor(private themeService: NbThemeService,) {
-     this.themeService.getJsTheme()
+    this.themeService.getJsTheme()
       .pipe(takeWhile(() => this.alive))
       .subscribe((theme: any) => {
-       this.statusCards = this.statusCardsByThemes[theme.name] || this.statusCardsByThemes['default'];
-    });
+        this.statusCards = this.statusCardsByThemes[theme.name] || this.statusCardsByThemes['default'];
+      });
   }
 
- ngOnDestroy() {
+  ngOnDestroy() {
     this.alive = false;
   }
 

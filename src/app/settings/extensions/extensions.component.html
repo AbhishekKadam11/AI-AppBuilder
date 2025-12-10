@@ -2,11 +2,12 @@
   <nb-card-header>Extensions Settings</nb-card-header>
   <nb-card-body>
     <div class="flex flex-wrap gap-4 justify-center">
-    <div class="flex-1" *ngFor="let statusCard of statusCards">
-      <app-status-card [title]="statusCard.title" [type]="statusCard.type">
-        <i [ngClass]="statusCard.iconClass"></i>
-      </app-status-card>
-    </div>
+      <div class="flex-1" *ngFor="let statusCard of statusCards">
+        <app-status-card [title]="statusCard.title" [type]="statusCard.type" [description]="statusCard.description"
+          [status]="statusCard.status">
+          <nb-icon class="svg-icon" [ngClass]="statusCard.iconClass"></nb-icon>
+        </app-status-card>
+      </div>
     </div>
   </nb-card-body>
 </nb-card>

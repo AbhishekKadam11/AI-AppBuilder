@@ -17,6 +17,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 10%;
       width: 5.75rem;
       height: 4.75rem;
       font-size: 3.75rem;
@@ -26,6 +27,7 @@
       -webkit-transform-style: preserve-3d;
       -webkit-backface-visibility: hidden;
       color: nb-theme(text-control-color);
+      filter: grayscale(0%);
 
       @each $status in nb-get-statuses() {
         &.status-#{$status} {
@@ -49,6 +51,7 @@
       .title,
       .icon {
         color: nb-theme(text-hint-color);
+        filter: grayscale(100%);
       }
 
       @each $status in nb-get-statuses() {
