@@ -37,6 +37,8 @@ nb-layout {
 .footer {
   min-height: 40px;
   padding: 0px;
+  height: 3rem;
+  width: 100%;
 }
 
 ::ng-deep nb-layout-footer nav {

@@ -26,7 +26,7 @@
     <router-outlet></router-outlet>
   </nb-layout-column>
 
-  <nb-layout-footer fixed class="footer">
+  <nb-layout-footer class="footer">
     <div class="stacked-window nb-global-scroll">
       @for (window of windowService.getWindows()(); track window.id; let i = $index) {
       <app-window [window]="window" [index]="i" [style.--window-index]="i"></app-window>

@@ -45,6 +45,12 @@ export class DashboardComponent {
 
   SideItems: NbMenuItem[] = [
     {
+      title: 'Dashboard',
+      icon: 'home-outline',
+      link: '/workspace',
+      home: true,
+    },
+    {
       title: 'File Explorer',
       icon: 'folder-outline',
     },
@@ -59,12 +65,11 @@ export class DashboardComponent {
     {
       title: 'Chat',
       icon: 'message-circle-outline',
-      link: '/chat',
     },
     {
       title: 'Settings',
       icon: 'settings-2-outline',
-      link: '/settings',
+      link: '/workspace/settings',
     },
     {
       title: 'Logout',
@@ -108,19 +113,21 @@ export class DashboardComponent {
     this.menuService.onItemClick()
       .pipe(
         filter(({ tag }) => tag === 'sideMenu'), // Optional: filter by menu tag if multiple menus exist
-        map(({ item }) => item.title),
+        map(({ item }) => item),
       )
-      .subscribe(title => {
-        console.log(`Menu item clicked: ${title}`);
-        // if (title === 'File Explorer') {
-        //   this.toggleSidebar();
-        // }
-        switch (title) {
+      .subscribe(item => {
+        console.log(`Menu item clicked: ${item}`);
+        switch (item.title) {
+          case 'Dashboard':
+
+            // this.router.navigate(['/']);
+            // item.selected = true;
+            break;
           case 'Console':
-         //   this.windowService.openWindow('consoleWindow', ConsoleWindowComponent, { title: 'Console', width: '600px', height: '400px' });
+            //   this.windowService.openWindow('consoleWindow', ConsoleWindowComponent, { title: 'Console', width: '600px', height: '400px' });
             break;
           case 'Browser':
-           // this.windowService.openWindow('browserWindow', BrowserWindowComponent, { title: 'Browser', width: '800px', height: '600px' });
+            // this.windowService.openWindow('browserWindow', BrowserWindowComponent, { title: 'Browser', width: '800px', height: '600px' });
             break;
           case 'File Explorer':
             this.toggleSidebar();
@@ -129,11 +136,12 @@ export class DashboardComponent {
             // Navigate to chat - handled by link property
             break;
           case 'Settings':
-            this.router.navigate(['/settings']);
-          break;
+            // item.selected = true;
+            // this.router.navigate(['/settings']);
+            break;
           // Add more cases as needed
           default:
-            console.log(`No action defined for menu item: ${title}`);
+            console.log(`No action defined for menu item: ${item.title}`);
         }
         // Add your custom logic here, e.g., navigate, open a dialog, etc.
       });
@@ -151,11 +159,11 @@ export class DashboardComponent {
         // }
         switch (title) {
           case 'Download':
-            this.downloadProject(); 
+            this.downloadProject();
             break;
-          case 'Sonar': 
+          case 'Sonar':
             this.executeSonar();
-          break;
+            break;
           // Add more cases as needed
           default:
             console.log(`No action defined for menu item: ${title}`);
@@ -236,13 +244,13 @@ export class DashboardComponent {
   }
 
   downloadProject() {
-    
+
   }
 
   executeSonar() {
-   this.appWorkflowService.webContainerCommandRunner(['npm', 'run', 'test']); 
-   setTimeout(() => {
-    this.appWorkflowService.webContainerCommandRunner(['npm', 'run', 'sonar']);
-   }, 15000);
+    this.appWorkflowService.webContainerCommandRunner(['npm', 'run', 'test']);
+    setTimeout(() => {
+      this.appWorkflowService.webContainerCommandRunner(['npm', 'run', 'sonar']);
+    }, 15000);
   }
 }

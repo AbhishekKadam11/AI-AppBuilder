@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterModule } from "@angular/router";
-import { NbContextMenuModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbSidebarModule } from '@nebular/theme';
-
+import { Router, RouterModule } from "@angular/router";
+import { NbContextMenuModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbSidebarModule } from '@nebular/theme';
 
 @Component({
   selector: 'app-settings',
@@ -18,13 +17,13 @@ export class SettingsComponent {
     {
       title: 'Extensions',
       icon: 'cube-outline',
-      selected: true,
-      link: '/settings'
+      home: true,
+      link: '/workspace/settings'
     },
     {
-      title: 'Themes',
+      title: 'Preferences',
       icon: 'color-palette-outline',
-      link: '/settings'
+      link: '/workspace/settings/preferences'
     },
     {
       title: 'Close',
@@ -33,9 +32,38 @@ export class SettingsComponent {
     },
   ]
 
-  constructor(
 
+  constructor(
+    private router: Router,
+    private menuService: NbMenuService,
   ) {
-    
+    // this.menuService.onItemClick()
+    //   .pipe(
+    //     filter(({ tag }) => tag === 'settingSideMenu'), // Optional: filter by menu tag if multiple menus exist
+    //     map(({ item }) => item),
+    //   )
+    //   .subscribe(item => {
+    //     // console.log(`Menu item clicked: ${JSON.stringify(item)} `);
+    //     switch (item.title) {
+    //       case 'Extensions':
+    //         item.selected = true;
+    //         this.menuService.onItemSelect().subscribe(selectedItem => {
+    //           // selectedItem.selected = false;
+    //           console.log(`Selected item: ${JSON.stringify(selectedItem)} `);
+    //         });
+    //         this.router.navigate(['/settings']);
+    //         break;
+    //       case 'Themes':
+    //         item.selected = true;
+    //         this.router.navigate(['/settings']);
+    //         break;
+    //       case 'Close':
+    //         item.selected = true;
+    //         this.router.navigate(['/']);
+    //         break;
+    //       default:
+    //         console.log(`No action defined for menu item: ${item.title}`);
+    //     }
+    //   });
   }
 }
