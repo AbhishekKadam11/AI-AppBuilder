@@ -1,23 +1,29 @@
-<nb-card>
-    <div class="window" [ngClass]="{'minimized': window.isMinimized(), 'maximized': window.isMaximized()}" cdkDrag [cdkDragDisabled]="window.isMinimized()">
+<nb-card class="window-card">
+    <div class="window" [ngClass]="{'minimized': window.isMinimized(), 'maximized': window.isMaximized()}" cdkDrag
+         [cdkDragDisabled]="window.isMinimized()" >
         <nb-card-header class="header-container">
             <div class="window-header" cdkDragHandle>
                 <span class="window-title">{{ window.title }}</span>
                 <div class="window-controls">
-                    <button nbButton ghost (click)="minimize()"><nb-icon icon="minus-outline"></nb-icon></button>
-                    <button nbButton ghost *ngIf="!window.isMaximized()" (click)="maximize()"><nb-icon
-                            icon="square-outline"></nb-icon></button>
+                    <button nbButton ghost (click)="minimize(); $event.stopPropagation()">
+                        <nb-icon icon="minus-outline"></nb-icon>
+                    </button>
+                    <button nbButton ghost *ngIf="!window.isMaximized(); else restoreButton" (click)="maximize()">
+                        <nb-icon icon="square-outline"></nb-icon>
+                    </button>
                     <ng-template #restoreButton>
-                        <button nbButton ghost (click)="restore()" *ngIf="window.isMaximized()"><nb-icon
-                                icon="square-outline"></nb-icon></button>
+                        <button nbButton ghost (click)="restore()" *ngIf="window.isMaximized()">
+                            <nb-icon icon="square-outline"></nb-icon>
+                        </button>
                     </ng-template>
-                    <button nbButton ghost status="danger" (click)="close()"><nb-icon
-                            icon="close-square-outline"></nb-icon></button>
+                    <button nbButton ghost status="danger" (click)="close()">
+                        <nb-icon icon="close-square-outline"></nb-icon>
+                    </button>
                 </div>
             </div>
         </nb-card-header>
         <nb-card-body>
-            <div class="window-content">
+            <div class="window-content" #contentContainer>
                 <ng-container *ngIf="!window.isMinimized()" [appDynamicContent]="window.contentComponent"
                     [appDynamicContentData]="window.data">
                 </ng-container>
