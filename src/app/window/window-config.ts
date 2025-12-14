@@ -7,5 +7,7 @@ export interface WindowConfig<T = any> {
   contentComponent: any;
   isMinimized: WritableSignal<boolean>;
   isMaximized: WritableSignal<boolean>;
+  placeholder: string;
+  maximizedStyles?: { [key: string]: string }; 
   // Add more state properties like position, zIndex, etc.
 }

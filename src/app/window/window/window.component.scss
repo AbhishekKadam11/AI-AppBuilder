@@ -2,84 +2,84 @@
 
 @include nb-install-component {
 
-  // .window {
-  //   position: absolute;
-  //   top: 8.6%;
-  //   left: 13.7%;
-  //   width: 41%;
-  //   height: 83.2%;
-  //   background-color: nb-theme(background-basic-color-1);
-  //   border: 1px dashed nb-theme(color-basic-700);
-  //   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  //   display: flex;
-  //   flex-direction: column;
-  //   z-index: 1000;
-  //   transition: all 0.3s ease-in-out;
-  // }
-
-  // .window.minimized {
-  //   position: static !important;
-  //   display: inline-block;
-  //   width: 320px !important;
-  //   min-width: 300px !important;
-  //   padding: 0 10px 0 10px;
-  //   top: auto !important;
-  //   left: auto !important;
-  //   right: auto !important;
-  //   bottom: auto !important;
-  //   cursor: pointer;
-  //   flex-shrink: 0;
-  // }
-
-  // .window.maximized {
-  //   position: absolute;
-  //   // top: 0;
-  //   // left: 0;
-  //   // width: 100%;
-  //   height: 70%;
-  //   border-radius: 0;
-  // }
-
   .window {
-    /* Use fixed size utilities in the app component. This CSS just styles the look */
-    background-color: var(--background-basic-color-1);
-    border: 1px solid var(--border-basic-color-3);
+    position: absolute; 
+   
+    background-color: nb-theme(background-basic-color-1);
+    border: 1px dashed nb-theme(color-basic-700);
     box-shadow: var(--shadow-2);
-    border-radius: var(--card-border-radius);
     display: flex;
     flex-direction: column;
-    /* transition handled by tailwind classes or custom CSS */
-    z-index: 10;
-    overflow: hidden;
-    /* Note: cdkDrag requires an initial position if not handled by tailwind classes */
+    z-index: 1000;
+    // transition: all 0.3s ease-in-out;
   }
 
-  .window-card {
-    background: none !important;
-  }
-
-  /* Minimize state only handles visual appearance and removes absolute positioning */
   .window.minimized {
     position: static !important;
     display: inline-block;
-    width: 200px;
-    height: 40px;
+    width: 320px !important;
+    min-width: 300px !important;
+    padding: 0 10px 0 10px;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
     cursor: pointer;
-    box-shadow: none;
     flex-shrink: 0;
   }
 
-  /* Maximize state will be handled by a specific tailwind class added in TS if needed, or stick to the CSS below for full-screen */
   .window.maximized {
     position: fixed;
     // top: 0;
     // left: 0;
-    // width: 100vw;
-    // height: 100vh;
-    // width: auto !important;
+    // width: 100%;
+    // height: 70%;
+    // width: inherit !important;
     border-radius: 0;
     z-index: 50;
   }
+
+  // .window {
+  //   /* Use fixed size utilities in the app component. This CSS just styles the look */
+  //   background-color: var(--background-basic-color-1);
+  //   border: 1px solid var(--border-basic-color-3);
+  //   box-shadow: var(--shadow-2);
+  //   border-radius: var(--card-border-radius);
+  //   display: flex;
+  //   flex-direction: column;
+  //   /* transition handled by tailwind classes or custom CSS */
+  //   z-index: 10;
+  //   overflow: hidden;
+  //   /* Note: cdkDrag requires an initial position if not handled by tailwind classes */
+  // }
+
+  // .window-card {
+  //  width: 100% !important;
+  //   box-sizing: border-box;
+  // }
+
+  // /* Minimize state only handles visual appearance and removes absolute positioning */
+  // .window.minimized {
+  //   position: static !important;
+  //   display: inline-block;
+  //   width: 200px;
+  //   height: 40px;
+  //   cursor: pointer;
+  //   box-shadow: none;
+  //   flex-shrink: 0;
+  // }
+
+  /* Maximize state will be handled by a specific tailwind class added in TS if needed, or stick to the CSS below for full-screen */
+  // .window.maximized {
+  //   position: fixed;
+  //   // top: 0;
+  //   // left: 0;
+  //   // width: 100vw;
+  //   // height: 100vh;
+  //   // width: auto !important;
+  //   border-radius: 0;
+  //   z-index: 50;
+  // }
 
   .header-container {
     padding-bottom: 0px !important;

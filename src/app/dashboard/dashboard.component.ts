@@ -15,6 +15,7 @@ import { WindowComponent } from '../window/window/window.component';
 import { FooterComponent } from "../common/footer/footer.component";
 import { Router, RouterModule } from '@angular/router';
 import { ConsoleWindowComponent } from '../console-window/console-window.component';
+import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
 
 type FileEvent = {
   data: string;
@@ -183,9 +184,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         }
       })
     );
-     effect(() =>{ 
-      setTimeout(() => this.renderWindows(), 100);
-    }); 
+    //  effect(() =>{ 
+    //   setTimeout(() => this.renderWindows(), 100);
+    // }); 
     // setTimeout(() => this.renderWindows(), 100);
     // setTimeout(() => this.windowService.renderWindows(this.windowHost, this.windowsComponents, this.renderer),1000);
   }
@@ -240,6 +241,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     // }, 2000);
 
     this.openFirstWindow();
+   // this.openSecondWindow();
   }
 
   ngOnDestroy() {
@@ -403,7 +405,21 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       title: 'Console',
       contentComponent: ConsoleWindowComponent,
       // isMaximized: signal(true),
-      data: { message: 'Placed via Tailwind CSS', placementClasses: 'absolute top-0 left-0 m-4 w-1/2' }
+      data: { message: 'Placed via Tailwind CSS' },
+      placeholder: 'top-20 left-10 m-10 w-1/2 h-1/2',
+      maximizedStyles: { width: '50% !important', height: '50% !important' },
+      isMaximized: signal(true)
+    });
+  }
+  
+
+    openSecondWindow(): void {
+    this.windowService.openWindow({
+      title: 'Chat',
+      contentComponent: ChatShowcaseComponent,
+      data: { message: 'Placed via Tailwind CSS' },
+      placeholder: 'top-20 left-10 m-80 w-1/2 h-1/2',
+      isMaximized: signal(true)
     });
   }
 
