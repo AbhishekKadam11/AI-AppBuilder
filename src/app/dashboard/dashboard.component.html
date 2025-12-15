@@ -26,22 +26,19 @@
     <router-outlet></router-outlet>
   </nb-layout-column> -->
   <nb-layout-column>
-    <div class="relative flex flex-col h-full w-full">
-    @for (window of windowService.getWindows()(); track window.id; let i = $index) {
+    <div class="flex-1 p-4 overflow-auto">
+      <div class="flex flex-wrap gap-4">
+        @for (window of windowService.getWindows()(); track window.id; let i = $index) {
         @if (!window.isMinimized()) {
-          <app-window 
-            [window]="window" [index]="i" [style.--window-index]="i"
-          
-            >
-          
-          </app-window>
+        <app-window [window]="window" [index]="i" [style.--window-index]="i"></app-window>
         }
-      }
+        }
+      </div>
     </div>
   </nb-layout-column>
 
   <nb-layout-footer class="footer">
-    <div class="stacked-window nb-global-scroll ">
+    <div class="stacked-window nb-global-scroll flex-shrink-0">
       @for (window of windowService.getWindows()(); track window.id; let i = $index) {
       @if (window.isMinimized()) {
       <app-window [window]="window" [index]="i" [style.--window-index]="i"></app-window>
