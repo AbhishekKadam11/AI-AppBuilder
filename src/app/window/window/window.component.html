@@ -1,6 +1,9 @@
-<nb-card>
-    <div class="window" [ngClass]="getCombinedClasses()" cdkDrag
-         [cdkDragDisabled]="window.isMinimized()" >
+<nb-card class="window-card">
+       <div class="window"
+         [ngClass]="getCombinedClasses()"
+         cdkDrag
+         [cdkDragDisabled]="window.isMinimized()"
+         >
         <nb-card-header class="header-container">
             <div class="window-header" cdkDragHandle>
                 <span class="window-title">{{ window.title }}</span>

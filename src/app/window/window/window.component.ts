@@ -25,23 +25,23 @@ export class WindowComponent {
   ngOnInit() {
   }
 
-    getCombinedClasses(): string {
+  getCombinedClasses(): string {
     let classes = '';
 
     // Always include base classes
     if (this.window?.isMinimized()) classes += ' minimized';
     if (this.window?.isMaximized()) classes += ' maximized';
-      console.log('Window State - Minimized:', this.window?.isMinimized(), 'Maximized:', this.window?.isMaximized());
+  //  console.log('Window State - Minimized:', this.window?.isMinimized(), 'Maximized:', this.window?.isMaximized());
     // Conditionally add placement classes
     if (this.window.placeholder && this.window?.isMaximized()) {
       // Check the condition for applying the placement classes (e.g. only when maximized, or default state)
       if (this.window.isMaximized() || (!this.window.isMaximized() && !this.window.isMinimized())) {
-        classes += ' ' + this.window.placeholder;
+        //   classes += ' ' + this.window.placeholder;
       }
-    } else{
+    } else {
       classes = 'minimized';
     }
-    console.log(classes);
+    // console.log(classes);
     return classes.trim();
   }
 
@@ -67,4 +67,6 @@ export class WindowComponent {
   close(): void {
     this.windowService.closeWindow(this.window.id);
   }
+
+
 }

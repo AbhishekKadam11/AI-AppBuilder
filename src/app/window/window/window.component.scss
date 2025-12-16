@@ -3,8 +3,8 @@
 @include nb-install-component {
 
   .window {
-    position: absolute; 
-   
+    // position: absolute; 
+    position: static; 
     background-color: nb-theme(background-basic-color-1);
     border: 1px dashed nb-theme(color-basic-700);
     box-shadow: var(--shadow-2);
@@ -29,12 +29,7 @@
   }
 
   .window.maximized {
-    position: fixed;
-    // top: 0;
-    // left: 0;
-    // width: 100%;
-    // height: 70%;
-    // width: inherit !important;
+    min-width: 500px !important;
     border-radius: 0;
     z-index: 50;
   }
@@ -53,10 +48,9 @@
   //   /* Note: cdkDrag requires an initial position if not handled by tailwind classes */
   // }
 
-  // .window-card {
-  //  width: 100% !important;
-  //   box-sizing: border-box;
-  // }
+  .window-card {
+   background: none;
+  }
 
   // /* Minimize state only handles visual appearance and removes absolute positioning */
   // .window.minimized {
