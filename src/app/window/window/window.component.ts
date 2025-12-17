@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output, computed, output } from '@angular/core';
+import { ChangeDetectorRef, Component, Input } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { WindowConfig } from '../window-config';
 import { WindowService } from '../../services/window.service';
@@ -16,9 +16,6 @@ import { NbButtonModule, NbCardModule, NbIconModule } from '@nebular/theme';
 export class WindowComponent {
   @Input({ required: true }) window!: WindowConfig;
   @Input({ required: true }) index!: number;
-  readonly minimizeWindowEvent = output<void>();
-  readonly maximizeWindowEvent = output<void>();
-  // placeholder = 'top-20 left-16 w-1/2 h-1/2';
 
   constructor(private windowService: WindowService, private cdr: ChangeDetectorRef) { }
 
@@ -28,17 +25,14 @@ export class WindowComponent {
   getCombinedClasses(): string {
     let classes = '';
 
-    // Always include base classes
     if (this.window?.isMinimized()) classes += ' minimized';
     if (this.window?.isMaximized()) classes += ' maximized';
-  //  console.log('Window State - Minimized:', this.window?.isMinimized(), 'Maximized:', this.window?.isMaximized());
-    // Conditionally add placement classes
+
     if (this.window.placeholder && this.window?.isMaximized()) {
-      // Check the condition for applying the placement classes (e.g. only when maximized, or default state)
       if (this.window.isMaximized() || (!this.window.isMaximized() && !this.window.isMinimized())) {
         //   classes += ' ' + this.window.placeholder;
       }
-    } else {
+    } else if (this.window?.isMinimized()) {
       classes = 'minimized';
     }
     // console.log(classes);
@@ -46,27 +40,24 @@ export class WindowComponent {
   }
 
   minimize(): void {
-    // this.minimizeWindowEvent.emit();
+    console.log('Minimize called for window ID:', this.window.id);
     this.windowService.minimizeWindow(this.window.id);
-    // this.getCombinedClasses()
-    // this.window.placeholder = 'bottom-0 left-0 w-32 h-8';
   }
 
   maximize(): void {
-    // this.maximizeWindowEvent.emit();
+    console.log('Maximize called for window ID:', this.window.id);
+    this.window.placeholder = 'w-1/2 h-1/2';
     this.windowService.maximizeWindow(this.window.id);
-    // this.getCombinedClasses()
-    // this.cdr.detectChanges();
-    // this.cdr.reattach();
   }
 
   restore(): void {
+    console.log('Restore called for window ID:', this.window.id);
+    this.window.placeholder = 'w-full h-full';
     this.windowService.restoreWindow(this.window.id);
   }
 
   close(): void {
     this.windowService.closeWindow(this.window.id);
   }
-
-
+  
 }
