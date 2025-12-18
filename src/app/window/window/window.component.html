@@ -1,4 +1,4 @@
-<nb-card class="window-card">
+<nb-card class="window-card" [size]="'large'">
        <div class="window"
          [ngClass]="getCombinedClasses()"
          cdkDrag
@@ -12,7 +12,7 @@
                         <nb-icon icon="minus-outline"></nb-icon>
                     </button>
                     <button nbButton ghost *ngIf="!window.isMaximized(); else restoreButton" (click)="maximize()">
-                        <nb-icon icon="square-outline"></nb-icon>
+                        <nb-icon icon="copy-outline"></nb-icon>
                     </button>
                     <ng-template #restoreButton>
                         <button nbButton ghost (click)="restore()" *ngIf="window.isMaximized()">

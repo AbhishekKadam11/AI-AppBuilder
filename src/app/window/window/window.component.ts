@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, HostBinding, HostListener, Input } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { WindowConfig } from '../window-config';
 import { WindowService } from '../../services/window.service';
@@ -16,6 +16,9 @@ import { NbButtonModule, NbCardModule, NbIconModule } from '@nebular/theme';
 export class WindowComponent {
   @Input({ required: true }) window!: WindowConfig;
   @Input({ required: true }) index!: number;
+  @HostBinding('style.z-index') get zIndex() {
+    return this.window.zIndex();
+  }
 
   constructor(private windowService: WindowService, private cdr: ChangeDetectorRef) { }
 
@@ -46,18 +49,23 @@ export class WindowComponent {
 
   maximize(): void {
     console.log('Maximize called for window ID:', this.window.id);
-    this.window.placeholder = 'w-1/2 h-1/2';
+    this.window.placeholder = 'w-auto h-auto';
     this.windowService.maximizeWindow(this.window.id);
   }
 
   restore(): void {
     console.log('Restore called for window ID:', this.window.id);
-    this.window.placeholder = 'w-full h-full';
+    this.window.placeholder = 'w-full h-full overflow-hidden absolute';
     this.windowService.restoreWindow(this.window.id);
   }
 
   close(): void {
     this.windowService.closeWindow(this.window.id);
   }
-  
+
+@HostListener('mousedown')  
+  onWindowClick(): void {
+    console.log('onWindowClick called for window ID:', this.window.id);
+    this.windowService.bringToFront(this.window.id);
+  }
 }

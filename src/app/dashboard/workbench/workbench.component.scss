@@ -23,10 +23,9 @@ nb-layout-column {
   gap: 35px; /* Optional: adds space between rows */
 }
 
-// .row-one,
-// .row-two {
-//   /* Define styling for your individual rows, e.g., flex-grow for distribution */
-//   flex-grow: 0.5; /* Distributes available space equally between rows */
-// //   padding: 1rem; /* Example padding */
-// }
-
+.window-container {
+  position: relative; /* All absolute-positioned windows will be relative to this div */
+  width: auto !important;
+  height: 100%;
+  overflow: hidden;
+}

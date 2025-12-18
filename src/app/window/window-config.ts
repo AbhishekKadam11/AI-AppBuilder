@@ -9,5 +9,5 @@ export interface WindowConfig<T = any> {
   isMaximized: WritableSignal<boolean>;
   placeholder: string;
   maximizedStyles?: { [key: string]: string }; 
-  // Add more state properties like position, zIndex, etc.
+  zIndex: WritableSignal<number>;
 }

@@ -22,19 +22,8 @@
     <app-directory-list (openFile)="onFileClick($event)" ngSkipHydration />
   </nb-sidebar>
 
-  <!-- <nb-layout-column class="workbench-container">
+  <nb-layout-column class="workbench-container">
     <router-outlet></router-outlet>
-  </nb-layout-column> -->
-  <nb-layout-column>
-    <div class="flex-1 p-4 overflow-auto">
-      <div class="flex flex-wrap gap-4">
-        @for (window of windowService.getWindows()(); track window.id; let i = $index) {
-        @if (!window.isMinimized()) {
-        <app-window [window]="window" [index]="i" [style.--window-index]="i"></app-window>
-        }
-        }
-      </div>
-    </div>
   </nb-layout-column>
 
   <nb-layout-footer class="footer">

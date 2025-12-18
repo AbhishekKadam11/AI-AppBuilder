@@ -6,6 +6,7 @@ import { WindowConfig } from '../window/window-config';
 })
 export class WindowService {
   private windows: WritableSignal<WindowConfig[]> = signal([]);
+  private currentMaxZIndex = signal(1000);
 
   openWindow<T>(config: Omit<WindowConfig<T>, 'id' | 'isMinimized'>): void {
     const newWindow: WindowConfig<T> = {
@@ -47,4 +48,11 @@ export class WindowService {
     );
   }
 
+   bringToFront(id: string): void {
+    const window = this.getWindows()().find(w => w.id === id);
+    if (window) {
+      this.currentMaxZIndex.update(z => z + 1);
+      window.zIndex.set(this.currentMaxZIndex());
+    }
+  }
 }

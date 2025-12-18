@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild, ViewContainerRef, effect, ComponentRef, Renderer2, AfterViewInit, untracked } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { NbActionsModule, NbButtonModule, NbContextMenuModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverModule, NbPosition, NbSidebarModule, NbSidebarService } from '@nebular/theme';
 import { Subject } from 'rxjs/internal/Subject';
 import { filter } from 'rxjs/internal/operators/filter';
@@ -14,8 +14,6 @@ import { WindowService } from '../services/window.service';
 import { WindowComponent } from '../window/window/window.component';
 import { FooterComponent } from "../common/footer/footer.component";
 import { Router, RouterModule } from '@angular/router';
-import { ConsoleWindowComponent } from '../console-window/console-window.component';
-import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
 
 type FileEvent = {
   data: string;
@@ -102,8 +100,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   private destroy$ = new Subject<void>();
   private socketSubscription!: Subscription;
   private subscriptions: Subscription = new Subscription();
-  @ViewChild('windowHost', { read: ViewContainerRef }) windowHost!: ViewContainerRef;
-  private windowsComponents: Map<string, ComponentRef<WindowComponent>> = new Map();
 
   constructor(
     private router: Router,
@@ -112,8 +108,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private socketService: SocketService,
     private appWorkflowService: AppWorkflowService,
     public windowService: WindowService,
-    private progressControlService: ProgressControlService,
-    private renderer: Renderer2,) {
+    private progressControlService: ProgressControlService) {
     // Sidebar menu item click handling
     this.menuService.onItemClick()
       .pipe(
@@ -184,11 +179,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         }
       })
     );
-    //  effect(() =>{ 
-    //   setTimeout(() => this.renderWindows(), 100);
-    // }); 
-    // setTimeout(() => this.renderWindows(), 100);
-    // setTimeout(() => this.windowService.renderWindows(this.windowHost, this.windowsComponents, this.renderer),1000);
+
   }
 
   ngAfterViewInit() {
@@ -204,10 +195,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     //     }
     //   }
     // });
-
-    // this.renderWindows();
-
-    //  this.windowService.processBuffer();
 
   }
 
@@ -233,15 +220,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     //     // Navigate to the specified link
     //   }
     // });
-
-    // setTimeout(() => {
-
-    //  setTimeout(() => {
-    //   this.renderWindows(); 
-    // }, 2000);
-
-    this.openFirstWindow();
-   // this.openSecondWindow();
   }
 
   ngOnDestroy() {
@@ -277,181 +255,4 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }, 15000);
   }
 
-  // renderWindows(): void {
-  //   debugger
-  //    if (!this.windowHost) {
-  //     return; 
-  //   }
-
-  //   const currentWindows = this.windowService.getWindows()();
-  //   this.windowHost?.clear();
-  //   this.windowsComponents.clear();
-  //   currentWindows.forEach((windowConfig, index) => {
-  //     // Only render non-minimized windows in the host container
-  //     if (!windowConfig.isMinimized()) {
-  //       const componentRef = this.windowHost.createComponent(WindowComponent);
-  //       componentRef.instance.window = windowConfig;
-
-  //       // Use Renderer2 to add tailwind classes for placement
-  //       if (windowConfig.data?.placementClasses) {
-
-  //         console.log("placementClasses", windowConfig.data.placementClasses);
-  //         windowConfig.data.placementClasses.split(' ').forEach((cls: string) => {
-  //           // Tailwind utilities for absolute positioning (e.g., 'top-0', 'right-0', 'transform', '-translate-x-1/2')
-  //           componentRef.location.nativeElement.classList.add(cls);
-  //         });
-  //       }
-  //       this.windowsComponents.set(windowConfig.id, componentRef);
-  //     }
-  //   });
-  // }
-
-  //  renderWindows(): void {
-  //   console.log("renderWindows called");
-  //   // CRITICAL FIX: Only proceed if the windowHost ViewContainerRef is defined
-  //   if (!this.windowHost) return;
-
-  //   const currentWindows = this.windowService.getWindows()();
-  //   //  console.log("currentWindows", currentWindows);
-  //   // CRITICAL CHANGE: activeWindowIds should only contain IDs of windows that are *not* minimized
-  //   const activeWindow = new Set(currentWindows.filter(w => !w.isMinimized()));
-
-  //   // 1. Destroy components that should no longer be in the dashboard area (i.e., they are now minimized or removed)
-  //   // this.windowsComponents.forEach((componentRef, id) => {
-  //   //   // If the window ID is not in the active list (it's minimized or closed), destroy the component
-  //   //   if (!activeWindowIds.has(id)) {
-  //   //     componentRef.destroy();
-  //   //     this.windowsComponents.delete(id);
-  //   //   }
-  //   // });
-
-  //   // 2. Create components for windows that should be active and aren't already rendered
-  //   currentWindows.forEach((windowConfig, index) => {
-  //     // Only act if the window is NOT minimized and NOT already rendered
-  //     // if (!windowConfig.isMinimized() && !this.windowsComponents.has(windowConfig.id)) {
-  //     let componentRef: ComponentRef<WindowComponent> | undefined;
-  //     if (!windowConfig.isMinimized()) {
-  //       componentRef = this.windowsComponents.get(windowConfig.id) as ComponentRef<WindowComponent>;
-  //       if (componentRef == undefined) {
-  //         componentRef = this.windowHost.createComponent(WindowComponent);
-  //       }
-  //       // const componentRef = this.windowHost.createComponent(WindowComponent);
-  //       componentRef.instance.window = windowConfig;
-  //       // componentRef
-        
-  //       // componentRef.instance.minimizeWindowEvent.subscribe(() => {
-  //       //   this.minimizeWindowCalled(windowConfig.id); 
-  //       // });
-  //       // componentRef.instance.maximizeWindowEvent.subscribe(() => {
-  //       //   this.maximizeWindowCalled(windowConfig.id);
-  //       // });
-
-  //       // Add Tailwind placement classes via the Renderer2
-  //       if (windowConfig.data?.placementClasses) {
-  //         windowConfig.data.placementClasses.split(' ').forEach((cls: string) => {
-  //           this.renderer.addClass(componentRef?.location.nativeElement, cls);
-  //         });
-  //       }
-
-  //       this.windowsComponents.set(windowConfig.id, componentRef);
-  //     }
-  //   });
-  // }
-
- renderWindows(): void {
-    if (!this.windowHost) return; 
-
-    const currentWindows = this.windowService.getWindows()();
-    const activeWindowIds = new Set<string>();
-
-    // CRITICAL FIX: Loop through windows and consume their isMinimized signal
-    // to make the effect sensitive to this change.
-    currentWindows.forEach(windowConfig => {
-      if (!windowConfig.isMinimized()) { // Read the signal here
-        activeWindowIds.add(windowConfig.id);
-      }
-    });
-
-    // 1. Destroy components that should no longer be in the dashboard area
-    this.windowsComponents.forEach((componentRef, id) => {
-      if (!activeWindowIds.has(id)) {
-        componentRef.destroy();
-        this.windowsComponents.delete(id);
-      }
-    });
-
-    // 2. Create components for windows that should be active and aren't already rendered
-    // Use `untracked` when iterating for creation, as we only need to track the minimization state change
-    untracked(() => {
-      currentWindows.forEach((windowConfig, index) => {
-        if (!windowConfig.isMinimized() && !this.windowsComponents.has(windowConfig.id)) {
-          const componentRef = this.windowHost.createComponent(WindowComponent);
-          componentRef.instance.window = windowConfig;
-          
-          if (windowConfig.data?.placementClasses) {
-            windowConfig.data.placementClasses.split(' ').forEach((cls: string) => {
-               this.renderer.addClass(componentRef.location.nativeElement, cls);
-            });
-          }
-
-          this.windowsComponents.set(windowConfig.id, componentRef);
-        }
-      });
-    });
-  }
-
-  openFirstWindow(): void {
-    this.windowService.openWindow({
-      title: 'Console',
-      contentComponent: ConsoleWindowComponent,
-      // isMaximized: signal(true),
-      data: { message: 'Placed via Tailwind CSS' },
-      placeholder: 'top-20 left-10 m-10 w-1/2 h-1/2',
-      maximizedStyles: { width: '50% !important', height: '50% !important' },
-      isMaximized: signal(true)
-    });
-  }
-  
-
-    openSecondWindow(): void {
-    this.windowService.openWindow({
-      title: 'Chat',
-      contentComponent: ChatShowcaseComponent,
-      data: { message: 'Placed via Tailwind CSS' },
-      placeholder: 'top-20 left-10 m-80 w-1/2 h-1/2',
-      isMaximized: signal(true)
-    });
-  }
-
-  minimizeWindowCalled(windowId: string): void {
-    console.log("minimizeWindow called", event);
-    const windowToMinimize = this.windowsComponents.get(windowId);
-    if (windowToMinimize) {
-      // windowToMinimize.destroy();
-      windowToMinimize.hostView.destroy();
-      // this.windowsComponents.delete(windowId);
-      this.windowService.minimizeWindow(windowId);
-    }
-  }
-
-  maximizeWindowCalled(windowId: string): void {
-    console.log("maximizeWindow called", event);
-    // const currentWindows = this.windowService.getWindows()();
-    // // CRITICAL CHANGE: activeWindowIds should only contain IDs of windows that are *not* minimized
-    // const activeWindowIds = new Set(currentWindows.filter(w => !w.isMinimized()).map(w => w.id));
-    // this.windowsComponents.forEach((componentRef, id) => {
-    //   // If the window ID is not in the active list (it's minimized or closed), destroy the component
-    //   // if (activeWindowIds.has(id)) {
-
-    //   this.windowService.maximizeWindow(id);
-    //   this.renderWindows();
-    //   //  }
-    // });
-    // this.renderWindows();
-    const windowToMaximize = this.windowsComponents.get(windowId);
-    if (windowToMaximize) {
-      this.windowService.maximizeWindow(windowId);
-      this.renderWindows();
-    }
-  }
 }

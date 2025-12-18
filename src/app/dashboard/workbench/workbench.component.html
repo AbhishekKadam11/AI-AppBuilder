@@ -1,15 +1,9 @@
-<nb-layout>
-    <nb-layout-column>
-        <div class="column-content-wrapper">
-        <div class="row-one">
-            <app-chat-showcase />
-        </div>
-        <div class="row-two">
-            <app-console-window />
-        </div>
-        </div>
-    </nb-layout-column>
-    <nb-layout-column>
-        <app-browser-window class="browser-window" />
-    </nb-layout-column>
-</nb-layout>
+<div class="grid h-full p-4">
+  <div class="grid grid-cols-2 grid-rows-2 relative gap-4 max-w-full">
+    @for (window of windowService.getWindows()(); track window.id; let i = $index) {
+    @if (!window.isMinimized()) {
+    <app-window [window]="window" [index]="i" [style.--window-index]="i" [ngClass]="window.placeholder"></app-window>
+    }
+    }
+  </div>
+</div>

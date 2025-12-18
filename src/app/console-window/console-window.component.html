@@ -1,24 +1,6 @@
-<div class="card-window">
-    <nb-card [size]="'medium'">
-        <nb-card-header class="header-container">
-            <div class="title-bar">
-                <span class="window-title">
-                    Console Window
-                </span>
-                <div class="">
-                    <button nbButton ghost><nb-icon icon="minus-outline"></nb-icon></button>
-                    <button nbButton ghost><nb-icon icon="square-outline"></nb-icon></button>
-                    <button nbButton ghost status="danger"><nb-icon icon="close-square-outline"></nb-icon></button>
-                </div>
-            </div>
-        </nb-card-header>
-        <nb-card-body [appAutoScroll]="true">
-            <div class="log-pane">
-                <div class="log-output">
-                    <p *ngFor="let log of collectionLogs">{{ log }}</p>
-                    <p>{{ samelineLogs }}</p>
-                </div>
-            </div>
-        </nb-card-body>
-    </nb-card>
+<div class="log-pane" [appAutoScroll]="true">
+    <div class="log-output">
+        <p *ngFor="let log of collectionLogs">{{ log }}</p>
+        <p>{{ samelineLogs }}</p>
+    </div>
 </div>
