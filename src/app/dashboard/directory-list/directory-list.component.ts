@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Output, signal } from '@angular/core';
 import { NbCardModule, NbIconModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule } from '@nebular/theme';
 import { FsIconComponent } from '../fs-icon/fs-icon.component';
 import { SocketService } from '../../services/socket.service';
@@ -97,7 +97,10 @@ export class DirectoryListComponent {
         this.windowService.openWindow({
           title: row.data.name,
           contentComponent: CodeEditorComponent, // Pass the component class to render
-          data: { fileDetails: { fileContent: fileData, filePath: row.data.path.replace(/\\/g, '/') } }
+          data: { fileDetails: { fileContent: fileData, filePath: row.data.path.replace(/\\/g, '/') } },
+          placeholder: 'top-20 left-16 w-1/2 h-full',
+          isMaximized: signal(false),
+          zIndex: signal(100)
         });
       }, error => {
         console.log('onRowClick error', error);

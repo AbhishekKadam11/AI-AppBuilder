@@ -35,8 +35,11 @@ export class WindowComponent {
       if (this.window.isMaximized() || (!this.window.isMaximized() && !this.window.isMinimized())) {
         //   classes += ' ' + this.window.placeholder;
       }
+
     } else if (this.window?.isMinimized()) {
       classes = 'minimized';
+    } else {
+      classes += ' h-full'; // Default size when not maximized or minimized
     }
     // console.log(classes);
     return classes.trim();
@@ -49,7 +52,7 @@ export class WindowComponent {
 
   maximize(): void {
     console.log('Maximize called for window ID:', this.window.id);
-    this.window.placeholder = 'w-auto h-auto';
+    this.window.placeholder = 'w-full h-full';
     this.windowService.maximizeWindow(this.window.id);
   }
 

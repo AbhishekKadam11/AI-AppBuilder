@@ -10,7 +10,6 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-workbench',
   imports: [NbLayoutModule, WindowComponent, CommonModule],
-  // imports: [NbLayoutModule,],
   templateUrl: './workbench.component.html',
   styleUrl: './workbench.component.scss'
 })
@@ -18,9 +17,9 @@ export class WorkbenchComponent {
 
   constructor(public windowService: WindowService) {
 
-    this.openSecondWindow();
-    setTimeout(() => this.openThirdWindow(), 100);
-    setTimeout(() => this.openFirstWindow(), 110);
+    this.openChatWindow();
+    setTimeout(() => this.openBrowserWindow(), 100);
+    setTimeout(() => this.openConsoleWindow(), 110);
   }
 
 
@@ -33,7 +32,14 @@ export class WorkbenchComponent {
 
   }
 
-  openFirstWindow(): void {
+  checkWindowExists(title: string): boolean {
+    return this.windowService.getWindows()().some(w => w.title === title);
+  }
+
+  openConsoleWindow(): void {
+    if (this.checkWindowExists('Console')) {
+      return;
+    }
     this.windowService.openWindow({
       title: 'Console',
       contentComponent: ConsoleWindowComponent,
@@ -45,7 +51,10 @@ export class WorkbenchComponent {
     });
   }
 
-  openSecondWindow(): void {
+  openChatWindow(): void {
+    if (this.checkWindowExists('Chat')) {
+      return;
+    }
     this.windowService.openWindow({
       title: 'Chat',
       contentComponent: ChatShowcaseComponent,
@@ -56,7 +65,10 @@ export class WorkbenchComponent {
     });
   }
 
-  openThirdWindow(): void {
+  openBrowserWindow(): void {
+    if (this.checkWindowExists('Browser')) {
+      return;
+    }
     this.windowService.openWindow({
       title: 'Browser',
       contentComponent: BrowserWindowComponent,

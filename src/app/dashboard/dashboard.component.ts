@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, signal } from '@angular/core';
 import { NbActionsModule, NbButtonModule, NbContextMenuModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverModule, NbPosition, NbSidebarModule, NbSidebarService } from '@nebular/theme';
 import { Subject } from 'rxjs/internal/Subject';
 import { filter } from 'rxjs/internal/operators/filter';
@@ -14,6 +14,9 @@ import { WindowService } from '../services/window.service';
 import { WindowComponent } from '../window/window/window.component';
 import { FooterComponent } from "../common/footer/footer.component";
 import { Router, RouterModule } from '@angular/router';
+import { ConsoleWindowComponent } from '../console-window/console-window.component';
+import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
+import { BrowserWindowComponent } from '../browser-window/browser-window.component';
 
 type FileEvent = {
   data: string;
@@ -125,15 +128,16 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             break;
           case 'Console':
             //   this.windowService.openWindow('consoleWindow', ConsoleWindowComponent, { title: 'Console', width: '600px', height: '400px' });
+            this.openConsoleWindow();
             break;
           case 'Browser':
-            // this.windowService.openWindow('browserWindow', BrowserWindowComponent, { title: 'Browser', width: '800px', height: '600px' });
+            this.openBrowserWindow();
             break;
           case 'File Explorer':
             this.toggleSidebar();
             break;
           case 'Chat':
-            // Navigate to chat - handled by link property
+            this.openChatWindow();
             break;
           case 'Settings':
             // item.selected = true;
@@ -253,6 +257,53 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     setTimeout(() => {
       this.appWorkflowService.webContainerCommandRunner(['npm', 'run', 'sonar']);
     }, 15000);
+  }
+
+  checkWindowExists(title: string): boolean {
+    return this.windowService.getWindows()().some(w => w.title === title);
+  }
+
+  openConsoleWindow(): void {
+    if (this.checkWindowExists('Console')) {
+      return; // Prevent opening duplicate window
+    }
+    this.windowService.openWindow({
+      title: 'Console',
+      contentComponent: ConsoleWindowComponent,
+      data: {},
+      placeholder: 'h-full w-full min-w-1/2 row-start-2 col-end-2 ',
+      maximizedStyles: {},
+      isMaximized: signal(true),
+      zIndex: signal(100)
+    });
+  }
+
+  openChatWindow(): void {
+    if (this.checkWindowExists('Chat')) {
+      return; // Prevent opening duplicate window
+    }
+    this.windowService.openWindow({
+      title: 'Chat',
+      contentComponent: ChatShowcaseComponent,
+      data: {},
+      placeholder: 'h-full w-full col-start-1 col-end-2 row-start-1',
+      isMaximized: signal(true),
+      zIndex: signal(100)
+    });
+  }
+
+  openBrowserWindow(): void {
+    if (this.checkWindowExists('Browser')) {
+      return; // Prevent opening duplicate window
+    }
+    this.windowService.openWindow({
+      title: 'Browser',
+      contentComponent: BrowserWindowComponent,
+      data: {},
+      placeholder: 'h-full w-full col-start-2 col-end-2 row-span-2',
+      isMaximized: signal(true),
+      zIndex: signal(100)
+    });
   }
 
 }

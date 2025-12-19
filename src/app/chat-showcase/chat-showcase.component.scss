@@ -1,0 +1,18 @@
+
+::ng-deep nb-chat .header {
+ display: none !important;
+}
+
+::ng-deep nb-chat {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+::ng-deep nb-card {
+    height: 100% !important;
+    width: 100% !important;
+    margin-bottom: 0px !important;
+    
+}
