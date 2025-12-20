@@ -1,18 +1,36 @@
 
-::ng-deep nb-chat .header {
- display: none !important;
+.chat-wrapper {
+  display: flex;
+  height: 100%; /* OR height: 100vh; OR any fixed height */
+  flex-direction: column;
 }
+
+// ::ng-deep nb-chat .header {
+//  display: none !important;
+// }
+
+// ::ng-deep nb-chat {
+//     background: transparent !important;
+//     border: none !important;
+//     box-shadow: none !important;
+//     padding: 0 !important;
+// }
 
 ::ng-deep nb-chat {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
+  flex: 1 1 auto; /* Fill all available space in the flex container */
+  height: 100% !important;
+  
+  /* IMPORTANT: Nebular chat uses an internal nb-card with fixed height */
+  nb-card.size-large {
+    height: 100% !important;
+    display: flex;
+    flex-direction: column;
+  }
 }
 
-::ng-deep nb-card {
-    height: 100% !important;
-    width: 100% !important;
-    margin-bottom: 0px !important;
+// nb-card {
+//     height: inherit !important;
+//     width: 100% !important;
+//     margin-bottom: 0px !important;
     
-}
+// }

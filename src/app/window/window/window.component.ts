@@ -20,44 +20,24 @@ export class WindowComponent {
     return this.window.zIndex();
   }
 
-  constructor(private windowService: WindowService, private cdr: ChangeDetectorRef) { }
+  constructor(public windowService: WindowService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
   }
 
-  getCombinedClasses(): string {
-    let classes = '';
-
-    if (this.window?.isMinimized()) classes += ' minimized';
-    if (this.window?.isMaximized()) classes += ' maximized';
-
-    if (this.window.placeholder && this.window?.isMaximized()) {
-      if (this.window.isMaximized() || (!this.window.isMaximized() && !this.window.isMinimized())) {
-        //   classes += ' ' + this.window.placeholder;
-      }
-
-    } else if (this.window?.isMinimized()) {
-      classes = 'minimized';
-    } else {
-      classes += ' h-full'; // Default size when not maximized or minimized
-    }
-    // console.log(classes);
-    return classes.trim();
-  }
-
   minimize(): void {
-    console.log('Minimize called for window ID:', this.window.id);
+    console.log('Minimize called for window ID:', this.window.title);
     this.windowService.minimizeWindow(this.window.id);
   }
 
   maximize(): void {
-    console.log('Maximize called for window ID:', this.window.id);
-    this.window.placeholder = 'w-full h-full';
+    console.log('Maximize called for window ID:', this.window.title);
+    this.window.placeholder = this.windowService.windowPlaceholderMap[this.window.title];
     this.windowService.maximizeWindow(this.window.id);
   }
 
   restore(): void {
-    console.log('Restore called for window ID:', this.window.id);
+    console.log('Restore called for window ID:', this.window.title);
     this.window.placeholder = 'w-full h-full overflow-hidden absolute';
     this.windowService.restoreWindow(this.window.id);
   }

@@ -7,6 +7,7 @@ import { WindowConfig } from '../window/window-config';
 export class WindowService {
   private windows: WritableSignal<WindowConfig[]> = signal([]);
   private currentMaxZIndex = signal(1000);
+  public windowPlaceholderMap: { [key: string]: string } = {};
 
   openWindow<T>(config: Omit<WindowConfig<T>, 'id' | 'isMinimized'>): void {
     const newWindow: WindowConfig<T> = {
@@ -15,6 +16,7 @@ export class WindowService {
       isMinimized: signal(false),
     };
     this.windows.update(w => [...w, newWindow]);
+    this.windowPlaceholderMap[newWindow.title] = newWindow.placeholder;
   }
 
   closeWindow(id: string): void {
@@ -27,13 +29,13 @@ export class WindowService {
   }
 
   maximizeWindow(id: string): void {
-     console.log(`maximizeWindow requested for window ID: ${id}`, this.windows());
+    console.log(`maximizeWindow requested for window ID: ${id}`, this.windows());
     this.updateWindowState(id, 'isMaximized', true);
     this.updateWindowState(id, 'isMinimized', false); // Cannot be both maximized and minimized
   }
 
   restoreWindow(id: string): void {
-     console.log(`restoreWindow requested for window ID: ${id}`, this.windows());
+    console.log(`restoreWindow requested for window ID: ${id}`, this.windows());
     this.updateWindowState(id, 'isMaximized', false);
     this.updateWindowState(id, 'isMinimized', false);
   }
@@ -48,11 +50,31 @@ export class WindowService {
     );
   }
 
-   bringToFront(id: string): void {
+  bringToFront(id: string): void {
     const window = this.getWindows()().find(w => w.id === id);
     if (window) {
       this.currentMaxZIndex.update(z => z + 1);
       window.zIndex.set(this.currentMaxZIndex());
     }
+  }
+
+  getWindowClasses(window: WindowConfig): string {
+    let classes = '';
+
+    if (window.isMinimized()) classes += ' minimized';
+    if (window.isMaximized()) { classes += ' maximized' };
+
+    if (window.placeholder && window.isMaximized()) {
+      //if (this.window.isMaximized() || (!this.window.isMaximized() && !this.window.isMinimized())) {
+      //   classes += ' ' + this.window.placeholder;
+      //}
+      classes += ' maximized ' + this.windowPlaceholderMap[window.title];
+    } else if (window.isMinimized()) {
+      classes = 'minimized';
+    } else {
+      classes += 'w-full h-full overflow-hidden absolute'; // Default size when not maximized or minimized
+    }
+    // console.log(classes);
+    return classes.trim();
   }
 }

@@ -1,6 +1,6 @@
 <nb-card class="window-card" [size]="'large'">
        <div class="window"
-         [ngClass]="getCombinedClasses()"
+         [ngClass]="this.windowService.getWindowClasses(window)"
          cdkDrag
          [cdkDragDisabled]="window.isMinimized()"
          >
