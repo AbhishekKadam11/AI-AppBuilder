@@ -14,6 +14,7 @@
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
+  height: inherit !important;
 }
 
 .header-container {
@@ -123,4 +124,8 @@ iframe {
   margin-top: 10px;
   font-size: 1rem;
   color: #333;
+}
+
+.card-window{
+  height: 100%;
 }

@@ -45,6 +45,7 @@ export class DirectoryListComponent {
   private readonly webContainerFiles: string = 'WebContainerFiles';
   private isWebContainerActive: boolean = false;
   private appList: any[] = [];
+  private currentMaxZIndex = signal(1000);
 
   constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>,
     private socketService: SocketService,
@@ -94,13 +95,14 @@ export class DirectoryListComponent {
   onRowClick(row: any) {
     if (row && row.data && row.data.kind !== 'directory') {
       this.webContainerService.webContainerFileContent(row.data.path.replace(/\\/g, '/')).then((fileData: string) => {
+        this.currentMaxZIndex.update(z => z + 1);
         this.windowService.openWindow({
           title: row.data.name,
           contentComponent: CodeEditorComponent, // Pass the component class to render
           data: { fileDetails: { fileContent: fileData, filePath: row.data.path.replace(/\\/g, '/') } },
-          placeholder: 'top-20 left-16 w-1/2 h-full',
-          isMaximized: signal(false),
-          zIndex: signal(100)
+          placeholder: 'h-full w-full col-start-1 col-end-2 row-start-1 row-span-2',
+          isMaximized: signal(true),
+          zIndex: signal(this.currentMaxZIndex())
         });
       }, error => {
         console.log('onRowClick error', error);

@@ -6,10 +6,11 @@ import { ConsoleWindowComponent } from '../../console-window/console-window.comp
 import { WindowComponent } from '../../window/window/window.component';
 import { WindowService } from '../../services/window.service';
 import { CommonModule } from '@angular/common';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-workbench',
-  imports: [NbLayoutModule, WindowComponent, CommonModule],
+  imports: [NbLayoutModule, WindowComponent, CommonModule, DragDropModule],
   templateUrl: './workbench.component.html',
   styleUrl: './workbench.component.scss'
 })

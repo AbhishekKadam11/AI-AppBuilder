@@ -5,32 +5,33 @@
   flex-direction: column;
 }
 
-// ::ng-deep nb-chat .header {
-//  display: none !important;
-// }
-
-// ::ng-deep nb-chat {
-//     background: transparent !important;
-//     border: none !important;
-//     box-shadow: none !important;
-//     padding: 0 !important;
-// }
-
-::ng-deep nb-chat {
-  flex: 1 1 auto; /* Fill all available space in the flex container */
-  height: 100% !important;
-  
-  /* IMPORTANT: Nebular chat uses an internal nb-card with fixed height */
-  nb-card.size-large {
-    height: 100% !important;
-    display: flex;
-    flex-direction: column;
-  }
+::ng-deep nb-chat .header {
+ display: none !important;
 }
 
-// nb-card {
-//     height: inherit !important;
-//     width: 100% !important;
-//     margin-bottom: 0px !important;
-    
+::ng-deep nb-chat {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin-bottom: 0px !important;
+}
+
+// ::ng-deep nb-chat {
+//   flex: 1 1 auto; /* Fill all available space in the flex container */
+//   height: 100% !important;
+  
+//   /* IMPORTANT: Nebular chat uses an internal nb-card with fixed height */
+//   nb-card.size-large {
+//     height: 100% !important;
+//     display: flex;
+//     flex-direction: column;
+//   }
 // }
+
+nb-card {
+    height: inherit !important;
+    width: 100% !important;
+    margin-bottom: 0px !important;
+    
+}

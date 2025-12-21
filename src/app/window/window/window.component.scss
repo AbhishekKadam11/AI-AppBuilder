@@ -4,12 +4,13 @@
 
   .window {
     // position: absolute; 
-    position: static; 
+    position: static;
     background-color: nb-theme(background-basic-color-1);
     border: 1px dashed nb-theme(color-basic-700);
     box-shadow: var(--shadow-2);
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
     z-index: 10;
     // transition: all 0.3s ease-in-out;
   }
@@ -30,7 +31,11 @@
 
   .window.maximized {
     min-width: 500px !important;
-    height: 100% !important;
+    //  height: 100% !important;
+    min-height: 300px !important;
+    height: 300px;
+    flex-grow: 1;    
+    overflow-y: auto;
     border-radius: 0;
     z-index: 100;
   }
@@ -50,7 +55,10 @@
   // }
 
   .window-card {
-   background: none;
+    background: none;
+    display: flex;
+    flex-direction: column;
+    height: 100% !important;
   }
 
   // /* Minimize state only handles visual appearance and removes absolute positioning */

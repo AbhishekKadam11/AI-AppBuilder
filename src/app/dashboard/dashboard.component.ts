@@ -236,7 +236,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   toggleSidebar() {
-    this.sidebarService.toggle(false, 'dynamicSidebar');
+    this.sidebarService.toggle(!this.isExplorerReady, 'dynamicSidebar');
   }
 
   onFileClick(event: any) {
