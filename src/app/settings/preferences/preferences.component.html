@@ -1,1 +1,79 @@
-<p>preferences works!</p>
+<nb-card>
+    <nb-card-header>Preferences</nb-card-header>
+    <nb-card-body>
+        <div class="flex flex-wrap gap-4 justify-start">
+            <nb-card>
+                <nb-card-header>Logs Settings</nb-card-header>
+                <nb-card-body>
+                    <div class="flex flex-wrap gap-4 justify-start">
+                        <div>
+                            <nb-card class="card-log">
+                                <nb-card-header>Server</nb-card-header>
+                                <nb-card-body>
+                                    <div class="">
+                                        <div class="details">
+                                            <div class="title h5">Log Level</div>
+                                            <div class="status text-basic">{{ userPreferences.server.logLevel |
+                                                titlecase}}</div>
+                                            <p class="paragraph-2"></p>
+                                        </div>
+                                    </div>
+
+                                    <nb-radio-group [(ngModel)]="userPreferences.server.logLevel" name="serverside-mode"
+                                        class="p-2">
+                                        <nb-radio value="off">
+                                            <nb-icon icon="eye-off-outline"></nb-icon>
+                                        </nb-radio>
+                                        <nb-radio value="info">
+                                            <nb-icon icon="info-outline"></nb-icon>
+                                        </nb-radio>
+                                        <nb-radio value="debug">
+                                            <nb-icon icon="activity-outline"></nb-icon>
+                                        </nb-radio>
+                                        <nb-radio value="error">
+                                            <nb-icon icon="alert-triangle-outline"></nb-icon>
+                                        </nb-radio>
+                                    </nb-radio-group>
+                                </nb-card-body>
+                            </nb-card>
+                        </div>
+
+                        <div>
+                            <nb-card class="card-log">
+                                <nb-card-header>Client</nb-card-header>
+                                <nb-card-body>
+                                    <div class="">
+                                        <div class="details">
+                                            <div class="title h5">Log Level</div>
+                                            <div class="status text-basic">{{ userPreferences.client.logLevel |
+                                                titlecase }}</div>
+                                            <p class="paragraph-2"></p>
+                                        </div>
+                                    </div>
+
+                                    <nb-radio-group [(ngModel)]="userPreferences.client.logLevel" value="info"
+                                        disabled="true" name="clientSide" class="p-2">
+                                        <nb-radio value="off">
+                                            <nb-icon icon="radio-button-off-outline"></nb-icon>
+                                        </nb-radio>
+                                        <nb-radio value="info">
+                                            <nb-icon icon="radio-button-on-outline"></nb-icon>
+                                        </nb-radio>
+
+                                    </nb-radio-group>
+                                </nb-card-body>
+                            </nb-card>
+                        </div>
+
+                    </div>
+                </nb-card-body>
+            </nb-card>
+        </div>
+    </nb-card-body>
+    <nb-card-footer>
+        <div class="flex float-end gap-4">
+            <button nbButton (click)="save()" status="success">Save</button>
+            <button nbButton (click)="cancel()" status="danger">Cancel</button>
+        </div>
+    </nb-card-footer>
+</nb-card>

@@ -8,6 +8,7 @@ import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { UserData } from './core/users';
 import { UserService } from './services/users.service';
 import { provideMonacoEditor } from 'ngx-monaco-editor-v2';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -20,9 +21,10 @@ export const appConfig: ApplicationConfig = {
       NbMenuModule.forRoot(),
       NbEvaIconsModule,
     ),
+    provideHttpClient(withFetch()),
     provideAnimations(),
     provideClientHydration(withEventReplay()),
     { provide: UserData, useClass: UserService },
-     provideMonacoEditor({ baseUrl: '/assets/monaco/min/vs' }),
+    provideMonacoEditor({ baseUrl: '/assets/monaco/min/vs' }),
   ]
 };
