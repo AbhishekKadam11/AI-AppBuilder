@@ -4,14 +4,16 @@ import { WindowConfig } from '../window-config';
 import { WindowService } from '../../services/window.service';
 import { DynamicContentDirective } from '../dynamic-content.directive';
 import { NbButtonModule, NbCardModule, NbIconModule } from '@nebular/theme';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-window',
   standalone: true,
-  imports: [NgClass, DynamicContentDirective, CommonModule, NbCardModule, NbButtonModule, NbIconModule],
+  imports: [NgClass, DynamicContentDirective, CommonModule, NbCardModule, NbButtonModule, NbIconModule, DragDropModule],
   templateUrl: './window.component.html',
   styleUrls: ['./window.component.scss']
 })
+
 export class WindowComponent {
   @Input({ required: true }) window!: WindowConfig;
   @Input({ required: true }) index!: number;

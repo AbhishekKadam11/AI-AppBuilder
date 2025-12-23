@@ -10,7 +10,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-workbench',
-  imports: [NbLayoutModule, WindowComponent, CommonModule, DragDropModule],
+  imports: [NbLayoutModule, WindowComponent, CommonModule],
   templateUrl: './workbench.component.html',
   styleUrl: './workbench.component.scss'
 })

@@ -45,7 +45,7 @@ export class DirectoryListComponent {
   private readonly webContainerFiles: string = 'WebContainerFiles';
   private isWebContainerActive: boolean = false;
   private appList: any[] = [];
-  private currentMaxZIndex = signal(1000);
+  private currentMaxZIndex = signal(2000);
 
   constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>,
     private socketService: SocketService,

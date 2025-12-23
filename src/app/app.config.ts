@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { NbMenuModule, NbSidebarModule, NbThemeModule, NbWindowModule, } from '@nebular/theme';
+import { NbMenuModule, NbSidebarModule, NbThemeModule, NbToastrModule, NbWindowModule, } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { UserData } from './core/users';
 import { UserService } from './services/users.service';
@@ -19,6 +19,7 @@ export const appConfig: ApplicationConfig = {
       NbSidebarModule.forRoot(),
       NbWindowModule.forRoot(),
       NbMenuModule.forRoot(),
+      NbToastrModule.forRoot(),
       NbEvaIconsModule,
     ),
     provideHttpClient(withFetch()),

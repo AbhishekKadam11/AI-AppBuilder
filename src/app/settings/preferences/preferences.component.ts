@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NbButtonModule, NbCardModule, NbIconModule, NbRadioModule, NbTabsetModule } from '@nebular/theme';
+import { NbButtonModule, NbCardModule, NbIconModule, NbRadioModule, NbTabsetModule, NbToastrService, NbTooltipModule } from '@nebular/theme';
 import { ApiService } from '../../services/api.service';
 
 type Platforms = 'client' | 'server';
@@ -20,7 +20,7 @@ type ICaptureLogs ={
 @Component({
   selector: 'app-preferences',
   standalone: true,
-  imports: [CommonModule, NbCardModule, NbButtonModule, NbIconModule, NbTabsetModule, NbRadioModule, FormsModule],
+  imports: [CommonModule, NbCardModule, NbButtonModule, NbIconModule, NbTabsetModule, NbRadioModule, FormsModule, NbTooltipModule],
   templateUrl: './preferences.component.html',
   styleUrl: './preferences.component.scss'
 })
@@ -31,7 +31,7 @@ export class PreferencesComponent {
 
   userPreferences!: ICaptureLogs;
 
-  constructor(private apiService: ApiService) { 
+  constructor(private apiService: ApiService, private toastrService: NbToastrService) { 
     this.userPreferences = {
       client: {
         logLevel: 'info',
@@ -42,11 +42,18 @@ export class PreferencesComponent {
         captureLogs: true
       }
     }
+    this.save();
   }
 
   save() {
-    console.log(this.userPreferences)
-    this.apiService.post(this.apiPath, { userPreferences: this.userPreferences }).subscribe();
+    // console.log(this.userPreferences)
+    this.apiService.post(this.apiPath, { userPreferences: this.userPreferences }).subscribe((response: any)=>{
+      console.log(response);
+       this.toastrService.show('success', `User preferences updated successfully`, { status: 'success' });
+    }, (error: any) => {
+      console.error(error);
+      this.toastrService.show('danger', `Unable to update user preferences`, { status: 'danger' });
+    });
   }
   cancel() {
   }
