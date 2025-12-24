@@ -1,6 +1,8 @@
-<div class="log-pane" [appAutoScroll]="true">
-    <div class="log-output">
-        <p *ngFor="let log of collectionLogs">{{ log }}</p>
-        <p>{{ samelineLogs }}</p>
+<div class="flex flex-col h-full">
+    <div class="log-pane flex-1 min-h-0 overflow-y-auto" [appAutoScroll]="true">
+        <div class="log-output">
+            <p *ngFor="let log of collectionLogs">{{ log }}</p>
+            <p>{{ samelineLogs }}</p>
+        </div>
     </div>
 </div>

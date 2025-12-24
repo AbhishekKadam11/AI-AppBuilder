@@ -17,6 +17,8 @@ import { Router, RouterModule } from '@angular/router';
 import { ConsoleWindowComponent } from '../console-window/console-window.component';
 import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
 import { BrowserWindowComponent } from '../browser-window/browser-window.component';
+import { ApiService } from '../services/api.service';
+import { StorageService } from '../services/storage.service';
 
 type FileEvent = {
   data: string;
@@ -111,6 +113,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private socketService: SocketService,
     private appWorkflowService: AppWorkflowService,
     public windowService: WindowService,
+    private apiService: ApiService,
+    private storageService: StorageService,
     private progressControlService: ProgressControlService) {
     // Sidebar menu item click handling
     this.menuService.onItemClick()
@@ -203,27 +207,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-
     this.progressControlService.showProgressGif('init');
-
-    // this.menuService?.onItemSelect().subscribe((event) => {
-    //   // Handle the menu item click event here
-    //   debugger
-    //   console.log('Menu item clicked:', event.item.title);
-
-    //   // You can access properties of the clicked item, such as:
-    //   // event.item.title
-    //   // event.item.link
-    //   // event.item.tag (if a tag was assigned to the menu)
-    //   // event.item.data (if custom data was added to the item)
-
-    //   // Example: Perform an action based on the clicked item's title
-    //   if (event.item.title === 'Log out') {
-    //     // Perform logout logic
-    //   } else if (event.item.link) {
-    //     // Navigate to the specified link
-    //   }
-    // });
+    this.savePreferences();
   }
 
   ngOnDestroy() {
@@ -304,6 +289,21 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       isMaximized: signal(true),
       zIndex: signal(100)
     });
+  }
+
+  //Temporary function api call to sve log preferences
+  savePreferences() {
+    // console.log(this.userPreferences)
+    const userData = this.storageService.getItem('user');
+    if (userData) {
+      const userPreferences = JSON.parse(userData).preferences;
+      this.apiService.post('userPreferences', { userPreferences }).subscribe((response: any)=>{
+      console.log(response);
+    }, (error: any) => {
+      console.error(error);
+    });
+    }
+    
   }
 
 }

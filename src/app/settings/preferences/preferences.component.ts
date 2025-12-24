@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { NbButtonModule, NbCardModule, NbIconModule, NbRadioModule, NbTabsetModule, NbToastrService, NbTooltipModule } from '@nebular/theme';
 import { ApiService } from '../../services/api.service';
+import { FormsModule } from '@angular/forms';
+import { StorageService } from '../../services/storage.service';
 
 type Platforms = 'client' | 'server';
 
@@ -31,7 +32,13 @@ export class PreferencesComponent {
 
   userPreferences!: ICaptureLogs;
 
-  constructor(private apiService: ApiService, private toastrService: NbToastrService) { 
+  constructor(private apiService: ApiService, private toastrService: NbToastrService, private storageService: StorageService) {
+    //add user preferences for fetching from local storage
+    const userPreferences = this.storageService.getItem('user');
+    if (userPreferences) {
+      this.userPreferences = JSON.parse(userPreferences).preferences;
+    }
+  
     this.userPreferences = {
       client: {
         logLevel: 'info',
@@ -49,6 +56,7 @@ export class PreferencesComponent {
     // console.log(this.userPreferences)
     this.apiService.post(this.apiPath, { userPreferences: this.userPreferences }).subscribe((response: any)=>{
       console.log(response);
+      this.storeUserPreference();
        this.toastrService.show('success', `User preferences updated successfully`, { status: 'success' });
     }, (error: any) => {
       console.error(error);
@@ -56,5 +64,15 @@ export class PreferencesComponent {
     });
   }
   cancel() {
+  }
+
+   storeUserPreference() {
+    const currentUser = this.storageService.getItem('user');
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      userData.preferences = this.userPreferences;
+      this.storageService.setItem('user', JSON.stringify(userData));
+    }
+    return;
   }
 }
