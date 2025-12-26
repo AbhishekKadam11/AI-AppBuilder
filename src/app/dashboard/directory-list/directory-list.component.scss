@@ -50,3 +50,10 @@ button[nbTreeGridRowToggle] {
         padding-left: 0rem;
     }
 }
+
+::ng-deep {
+  .nb-tree-grid-cell {
+    border-width: 0 !important;
+    border-style: none !important;
+  }
+}

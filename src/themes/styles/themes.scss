@@ -3,22 +3,73 @@
 @use '@nebular/theme/styles/themes/default';
 @use '@nebular/theme/styles/themes/dark';
 
-$nb-enable-css-custom-properties: true; 
+$nb-enable-css-custom-properties: true;
 
-$nb-themes: nb-register-theme(
-  (
-    text-basic-color: color-basic-800,
-    text-disabled-color: color-basic-600
-  ),
-  default,
-  default
-);
+$nb-themes: nb-register-theme((text-basic-color: color-basic-800,
+      text-disabled-color: color-basic-600),
+    default,
+    default);
 
-$nb-themes: nb-register-theme(
-  (
-    text-basic-color: color-basic-800,
-    text-disabled-color: color-basic-600
-  ),
-  dark,
-  dark
-);
+$nb-themes: nb-register-theme((text-basic-color: color-basic-800,
+      text-disabled-color: color-basic-600),
+    dark,
+    dark);
+
+$nb-themes: nb-register-theme((color-primary-100: #faf7ff,
+      color-primary-200: #ece3ff,
+      color-primary-300: #d5bfff,
+      color-primary-400: #b18aff,
+      color-primary-500: #a16eff,
+      color-primary-600: #7b51db,
+      color-primary-700: #5a37b8,
+      color-primary-800: #3e2494,
+      color-primary-900: #29157a,
+      color-basic-100: white,
+      color-basic-200: #eefafc,
+      color-basic-300: #e8f5fa,
+      color-basic-400: #d6e6f2,
+      color-basic-500: #c7dbeb,
+      color-basic-600: #a9c0db,
+      color-basic-700: #497d8e,
+      color-basic-800: #336a77,
+      color-basic-900: #295c66,
+      color-basic-1000: #244555,
+      color-basic-1100: #121a2b,
+      background-basic-color-1: color-basic-700,
+      background-basic-color-2: color-basic-800,
+      background-basic-color-3: color-basic-900,
+      background-basic-color-4: color-basic-100,
+      border-basic-color-1: color-basic-700,
+      border-basic-color-2: color-basic-800,
+      border-basic-color-3: color-basic-900,
+      border-basic-color-4: color-basic-1000,
+      border-basic-color-5: color-basic-1100,
+      shadow: 0 0.5rem 1rem 0 rgba(25, 30, 51, 0.24),
+      text-disabled-color: color-basic-600,
+      text-basic-color: color-basic-1000,
+    ), aquamarine, dark);
+
+$nb-themes: nb-register-theme((color-basic-1000: #0a0a0a,
+      color-basic-900: #121212,
+      color-basic-800: #1a1a1a,
+      color-primary-100: #fffdf2,
+      color-primary-200: #fff1c2,
+      color-primary-300: #ffe59e,
+      color-primary-400: #ffc94d,
+      color-primary-500: #ffaa00,
+      color-primary-600: #db8b00,
+      color-primary-700: #b86e00,
+      color-primary-800: #945400,
+      color-primary-900: #703c00,
+      border-basic-color-1: color-basic-500,
+      border-basic-color-2: color-basic-600,
+      border-basic-color-3: color-basic-700,
+      border-basic-color-4: color-basic-800,
+      border-basic-color-5: color-basic-900,
+      shadow: 0 0.5rem 1rem 0 rgba(25, 30, 51, 0.24),
+      text-basic-color: color-basic-100,
+      text-hint-color: color-basic-600,
+    ),
+    golden-dark,
+    dark
+  );

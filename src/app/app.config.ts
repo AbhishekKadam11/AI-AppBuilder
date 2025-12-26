@@ -9,13 +9,17 @@ import { UserData } from './core/users';
 import { UserService } from './services/users.service';
 import { provideMonacoEditor } from 'ngx-monaco-editor-v2';
 import { provideHttpClient, withFetch } from '@angular/common/http';
+import { AQUAMARINE_THEME, GOLDEN_DARK_THEME } from '../themes/custom.theme';
+
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes),
     importProvidersFrom(
-      NbThemeModule.forRoot({ name: 'default' }),
+      NbThemeModule.forRoot({ name: 'default' },
+        [GOLDEN_DARK_THEME, AQUAMARINE_THEME],
+      ),
       NbSidebarModule.forRoot(),
       NbWindowModule.forRoot(),
       NbMenuModule.forRoot(),

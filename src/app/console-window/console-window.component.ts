@@ -36,7 +36,7 @@ export class ConsoleWindowComponent {
     const timestamp = `[${new Date().toISOString()}]`;
     if (samelineWords.includes(log.trim().charAt(0))) {
       // Handle carriage return: overwrite the last line
-      console.log('sameline log:', log);
+      // console.log('sameline log:', log);
       this.samelineLogs = log != undefined ? `[client] ${timestamp}: ${log.trim()}` : '';
     } else {
       if (log != undefined && log.trim() != '') {

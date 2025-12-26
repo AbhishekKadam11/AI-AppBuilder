@@ -26,6 +26,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
     {
       value: 'dark',
       name: 'Dark',
+    },
+    {
+      value: 'aquamarine',
+      name: 'Aquamarine',
+    },
+    {
+      value: 'golden-dark',
+      name: 'Golden Dark',
     }
   ];
 
