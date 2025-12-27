@@ -10,4 +10,10 @@
       </div>
     </div>
   </nb-card-body>
+   <nb-card-footer>
+        <div class="flex float-end gap-4">
+            <button nbButton (click)="save()" status="success">Save</button>
+            <button nbButton (click)="cancel()" status="danger">Cancel</button>
+        </div>
+    </nb-card-footer>
 </nb-card>

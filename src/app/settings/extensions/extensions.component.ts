@@ -1,8 +1,11 @@
 import { Component, OnDestroy } from '@angular/core';
-import { NbCardModule, NbIconModule, NbThemeService } from '@nebular/theme';
+import { NbButtonModule, NbCardModule, NbIconModule, NbThemeService, NbToastrService } from '@nebular/theme';
 import { StatusCardComponent } from '../../common/status-card/status-card.component';
 import { CommonModule } from '@angular/common';
 import { takeWhile } from 'rxjs/internal/operators/takeWhile';
+import { ApiService } from '../../services/api.service';
+import { themes } from '../../common/header/header.component';
+import { StorageService } from '../../services/storage.service';
 
 interface CardSettings {
   title: string;
@@ -14,86 +17,61 @@ interface CardSettings {
 
 @Component({
   selector: 'app-extensions',
-  imports: [NbCardModule, StatusCardComponent, CommonModule, NbIconModule],
+  imports: [NbCardModule, StatusCardComponent, CommonModule, NbIconModule, NbButtonModule],
   templateUrl: './extensions.component.html',
   styleUrl: './extensions.component.scss'
 })
 export class ExtensionsComponent implements OnDestroy {
 
   private alive = true;
-  lightCard: CardSettings = {
-    title: 'Angular',
-    description: 'App builder will create app using Angular framework. this extension is mandatory and cannot be turned off.',
-    iconClass: 'angular-icon',
-    type: 'primary',
-    status: false,
-  };
-  rollerShadesCard: CardSettings = {
-    title: 'SonarQube',
-    description: 'SonarQube extension for code quality analysis',
-    iconClass: 'sonarqube-icon',
-    type: 'primary',
-    status: true,
-  };
-  wirelessAudioCard: CardSettings = {
-    title: 'Docker',
-    description: 'Docker extension for containerization',
-    iconClass: 'docker-icon',
-    type: 'primary',
-    status: true,
-  };
-  coffeeMakerCard: CardSettings = {
-    title: 'Coffee Maker',
-    description: 'Coffee Maker',
-    iconClass: 'nb-coffee-maker',
-    type: 'primary',
-    status: true,
-  };
-
   statusCards: any = {};
-
-  commonStatusCardsSet: CardSettings[] = [
-    this.lightCard,
-    this.rollerShadesCard,
-    this.wirelessAudioCard,
-    this.coffeeMakerCard,
-  ];
-
-  statusCardsByThemes: any = {
-    default: this.commonStatusCardsSet,
-    cosmic: this.commonStatusCardsSet,
-    corporate: [
-      {
-        ...this.lightCard,
-        type: 'warning',
-      },
-      {
-        ...this.rollerShadesCard,
-        type: 'primary',
-      },
-      {
-        ...this.wirelessAudioCard,
-        type: 'danger',
-      },
-      {
-        ...this.coffeeMakerCard,
-        type: 'info',
-      },
-    ],
-    dark: this.commonStatusCardsSet,
-  };
+  extensions: CardSettings[] = [];
+  commonStatusCardsSet: CardSettings[] = [];
+  statusCardsByThemes: any = {};
   isGrayscale = true;
+  apiPath = 'userPreferences/extensions';
+  userPreferences!: any;
 
-  constructor(private themeService: NbThemeService,) {
-    this.themeService.getJsTheme()
-      .pipe(takeWhile(() => this.alive))
-      .subscribe((theme: any) => {
-        this.statusCards = this.statusCardsByThemes[theme.name] || this.statusCardsByThemes['default'];
-      });
+  constructor(private themeService: NbThemeService, private apiService: ApiService, private toastrService: NbToastrService, private storageService: StorageService) {
+   this.apiService.get(this.apiPath).subscribe((response: any) => {
+      this.commonStatusCardsSet = response;
+      for (let theme of themes) {
+        this.statusCardsByThemes[theme.value] = this.commonStatusCardsSet;
+      }
+      this.themeService.getJsTheme()
+        .pipe(takeWhile(() => this.alive))
+        .subscribe((theme: any) => {
+          this.statusCards =  this.statusCardsByThemes[theme.value] || this.statusCardsByThemes['default'];
+        });
+    }, (error: any) => {
+      console.error(error);
+    });
   }
 
   ngOnDestroy() {
     this.alive = false;
   }
+ save() {
+    // console.log(this.userPreferences)
+    this.apiService.post(this.apiPath, { userPreferences: this.userPreferences }).subscribe((response: any)=>{
+      console.log(response);
+      this.storeUserPreference();
+       this.toastrService.show('success', `User preferences updated successfully`, { status: 'success' });
+    }, (error: any) => {
+      console.error(error);
+      this.toastrService.show('danger', `Unable to update user preferences`, { status: 'danger' });
+    });
+  }
+  cancel() {
+  }
 
+   storeUserPreference() {
+    const currentUser = this.storageService.getItem('user');
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      // userData.preferences = this.userPreferences;
+      // this.storageService.setItem('user', JSON.stringify(userData));
+    }
+    return;
+  }
 }

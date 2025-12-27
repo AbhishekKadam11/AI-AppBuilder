@@ -7,41 +7,41 @@ import { NgFor } from '@angular/common';
 import { StorageService } from '../../services/storage.service';
 import { AppWorkflowService } from '../../services/app-workflow.service';
 
+export const themes = [
+  {
+    value: 'default',
+    name: 'Light',
+  },
+  {
+    value: 'dark',
+    name: 'Dark',
+  },
+  {
+    value: 'aquamarine',
+    name: 'Aquamarine',
+  },
+  {
+    value: 'golden-dark',
+    name: 'Golden Dark',
+  }
+];
+
 @Component({
   selector: 'app-header',
   imports: [NbIconModule, NbActionsModule, NbSelectModule, NbUserModule, NgFor, NbOptionModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
+
 export class HeaderComponent implements OnInit, OnDestroy {
   private destroy$: Subject<void> = new Subject<void>();
   userPictureOnly: boolean = false;
   user: any;
-
-  themes = [
-    {
-      value: 'default',
-      name: 'Light',
-    },
-    {
-      value: 'dark',
-      name: 'Dark',
-    },
-    {
-      value: 'aquamarine',
-      name: 'Aquamarine',
-    },
-    {
-      value: 'golden-dark',
-      name: 'Golden Dark',
-    }
-  ];
-
   currentTheme = 'default';
-
   userMenu = [{ title: 'Profile' }, { title: 'Log out' }];
   appList: any[] = [];
   selectedApp: string = '';
+  themes: any[] = [];
 
   constructor(private sidebarService: NbSidebarService,
     private menuService: NbMenuService,
@@ -54,6 +54,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.themes = themes;
     this.currentTheme = this.themeService.currentTheme;
 
     this.userService.getUsers()
