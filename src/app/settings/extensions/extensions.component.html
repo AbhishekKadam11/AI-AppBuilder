@@ -2,17 +2,17 @@
   <nb-card-header>Extensions Settings</nb-card-header>
   <nb-card-body>
     <div class="flex flex-wrap gap-4 justify-center">
-      <div class="flex-1" *ngFor="let statusCard of statusCards">
+      <div class="flex-1" *ngFor="let statusCard of statusCards || []">
         <app-status-card [title]="statusCard.title" [type]="statusCard.type" [description]="statusCard.description"
-          [status]="statusCard.status">
-          <nb-icon class="svg-icon" [ngClass]="statusCard.iconClass"></nb-icon>
+          [status]="statusCard.status" [on]="statusCard.active" (statusChanged)="statusCard.active = $event">
+          <nb-icon class="svg-icon" [ngStyle]="statusCard.iconStyle" ></nb-icon>
         </app-status-card>
       </div>
     </div>
   </nb-card-body>
    <nb-card-footer>
         <div class="flex float-end gap-4">
-            <button nbButton (click)="save()" status="success">Save</button>
+            <button nbButton (click)="save()" status="primary">Save</button>
             <button nbButton (click)="cancel()" status="danger">Cancel</button>
         </div>
     </nb-card-footer>

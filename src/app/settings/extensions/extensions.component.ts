@@ -13,6 +13,7 @@ interface CardSettings {
   iconClass: string;
   type: string;
   status: boolean;
+  active: boolean;
 }
 
 @Component({
@@ -24,7 +25,7 @@ interface CardSettings {
 export class ExtensionsComponent implements OnDestroy {
 
   private alive = true;
-  statusCards: any = {};
+  statusCards: any = [];
   extensions: CardSettings[] = [];
   commonStatusCardsSet: CardSettings[] = [];
   statusCardsByThemes: any = {};
@@ -32,16 +33,18 @@ export class ExtensionsComponent implements OnDestroy {
   apiPath = 'userPreferences/extensions';
   userPreferences!: any;
 
+
   constructor(private themeService: NbThemeService, private apiService: ApiService, private toastrService: NbToastrService, private storageService: StorageService) {
-   this.apiService.get(this.apiPath).subscribe((response: any) => {
+    this.apiService.get(this.apiPath).subscribe((response: any) => {
       this.commonStatusCardsSet = response;
+      //  console.log("get commonStatusCardsSet ",response);
       for (let theme of themes) {
         this.statusCardsByThemes[theme.value] = this.commonStatusCardsSet;
       }
       this.themeService.getJsTheme()
         .pipe(takeWhile(() => this.alive))
         .subscribe((theme: any) => {
-          this.statusCards =  this.statusCardsByThemes[theme.value] || this.statusCardsByThemes['default'];
+          this.statusCards = this.statusCardsByThemes[theme.value] || this.statusCardsByThemes['default'];
         });
     }, (error: any) => {
       console.error(error);
@@ -51,27 +54,18 @@ export class ExtensionsComponent implements OnDestroy {
   ngOnDestroy() {
     this.alive = false;
   }
- save() {
-    // console.log(this.userPreferences)
-    this.apiService.post(this.apiPath, { userPreferences: this.userPreferences }).subscribe((response: any)=>{
-      console.log(response);
-      this.storeUserPreference();
-       this.toastrService.show('success', `User preferences updated successfully`, { status: 'success' });
+  save() {
+    console.log("post statusCards ", this.statusCards);
+    this.apiService.post(this.apiPath, { extensions: this.statusCards }).subscribe((response: any) => {
+     // console.log("post commonStatusCardsSet ", response);
+      this.toastrService.show('Success', `User preferences updated successfully`, { status: 'success' });
     }, (error: any) => {
-      console.error(error);
-      this.toastrService.show('danger', `Unable to update user preferences`, { status: 'danger' });
+      console.log(error);
+      this.toastrService.show('Failed', `Unable to update user preferences`, { status: 'danger' });
     });
   }
   cancel() {
   }
 
-   storeUserPreference() {
-    const currentUser = this.storageService.getItem('user');
-    if (currentUser) {
-      const userData = JSON.parse(currentUser);
-      // userData.preferences = this.userPreferences;
-      // this.storageService.setItem('user', JSON.stringify(userData));
-    }
-    return;
-  }
+
 }

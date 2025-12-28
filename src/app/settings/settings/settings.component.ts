@@ -25,6 +25,11 @@ export class SettingsComponent {
       icon: 'color-palette-outline',
       link: '/workspace/settings/preferences'
     },
+     {
+      title: 'Developer',
+      icon: 'layers-outline',
+      link: '/workspace/settings/developer'
+    },
     {
       title: 'Close',
       icon: 'close-outline',

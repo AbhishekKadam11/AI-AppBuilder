@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NbCardModule, NbIconModule } from '@nebular/theme';
 
 @Component({
@@ -34,10 +34,12 @@ export class StatusCardComponent {
   on: boolean = true;
   @Input()
   status: boolean = true;
+  @Output() statusChanged = new EventEmitter<boolean>();
 
   toggle(): void {
     if (this.status) {
       this.on = !this.on;
+      this.statusChanged.emit(this.on);
     }
   }
 

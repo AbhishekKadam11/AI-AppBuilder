@@ -72,3 +72,29 @@
   height: 500px !important;
   width: 40vw;
 }
+
+.golden-dark {
+  /* PRIMARY (Golden Accents) - Used for status="primary" */
+  --color-primary-500: #FFAA00;
+  --color-primary-100: #FFFDF2;
+  --color-primary-600: #DB8B00;
+  --color-primary-700: #B86E00;
+  --color-primary-800: #945400;
+  --color-primary-900: #703C00;
+
+  /* SUCCESS (Green for status="success") */
+  --color-success-500: #10b981;
+  --color-success-700: #047857;
+
+  /* INFO (Teal for status="info") */
+  --color-info-500: #06b6d4;
+  --color-info-700: #0e7490;
+
+  /* WARNING (Orange/Amber for status="warning") */
+  --color-warning-500: #f59e0b;
+  --color-warning-700: #b45309;
+
+  /* DANGER (Red for status="danger") */
+  --color-danger-500: #ef4444;
+  --color-danger-700: #b91c1c;
+}
