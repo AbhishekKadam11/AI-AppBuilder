@@ -100,19 +100,6 @@ nb-layout {
   width: 100%;
 }
 
-// .sidebar-header {
-//   position: relative;
-// }
-
-// .sidebar-header::after {
-//   content: '';
-//   position: absolute;
-//   right: -1px;
-//   top: 0;
-//   height: 100%;
-//   width: 2px;
-//   /* Use your custom golden glow color via a Nebular variable if you mapped one, or a raw hex */
-//   background: linear-gradient(to bottom, nb-theme(color-primary-500), transparent);
-//   box-shadow: 0 0 10px nb-theme(color-primary-500);
-//   opacity: 0.5; /* Adjust opacity as needed */
-// }
+:host ::ng-deep nb-menu .menu-item a {
+  text-align: left !important;
+}
