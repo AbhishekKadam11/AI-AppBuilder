@@ -17,21 +17,70 @@
     margin-bottom: 0px !important;
 }
 
-// ::ng-deep nb-chat {
-//   flex: 1 1 auto; /* Fill all available space in the flex container */
-//   height: 100% !important;
-  
-//   /* IMPORTANT: Nebular chat uses an internal nb-card with fixed height */
-//   nb-card.size-large {
-//     height: 100% !important;
-//     display: flex;
-//     flex-direction: column;
-//   }
-// }
-
 nb-card {
     height: inherit !important;
     width: 100% !important;
     margin-bottom: 0px !important;
     
 }
+
+.floating-attach-btn {
+  position: absolute;
+  bottom: 40px;       /* Aligns with the nb-chat-form input */
+  right: 100px;
+  z-index: 1000;      /* Keeps it on top of the chat's internal layers */
+  height: 2.5rem;
+  width: 2.5rem;
+  padding: 0;
+}
+
+.chat-thumbnail {
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: 8px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.file-name {
+  font-size: 0.75rem;
+  color: var(--text-hint-color);
+  margin: 0;
+}
+
+// ::ng-deep nb-chat-form .dropped-files {
+//       display: flex;
+//       flex-direction: row;
+//       margin-bottom: 0.5rem;
+//       flex-wrap: wrap;
+
+
+//       div {
+//         background-size: cover;
+//         width: 3rem;
+//         height: 3rem;
+//         border-radius: 0.5rem;
+//         @include nb-ltr(margin-right, 0.5rem);
+//         @include nb-rtl(margin-left, 0.5rem);
+//         margin-bottom: 0.5rem;
+//         border: 1px solid currentColor;
+//         text-align: center;
+//         font-size: 2rem;
+//         position: relative;
+
+//         .remove {
+//           position: absolute;
+//           right: -0.5rem;
+//           top: -0.875rem;
+//           font-size: 0.875rem;
+//           line-height: 1;
+//           cursor: pointer;
+//         }
+
+//         nb-icon {
+//           width: 85%;
+//           height: 100%;
+//         }
+//       }
+//     }
+  

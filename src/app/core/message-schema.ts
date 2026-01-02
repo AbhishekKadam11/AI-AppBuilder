@@ -27,7 +27,7 @@ export class MessageSchema {
         this.text = message.text;
         this.date = message.date || new Date();
         this.reply = true;
-        this.type = 'text';
+        this.type = message.type || 'text';
         this.files = message.files;
         this.user = {
         name: 'Creator',
