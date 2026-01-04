@@ -1,18 +1,19 @@
-import { AfterViewInit, Component, effect, signal, WritableSignal } from '@angular/core';
+import { AfterViewInit, Component, signal, WritableSignal } from '@angular/core';
 import { ChatShowcaseService } from '../services/chat-showcase.service';
-import { NbChatMessageFile, NbChatModule } from '@nebular/theme';
-import { NgFor } from '@angular/common';
+import { NbChatModule, NbIconModule } from '@nebular/theme';
+import { CommonModule, NgFor } from '@angular/common';
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { MessageSchema } from '../core/message-schema';
 import { ProgressControlService } from '../services/progress-control.service';
 import { AppWorkflowService } from '../services/app-workflow.service';
 import { IChatMessage } from '../core/common';
+import { ChatFormComponent } from './chat-form/chat-form.component';
 
 @Component({
   selector: 'app-chat-showcase',
   standalone: true,
-  imports: [NbChatModule, NgFor],
+  imports: [NbChatModule, NgFor, NbIconModule, CommonModule, ChatFormComponent],
   templateUrl: './chat-showcase.component.html',
   styleUrl: './chat-showcase.component.scss'
 })
@@ -25,6 +26,7 @@ export class ChatShowcaseComponent implements AfterViewInit {
   private subscriptions: Subscription = new Subscription();
   messageSchema: MessageSchema;
   private appObject: any;
+  droppedFiles: any[] = [];
 
   constructor(protected chatShowcaseService: ChatShowcaseService,
     private socketService: SocketService,
@@ -32,14 +34,9 @@ export class ChatShowcaseComponent implements AfterViewInit {
     private appWorkflowService: AppWorkflowService,
   ) {
     this.messageSchema = new MessageSchema();
-    // effect(() => {
-    //   const currentItems = this.messages();
-    //   console.log('Effect running: Array value is now:', currentItems);
-    //   if (currentItems.length > 0 && this.appWorkflowService.projectName) {
-    //     this.appWorkflowService.saveAppObjInLocalStorage({ data: { chatMessages: [...currentItems] } });
-    //   }
-    // });
   }
+
+
 
   ngAfterViewInit() {
     this.socketSubscription = this.socketService?.socketStatus.subscribe((message) => {
@@ -73,40 +70,31 @@ export class ChatShowcaseComponent implements AfterViewInit {
     );
   }
 
-  ngOnInit(): void {
-
-  }
-
   sendMessage(event: any) {
 
     this.progressControlService.showProgressGif('reseacrhing');
-    const files = !event.files ? [] : event.files.map((file: { src: string; type: string; }) => {
-      return {
-        url: file.src,
-        type: file.type,
-        icon: 'file-text-outline',
-      };
-    });
 
     this.messageSchema.setMessage({
       text: event.message,
+      type: this.droppedFiles.length > 0 ? 'file' : 'text',
+      files: this.droppedFiles
     });
     this.messages.update(currentItems => [...currentItems, this.messageSchema.getMessage()]);
     let payload: any = {
       data: this.messages(),
     };
+     this.droppedFiles = [];
     if (this.appObject && this.appObject.data.extraConfig.projectName) { 
       payload.projectName = this.appObject.data.extraConfig.projectName;
       payload.path = this.appObject.data.extraConfig.path;
       payload.chat_history = this.appObject.data.chat_history;
     }
 
-    this.socketService.sendMessage(this.chatSource, payload);
-    // const botReply = this.chatShowcaseService.reply(event.message);
-    // if (botReply) {
-    //   setTimeout(() => { this.messages.push(botReply) }, 500);
-    // }
+   this.socketService.sendMessage(this.chatSource, payload);
   }
 
+  fileOverEvent(event: any) {
+    this.droppedFiles = event;
+  }
 
 }

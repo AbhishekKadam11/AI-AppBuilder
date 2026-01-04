@@ -10,7 +10,7 @@ import {
   Output,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { NbButtonModule, NbComponentOrCustomStatus, NbIconModule, NbInputModule } from '@nebular/theme';
 
 @Component({
@@ -25,9 +25,14 @@ export class ChatFormComponent {
   status: NbComponentOrCustomStatus = 'basic';
   inputFocus: boolean = false;
   inputHover: boolean = false;
-
   droppedFiles: any[] = [];
   imgDropTypes = ['image/png', 'image/jpeg', 'image/gif'];
+  
+  /**
+   * Send files is uploaded event
+   * @type {any}
+   */
+  @Output() fileOverEvent: any = new EventEmitter<any>();
 
   /**
    * Predefined message text
@@ -180,5 +185,34 @@ export class ChatFormComponent {
 
   onModelChange(value: any): void {
     this.onInputChange.emit(value);
+  }
+
+  handleFileUpload(event: any) {
+    const files = event.target.files;
+    if (files) {
+      for (const file of files) {
+          this.addFileToChat(file);
+      }
+    }
+  }
+
+  private addFileToChat(file: File) {
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      // Sanitize the style to allow [style.background-image]
+      const base64Data = e.target.result;
+      const safeUrlStyle: SafeStyle = this.domSanitizer.bypassSecurityTrustStyle(`url(${base64Data})`);
+      const fileObj: any = {
+        name: file.name,
+        url: base64Data,
+        type: file.type,
+        icon: 'file-text-outline',
+        urlStyle: safeUrlStyle
+      };
+      this.droppedFiles.push(fileObj);
+      this.fileOverEvent.emit(this.droppedFiles);
+      this.cd.detectChanges();
+    };
+    reader.readAsDataURL(file);
   }
 }

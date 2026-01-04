@@ -34,6 +34,82 @@
       background: nb-theme(layout-scrollbar-background-color);
     }
   }
+
+  app-chat-form {
+        display: flex;
+        flex-direction: column;
+        padding: nb-theme(chat-padding);
+        border-top: nb-theme(chat-divider-width) nb-theme(chat-divider-style) nb-theme(chat-divider-color);
+
+        .message-row {
+            flex-direction: row;
+            display: flex;
+        }
+
+        input {
+            flex: 1;
+
+            &.with-button {
+                border-bottom-right-radius: 0;
+                border-top-right-radius: 0;
+                @include nb-ltr(border-bottom-right-radius, 0);
+                @include nb-ltr(border-top-right-radius, 0);
+                @include nb-rtl(border-bottom-left-radius, 0);
+                @include nb-rtl(border-top-left-radius, 0);
+            }
+        }
+
+        .send-button {
+            nb-icon {
+                font-size: 1.5rem;
+            }
+
+            @include nb-ltr {
+                border-bottom-left-radius: 0;
+                border-top-left-radius: 0;
+            }
+
+            @include nb-rtl {
+                border-bottom-right-radius: 0;
+                border-top-right-radius: 0;
+            }
+        }
+
+        .dropped-files {
+            display: flex;
+            flex-direction: row;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+
+            div {
+                background-size: cover;
+                width: 3rem;
+                height: 3rem;
+                border-radius: 0.5rem;
+                @include nb-ltr(margin-right, 0.5rem);
+                @include nb-rtl(margin-left, 0.5rem);
+                margin-bottom: 0.5rem;
+                border: 1px solid currentColor;
+                text-align: center;
+                font-size: 2rem;
+                position: relative;
+
+                .remove {
+                    position: absolute;
+                    right: -0.5rem;
+                    top: -0.875rem;
+                    font-size: 0.875rem;
+                    line-height: 1;
+                    cursor: pointer;
+                }
+
+                nb-icon {
+                    width: 65%;
+                    height: 100%;
+                }
+            }
+        }
+    }
 }
 
 .custom-code-editor {
