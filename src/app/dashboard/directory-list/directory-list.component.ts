@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output, signal } from '@angular/core';
-import { NbCardModule, NbIconModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule } from '@nebular/theme';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output, Renderer2, signal, ViewChild } from '@angular/core';
+import { NbAdjustment, NbCardModule, NbContextMenuDirective, NbContextMenuModule, NbIconModule, NbMenuItem, NbMenuModule, NbMenuService, NbPosition, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule } from '@nebular/theme';
 import { FsIconComponent } from '../fs-icon/fs-icon.component';
 import { SocketService } from '../../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -23,7 +23,7 @@ interface FSEntry {
 
 @Component({
   selector: 'app-directory-list',
-  imports: [NbTreeGridModule, NbIconModule, NbCardModule, CommonModule, FsIconComponent],
+  imports: [NbTreeGridModule, NbIconModule, NbCardModule, CommonModule, FsIconComponent, NbMenuModule, NbContextMenuModule],
   standalone: true,
   templateUrl: './directory-list.component.html',
   styleUrl: './directory-list.component.scss'
@@ -46,18 +46,32 @@ export class DirectoryListComponent {
   private isWebContainerActive: boolean = false;
   private appList: any[] = [];
   private currentMaxZIndex = signal(2000);
+  @ViewChild(NbContextMenuDirective)
+  contextMenu!: NbContextMenuDirective;
+  @ViewChild('contextMenuPosition') contextMenuPositionRef!: ElementRef;
+ readonly position = NbPosition.BOTTOM;
+ readonly NbAdjustment = NbAdjustment;
+
+  contextMenuItems: NbMenuItem[] = [
+    { title: 'View Details', icon: 'eye-outline' },
+    { title: 'Edit Node', icon: 'edit-outline' },
+    { title: 'Delete Node', icon: 'trash-outline' },
+  ];
 
   constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>,
     private socketService: SocketService,
     private webContainerService: WebContainerService,
     private windowService: WindowService,
+    private nbMenuService: NbMenuService,
+    private cdr: ChangeDetectorRef,
+    private renderer: Renderer2,
     private appWorkflowService: AppWorkflowService) {
   }
 
   ngAfterViewInit() {
 
     this.subscriptions.add(
-    this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
+      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
         if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
           this.messages = { "action": "getContainerFiles", "path": appDetails.data.extraConfig.projectName };
           this.socketService.sendMessage(this.directoryManager, this.messages);
@@ -110,7 +124,41 @@ export class DirectoryListComponent {
     }
   }
 
-   ngOnDestroy(): void {
+  menuPosition = { x: 0, y: 0 };
+  selectedRow: any;
+
+  onRightClick(event: MouseEvent) {
+    event.preventDefault();
+
+    // 1. Set coordinates from the event
+    // this.menuPosition = { x: event.clientX, y: event.clientY };
+
+    // 2. Hide the menu to clear any existing CDK overlay instance
+    this.contextMenu.hide();
+
+    // 3. Force Angular to update the DOM immediately
+   
+
+    // 4. Use requestAnimationFrame to ensure the anchor <div> has moved 
+    // to the new (x, y) BEFORE the overlay starts calculation
+    requestAnimationFrame(() => {
+      this.contextMenu.show();
+      setTimeout(() => {
+   const overlayPane = document.querySelector('.cdk-overlay-pane') as HTMLElement;
+    if (overlayPane) {
+      // overlayPane.style.transform = 'none'; // Prevents Nebular offset interference
+      overlayPane.style.top = event.clientX + 'px'; // Prevents Nebular offset interference
+      overlayPane.style.bottom = event.clientY + 'px'; // Prevents Nebular offset interference
+    }
+    //  this.cdr.detectChanges();
+    console.log('overlayPane', overlayPane)
+      }, 10);
+    
+      
+    });
+  }
+  
+  ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
 }

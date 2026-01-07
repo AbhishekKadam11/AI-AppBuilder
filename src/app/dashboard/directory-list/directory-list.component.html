@@ -11,12 +11,26 @@
       {{customColumn}}
     </th>
     <td nbTreeGridCell *nbTreeGridCellDef="let row" (click)="onRowClick(row)">
-      <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 10px;" 
+                  
+                    (contextmenu)="onRightClick($event)">
         <app-fs-icon [kind]="row.data.kind" [expanded]="row.expanded"></app-fs-icon>
-        {{row.data[customColumn]}}
+        {{row.data[customColumn]}}  {{menuPosition.x}}, {{menuPosition.y}}
+      
       </div>
     </td>
+    
+ <span
+  [style.left.px]="menuPosition.x" 
+  [style.top.px]="menuPosition.y"
+   style="position: fixed; width: 2px; height: 2px; pointer-events: none; z-index: 9999;"
+  [nbContextMenu]="contextMenuItems"
+  nbContextMenuTrigger="noop"
+  >
+</span>
+
   </ng-container>
+
 
   <ng-container *ngFor="let column of defaultColumns; let index = index" [nbTreeGridColumnDef]="column"
     [showOn]="getShowOn(index)">
