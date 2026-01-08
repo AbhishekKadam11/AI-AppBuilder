@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output, Renderer2, signal, ViewChild } from '@angular/core';
-import { NbAdjustment, NbCardModule, NbContextMenuDirective, NbContextMenuModule, NbIconModule, NbMenuItem, NbMenuModule, NbMenuService, NbPosition, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule } from '@nebular/theme';
+import { Component, ElementRef, EventEmitter, HostListener, Output, signal, ViewChild } from '@angular/core';
+import { NbCardModule, NbContextMenuModule, NbIconModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverDirective, NbPopoverModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule, NbCdkMappingModule } from '@nebular/theme';
 import { FsIconComponent } from '../fs-icon/fs-icon.component';
 import { SocketService } from '../../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -23,7 +23,7 @@ interface FSEntry {
 
 @Component({
   selector: 'app-directory-list',
-  imports: [NbTreeGridModule, NbIconModule, NbCardModule, CommonModule, FsIconComponent, NbMenuModule, NbContextMenuModule],
+  imports: [NbTreeGridModule, NbIconModule, NbCardModule, CommonModule, FsIconComponent, NbMenuModule, NbContextMenuModule, NbPopoverModule, NbCdkMappingModule],
   standalone: true,
   templateUrl: './directory-list.component.html',
   styleUrl: './directory-list.component.scss'
@@ -46,11 +46,10 @@ export class DirectoryListComponent {
   private isWebContainerActive: boolean = false;
   private appList: any[] = [];
   private currentMaxZIndex = signal(2000);
-  @ViewChild(NbContextMenuDirective)
-  contextMenu!: NbContextMenuDirective;
-  @ViewChild('contextMenuPosition') contextMenuPositionRef!: ElementRef;
- readonly position = NbPosition.BOTTOM;
- readonly NbAdjustment = NbAdjustment;
+  @ViewChild(NbPopoverDirective)
+  popover!: NbPopoverDirective;
+  @ViewChild('popoverHost', { read: ElementRef })
+  popoverHost!: ElementRef;
 
   contextMenuItems: NbMenuItem[] = [
     { title: 'View Details', icon: 'eye-outline' },
@@ -62,10 +61,30 @@ export class DirectoryListComponent {
     private socketService: SocketService,
     private webContainerService: WebContainerService,
     private windowService: WindowService,
-    private nbMenuService: NbMenuService,
-    private cdr: ChangeDetectorRef,
-    private renderer: Renderer2,
+    private menuService: NbMenuService,
     private appWorkflowService: AppWorkflowService) {
+   
+  }
+
+  ngOnInit() {
+    this.menuService.onItemClick().subscribe((data) => {
+      console.log(data);
+      switch(data.item.title) {
+        case 'Rename':
+          console.log('Rename');
+          break;
+        case 'Delete':
+          console.log('Delete');
+          break;
+        case 'Add Folder':
+          console.log('Add Folder');
+          break;
+        case 'Add File':
+          console.log('Add File');
+          break;
+      }
+    });
+
   }
 
   ngAfterViewInit() {
@@ -86,6 +105,7 @@ export class DirectoryListComponent {
         }
       })
     );
+
   }
 
   updateSort(sortRequest: NbSortRequest): void {
@@ -124,40 +144,36 @@ export class DirectoryListComponent {
     }
   }
 
-  menuPosition = { x: 0, y: 0 };
-  selectedRow: any;
-
-  onRightClick(event: MouseEvent) {
-    event.preventDefault();
-
-    // 1. Set coordinates from the event
-    // this.menuPosition = { x: event.clientX, y: event.clientY };
-
-    // 2. Hide the menu to clear any existing CDK overlay instance
-    this.contextMenu.hide();
-
-    // 3. Force Angular to update the DOM immediately
-   
-
-    // 4. Use requestAnimationFrame to ensure the anchor <div> has moved 
-    // to the new (x, y) BEFORE the overlay starts calculation
-    requestAnimationFrame(() => {
-      this.contextMenu.show();
-      setTimeout(() => {
-   const overlayPane = document.querySelector('.cdk-overlay-pane') as HTMLElement;
-    if (overlayPane) {
-      // overlayPane.style.transform = 'none'; // Prevents Nebular offset interference
-      overlayPane.style.top = event.clientX + 'px'; // Prevents Nebular offset interference
-      overlayPane.style.bottom = event.clientY + 'px'; // Prevents Nebular offset interference
+  openOnRightClick(event: MouseEvent, popover: any, row: any) {
+    if (row.kind === 'directory') {
+      this.contextMenuItems = [
+        { title: 'Rename', icon: 'edit-outline' },
+        { title: 'Delete', icon: 'trash-outline' },
+        { title: 'Add Folder', icon: 'folder-outline' },
+        { title: 'Add File', icon: 'file-text-outline' }
+      ]
+    } else if (row.kind === 'file') {
+      this.contextMenuItems = [
+        { title: 'Rename', icon: 'edit-outline' },
+        { title: 'Delete', icon: 'trash-outline' }
+      ]
     }
-    //  this.cdr.detectChanges();
-    console.log('overlayPane', overlayPane)
-      }, 10);
-    
-      
-    });
+    event.preventDefault();
+    this.onDocumentClick(event);
+    popover.show();
+    this.popover = popover;
   }
-  
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+   
+    if (this.popover && this.popover.isShown) {
+      const clickedInside = this.popoverHost.nativeElement.contains(event.target);
+      if (!clickedInside) {
+        this.popover.hide();
+      }
+    }
+  }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }

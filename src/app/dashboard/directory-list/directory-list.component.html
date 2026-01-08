@@ -11,24 +11,23 @@
       {{customColumn}}
     </th>
     <td nbTreeGridCell *nbTreeGridCellDef="let row" (click)="onRowClick(row)">
-      <div style="display: flex; align-items: center; gap: 10px;" 
-                  
-                    (contextmenu)="onRightClick($event)">
+      <div style="display: flex; align-items: center; gap: 10px;" #popoverHost [nbPopover]="popoverContent"
+        nbPopoverTrigger="noop" #popover="nbPopover" nbPopoverPlacement="bottom" 
+        (contextmenu)="openOnRightClick($event, popover, row.data)">
         <app-fs-icon [kind]="row.data.kind" [expanded]="row.expanded"></app-fs-icon>
-        {{row.data[customColumn]}}  {{menuPosition.x}}, {{menuPosition.y}}
-      
+        {{row.data[customColumn]}}
       </div>
     </td>
-    
- <span
-  [style.left.px]="menuPosition.x" 
-  [style.top.px]="menuPosition.y"
-   style="position: fixed; width: 2px; height: 2px; pointer-events: none; z-index: 9999;"
-  [nbContextMenu]="contextMenuItems"
-  nbContextMenuTrigger="noop"
-  >
-</span>
 
+    <ng-template #popoverContent>
+      <nb-card class="directory-menu-card">
+        <nb-card-body class="directory-menu-card-body">
+      <div style="min-width: 150px;">
+        <nb-menu [items]="contextMenuItems" placement="bottom-end"></nb-menu>
+      </div>
+      </nb-card-body> 
+      </nb-card>
+    </ng-template>
   </ng-container>
 
 

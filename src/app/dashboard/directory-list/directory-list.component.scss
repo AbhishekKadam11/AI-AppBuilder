@@ -56,4 +56,11 @@ button[nbTreeGridRowToggle] {
     border-width: 0 !important;
     border-style: none !important;
   }
+
+  .directory-menu-card, .directory-menu-card-body {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid nb-theme(color-primary-600) !important;
+    border-radius: nb-theme(card-border-radius);
+  }
 }
