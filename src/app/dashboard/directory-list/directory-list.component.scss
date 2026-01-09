@@ -9,6 +9,7 @@ button[nbTreeGridRowToggle] {
 .search-label {
   display: block;
 }
+
 .search-input {
   margin-bottom: 1rem;
 }
@@ -18,6 +19,7 @@ button[nbTreeGridRowToggle] {
 }
 
 @media screen and (min-width: 400px) {
+
   .nb-column-name,
   .nb-column-size {
     width: 50%;
@@ -25,6 +27,7 @@ button[nbTreeGridRowToggle] {
 }
 
 @media screen and (min-width: 500px) {
+
   .nb-column-name,
   .nb-column-size,
   .nb-column-kind {
@@ -36,6 +39,7 @@ button[nbTreeGridRowToggle] {
   .nb-column-name {
     width: 31%;
   }
+
   .nb-column-size,
   .nb-column-kind,
   .nb-column-items {
@@ -45,10 +49,10 @@ button[nbTreeGridRowToggle] {
 
 
 @include nb-install-component {
-    .nb-tree-grid-cell {
-        height: 1rem;
-        padding-left: 0rem;
-    }
+  .nb-tree-grid-cell {
+    height: 1rem;
+    padding-left: 0rem;
+  }
 }
 
 ::ng-deep {
@@ -57,10 +61,31 @@ button[nbTreeGridRowToggle] {
     border-style: none !important;
   }
 
-  .directory-menu-card, .directory-menu-card-body {
+  .directory-menu-card,
+  .directory-menu-card-body {
     margin: 0 !important;
     padding: 0 !important;
     border: 1px solid nb-theme(color-primary-600) !important;
     border-radius: nb-theme(card-border-radius);
+  }
+
+  .directory-item {
+    padding: 0px !important;
+    margin: 0px !important;
+    border-radius: unset !important;
+    max-width: unset !important;
+    font-weight: unset !important;
+    line-height: unset !important;
+    background-color: unset !important;
+    border: unset !important;
+    caret-color: transparent;
+    cursor: default;
+  }
+
+  .input-heighlighter {
+    border: 1px solid nb-theme(color-primary-600) !important;
+    width: 100% !important;
+    caret-color: auto !important;
+    cursor: default;
   }
 }
