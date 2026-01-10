@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, HostListener, Output, signal, ViewChild } from '@angular/core';
-import { NbCardModule, NbContextMenuModule, NbIconModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverDirective, NbPopoverModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule, NbCdkMappingModule } from '@nebular/theme';
+import { Component, ElementRef, EventEmitter, HostListener, Output, signal, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { NbCardModule, NbContextMenuModule, NbIconModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverDirective, NbPopoverModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule, NbCdkMappingModule, NbInputModule } from '@nebular/theme';
 import { FsIconComponent } from '../fs-icon/fs-icon.component';
 import { SocketService } from '../../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -8,6 +8,7 @@ import { AppWorkflowService } from '../../services/app-workflow.service';
 import { WebContainerService } from '../../services/web-container.service';
 import { WindowService } from '../../services/window.service';
 import { CodeEditorComponent } from '../../code-display/code-editor.component';
+import { FormsModule } from '@angular/forms';
 
 interface TreeNode<T> {
   data: T;
@@ -23,7 +24,7 @@ interface FSEntry {
 
 @Component({
   selector: 'app-directory-list',
-  imports: [NbTreeGridModule, NbIconModule, NbCardModule, CommonModule, FsIconComponent, NbMenuModule, NbContextMenuModule, NbPopoverModule, NbCdkMappingModule],
+  imports: [NbTreeGridModule, NbIconModule, NbCardModule, CommonModule, FsIconComponent, NbMenuModule, NbContextMenuModule, NbPopoverModule, NbCdkMappingModule, NbInputModule, FormsModule],
   standalone: true,
   templateUrl: './directory-list.component.html',
   styleUrl: './directory-list.component.scss'
@@ -50,6 +51,10 @@ export class DirectoryListComponent {
   popover!: NbPopoverDirective;
   @ViewChild('popoverHost', { read: ElementRef })
   popoverHost!: ElementRef;
+  setReadOnly: boolean = false;
+  @ViewChild('editInput')
+  inputElement!: ElementRef;
+  private activeElements: any[] = [];
 
   contextMenuItems: NbMenuItem[] = [
     { title: 'View Details', icon: 'eye-outline' },
@@ -63,15 +68,15 @@ export class DirectoryListComponent {
     private windowService: WindowService,
     private menuService: NbMenuService,
     private appWorkflowService: AppWorkflowService) {
-   
+
   }
 
   ngOnInit() {
-    this.menuService.onItemClick().subscribe((data) => {
-      console.log(data);
-      switch(data.item.title) {
+    this.menuService.onItemClick().subscribe((menuItem) => {
+      console.log(menuItem);
+      switch (menuItem.item.title) {
         case 'Rename':
-          console.log('Rename');
+          this.renameDirectory(menuItem.item.data);
           break;
         case 'Delete':
           console.log('Delete');
@@ -106,6 +111,13 @@ export class DirectoryListComponent {
       })
     );
 
+    //   this.inputElement.changes.subscribe((newList: QueryList<ElementRef>) => {
+    //   // Focus the last added element
+    //   const lastIndex = newList.length - 1;
+    //   if (lastIndex >= 0) {
+    //     newList.toArray()[lastIndex].nativeElement.focus();
+    //   }
+    // });
   }
 
   updateSort(sortRequest: NbSortRequest): void {
@@ -127,7 +139,7 @@ export class DirectoryListComponent {
   }
 
   onRowClick(row: any) {
-    if (row && row.data && row.data.kind !== 'directory') {
+    if (row && row.data && row.data.kind !== 'directory' && !row.data.setReadOnly) {
       this.webContainerService.webContainerFileContent(row.data.path.replace(/\\/g, '/')).then((fileData: string) => {
         this.currentMaxZIndex.update(z => z + 1);
         this.windowService.openWindow({
@@ -147,15 +159,15 @@ export class DirectoryListComponent {
   openOnRightClick(event: MouseEvent, popover: any, row: any) {
     if (row.kind === 'directory') {
       this.contextMenuItems = [
-        { title: 'Rename', icon: 'edit-outline' },
-        { title: 'Delete', icon: 'trash-outline' },
-        { title: 'Add Folder', icon: 'folder-outline' },
-        { title: 'Add File', icon: 'file-text-outline' }
+        { title: 'Rename', icon: 'edit-outline', data: row },
+        { title: 'Delete', icon: 'trash-outline', data: row },
+        { title: 'Add Folder', icon: 'folder-outline', data: row },
+        { title: 'Add File', icon: 'file-text-outline', data: row }
       ]
     } else if (row.kind === 'file') {
       this.contextMenuItems = [
-        { title: 'Rename', icon: 'edit-outline' },
-        { title: 'Delete', icon: 'trash-outline' }
+        { title: 'Rename', icon: 'edit-outline', data: row },
+        { title: 'Delete', icon: 'trash-outline', data: row }
       ]
     }
     event.preventDefault();
@@ -166,7 +178,6 @@ export class DirectoryListComponent {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
-   
     if (this.popover && this.popover.isShown) {
       const clickedInside = this.popoverHost.nativeElement.contains(event.target);
       if (!clickedInside) {
@@ -174,6 +185,48 @@ export class DirectoryListComponent {
       }
     }
   }
+
+  renameDirectory(row: any) {
+    row.setReadOnly = !row.setReadOnly;
+    const element = document.getElementById(row.name);
+    console.log('renameDirectory row:', row);
+    if (element) {
+      setTimeout(() => {
+        element.focus();
+        if (this.activeElements.indexOf(element) === -1) {
+          this.activeElements.map(el => {
+            if (el.element !== element) {
+              el.row.setReadOnly = true;
+              el.element.blur();
+              this.activeElements.splice(this.activeElements.indexOf(el), 1);
+            }
+          })
+        }
+        this.activeElements.push({ element, row });
+      }, 0);
+    }
+  }
+
+  focusOutInput(row: any) {
+    if (this.activeElements.length === 0) {
+      return;
+    }
+    console.log('focusOutInput row:', row);
+    this.webContainerService.renameWebContainerFile(row).then(() => {
+      console.log('File renamed successfully');
+    }).catch((error) => {
+      console.error('Error renaming file:', error);
+    });
+    this.activeElements.map(el => {
+      el.row.setReadOnly = true;
+      el.element.blur();
+    })
+  }
+
+  trackByFn(index: number, item: any) {
+    return item.data.id;
+  }
+
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }

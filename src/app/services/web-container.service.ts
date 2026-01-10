@@ -11,6 +11,7 @@ interface FileEntry {
   kind: 'file' | 'directory';
   path: string;
   contents?: string; // Optional for files
+  setReadOnly?: boolean
 }
 
 interface TreeNode<T> {
@@ -63,7 +64,7 @@ export class WebContainerService {
     this.outputSubject.next('Files mounted.');
   }
 
-  private async runCommands(commands: string[]): Promise<void> {
+  public async runCommands(commands: string[]): Promise<void> {
     this.outputSubject.next(`Running command: ${commands.join(' ')}`);
     const process = await this.webcontainerInstance.spawn(commands[0], commands.slice(1));
 
@@ -129,7 +130,7 @@ export class WebContainerService {
         // Handle directories
         if (entry.directory) {
           const directoryNode: TreeNode<FileEntry> = {
-            data: { name: name, kind: 'directory', path: entry.path, },
+            data: { name: name, kind: 'directory', path: entry.path, setReadOnly: true },
             expanded: expanded,
             children: this.transformToNebularTree(entry.directory, false), // Recurse for children
           };
@@ -144,6 +145,7 @@ export class WebContainerService {
               kind: 'file',
               path: entry.file.path,
               contents: entry.file.contents,
+              setReadOnly: true
             },
           };
           result.push(fileNode);
@@ -204,6 +206,17 @@ export class WebContainerService {
     } catch (error) {
       console.error('Error exporting files from WebContainer:', error);
     }
+  }
+
+  public renameWebContainerFile(file: any): Promise<void> {
+    const oldPath = file.path;
+    const pathParts = oldPath.split('/');
+    pathParts.pop();
+    const newPath = pathParts.length > 1 ? pathParts.join('/') + '/' + file.name : file.name;
+    if (!this.webcontainerInstance) {
+      return Promise.reject('WebContainer not initialized.');
+    }
+    return this.webcontainerInstance.fs.rename(oldPath, newPath);
   }
 
 }
