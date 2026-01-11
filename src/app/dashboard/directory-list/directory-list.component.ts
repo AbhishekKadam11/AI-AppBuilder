@@ -86,6 +86,7 @@ export class DirectoryListComponent {
           break;
         case 'Add File':
           console.log('Add File');
+          this.addFile(menuItem.item.data);
           break;
       }
     });
@@ -161,12 +162,16 @@ export class DirectoryListComponent {
       this.contextMenuItems = [
         { title: 'Rename', icon: 'edit-outline', data: row },
         { title: 'Delete', icon: 'trash-outline', data: row },
+        { title: 'Copy', icon: 'copy-outline', data: row },
+        { title: 'Cut', icon: 'scissors-outline', data: row },
         { title: 'Add Folder', icon: 'folder-outline', data: row },
         { title: 'Add File', icon: 'file-text-outline', data: row }
       ]
     } else if (row.kind === 'file') {
       this.contextMenuItems = [
         { title: 'Rename', icon: 'edit-outline', data: row },
+        { title: 'Copy', icon: 'copy-outline', data: row },
+        { title: 'Cut', icon: 'scissors-outline', data: row },
         { title: 'Delete', icon: 'trash-outline', data: row }
       ]
     }
@@ -189,7 +194,6 @@ export class DirectoryListComponent {
   renameDirectory(row: any) {
     row.setReadOnly = !row.setReadOnly;
     const element = document.getElementById(row.name);
-    console.log('renameDirectory row:', row);
     if (element) {
       setTimeout(() => {
         element.focus();
@@ -211,20 +215,42 @@ export class DirectoryListComponent {
     if (this.activeElements.length === 0) {
       return;
     }
-    console.log('focusOutInput row:', row);
-    this.webContainerService.renameWebContainerFile(row).then(() => {
-      console.log('File renamed successfully');
-    }).catch((error) => {
-      console.error('Error renaming file:', error);
-    });
+
+    this.subscriptions.add(
+      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
+        if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
+          this.messages = { "action": "rename", "path": appDetails.data.extraConfig.projectName, "content": row };
+          this.socketService.sendMessage(this.directoryManager, this.messages);
+          const serverReply$ = this.socketService?.on(this.directoryManager);
+          if (serverReply$) {
+            this.directorySubscription = serverReply$.subscribe((response: any) => {
+              console.log('Received directorySubscription rename replay from server:', response);
+              this.sendRequestToRename(appDetails.data.extraConfig.projectName, row);
+            });
+          }
+        }
+      })
+    );
     this.activeElements.map(el => {
       el.row.setReadOnly = true;
       el.element.blur();
     })
   }
 
+  sendRequestToRename(projectName: string, row: any) {
+    this.webContainerService.renameWebContainerFile(projectName, row).then(() => {
+      console.log('File renamed successfully');
+    }).catch((error) => {
+      console.error('Error renaming file:', error);
+    });
+  }
+
   trackByFn(index: number, item: any) {
     return item.data.id;
+  }
+
+  addFile(row: any) {
+    
   }
 
   ngOnDestroy(): void {

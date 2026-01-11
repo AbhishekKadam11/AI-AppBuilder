@@ -208,11 +208,11 @@ export class WebContainerService {
     }
   }
 
-  public renameWebContainerFile(file: any): Promise<void> {
-    const oldPath = file.path;
-    const pathParts = oldPath.split('/');
+  public renameWebContainerFile(projectName: string, file: any): Promise<void> {
+    const oldPath = projectName + '/' + file.path.replaceAll('\\', '/');
+    const pathParts = oldPath.replaceAll('\\', '/').split('/');
     pathParts.pop();
-    const newPath = pathParts.length > 1 ? pathParts.join('/') + '/' + file.name : file.name;
+    const newPath = pathParts.length > 1 ? projectName + '/' + pathParts.join('\/') + '\/' + file.name : file.name;
     if (!this.webcontainerInstance) {
       return Promise.reject('WebContainer not initialized.');
     }
