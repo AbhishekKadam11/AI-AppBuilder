@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, EventEmitter, HostListener, Output, signal, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { NbCardModule, NbContextMenuModule, NbIconModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverDirective, NbPopoverModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule, NbCdkMappingModule, NbInputModule } from '@nebular/theme';
+import { NbCardModule, NbContextMenuModule, NbIconModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverDirective, NbPopoverModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule, NbCdkMappingModule, NbInputModule, NbFormFieldModule } from '@nebular/theme';
 import { FsIconComponent } from '../fs-icon/fs-icon.component';
 import { SocketService } from '../../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -24,7 +24,7 @@ interface FSEntry {
 
 @Component({
   selector: 'app-directory-list',
-  imports: [NbTreeGridModule, NbIconModule, NbCardModule, CommonModule, FsIconComponent, NbMenuModule, NbContextMenuModule, NbPopoverModule, NbCdkMappingModule, NbInputModule, FormsModule],
+  imports: [NbTreeGridModule, NbIconModule, NbCardModule, CommonModule, FsIconComponent, NbMenuModule, NbContextMenuModule, NbPopoverModule, NbCdkMappingModule, NbInputModule, FormsModule, NbFormFieldModule],
   standalone: true,
   templateUrl: './directory-list.component.html',
   styleUrl: './directory-list.component.scss'
@@ -55,6 +55,9 @@ export class DirectoryListComponent {
   @ViewChild('editInput')
   inputElement!: ElementRef;
   private activeElements: any[] = [];
+  addNewInputRow: string = '';
+  insertNewRowIndicator: string = '';
+  private webContainerSubscription: Subscription | undefined;
 
   contextMenuItems: NbMenuItem[] = [
     { title: 'View Details', icon: 'eye-outline' },
@@ -189,6 +192,7 @@ export class DirectoryListComponent {
         this.popover.hide();
       }
     }
+    // this.insertNewRowIndicator = '';
   }
 
   renameDirectory(row: any) {
@@ -250,7 +254,54 @@ export class DirectoryListComponent {
   }
 
   addFile(row: any) {
-    
+    console.log('Add file to row:', row, this.addNewInputRow);
+    // console.log('Add file to this.dataSource:', this.dataSource);
+    this.insertNewRowIndicator = row.name;
+  }
+
+  addNewDirectoryRow(row: any) {
+    console.log('Add new directory to row:', row, this.addNewInputRow);
+    const newRow = {
+      name: this.addNewInputRow,
+      kind: 'file',
+      path: row.data.path,
+    }
+    // row.data.name = this.addNewInputRow;
+    // row.data.setReadOnly = true;
+    this.insertNewRowIndicator = '';
+    console.log('After Add new directory to row:', newRow, this.addNewInputRow);
+      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
+        if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
+          this.messages = { "action": "AddFile", "path": appDetails.data.extraConfig.projectName, "content": newRow };
+          this.socketService.sendMessage(this.directoryManager, this.messages);
+          const serverReply$ = this.socketService?.on(this.directoryManager);
+          if (serverReply$) {
+            this.directorySubscription = serverReply$.subscribe((response: any) => {
+              console.log('Received add new file from server:', response);
+             // this.updateFileSystem(serverReply$, appDetails);
+            });
+          }
+        }
+      })
+  }
+
+  updateFileSystem(serverReply$: any, appObject: any) {
+    this.messages = { "action": "getContainerFiles", "path": appObject.data.extraConfig.projectName };
+    this.socketService.sendMessage(this.directoryManager, this.messages);
+    const webContainerFiles$ = this.socketService?.on(this.directoryManager);
+    if (webContainerFiles$) {
+      this.webContainerSubscription = webContainerFiles$.subscribe((response: any) => {
+        console.log('Received updateFileSystem from server:', response);
+        if (response && response.data && response.data[appObject.data.extraConfig.projectName]) {
+          const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
+          this.dataSource = this.dataSourceBuilder.create(formatedTree);
+          this.webContainerService.mountFiles(response.data[appObject.data.extraConfig.projectName]['directory']);
+          
+        } else {
+          console.log('Unable to receive webContainerFiles from server: Invalid response data');
+        }
+      });
+    }
   }
 
   ngOnDestroy(): void {
