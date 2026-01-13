@@ -44,6 +44,7 @@ export class DirectoryListComponent {
   private subscriptions: Subscription = new Subscription();
   @Output() openFile = new EventEmitter<any>();
   private readonly webContainerFiles: string = 'WebContainerFiles';
+  private readonly refreshDirectory: string = 'RefreshDirectory';
   private isWebContainerActive: boolean = false;
   private appList: any[] = [];
   private currentMaxZIndex = signal(2000);
@@ -143,7 +144,7 @@ export class DirectoryListComponent {
   }
 
   onRowClick(row: any) {
-    if (row && row.data && row.data.kind !== 'directory' && !row.data.setReadOnly) {
+    if (row && row.data && row.data.kind !== 'directory') {
       this.webContainerService.webContainerFileContent(row.data.path.replace(/\\/g, '/')).then((fileData: string) => {
         this.currentMaxZIndex.update(z => z + 1);
         this.windowService.openWindow({
@@ -254,35 +255,31 @@ export class DirectoryListComponent {
   }
 
   addFile(row: any) {
-    console.log('Add file to row:', row, this.addNewInputRow);
-    // console.log('Add file to this.dataSource:', this.dataSource);
+
     this.insertNewRowIndicator = row.name;
   }
 
   addNewDirectoryRow(row: any) {
-    console.log('Add new directory to row:', row, this.addNewInputRow);
     const newRow = {
       name: this.addNewInputRow,
       kind: 'file',
       path: row.data.path,
     }
-    // row.data.name = this.addNewInputRow;
-    // row.data.setReadOnly = true;
     this.insertNewRowIndicator = '';
     console.log('After Add new directory to row:', newRow, this.addNewInputRow);
-      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
-        if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
-          this.messages = { "action": "AddFile", "path": appDetails.data.extraConfig.projectName, "content": newRow };
-          this.socketService.sendMessage(this.directoryManager, this.messages);
-          const serverReply$ = this.socketService?.on(this.directoryManager);
-          if (serverReply$) {
-            this.directorySubscription = serverReply$.subscribe((response: any) => {
-              console.log('Received add new file from server:', response);
-             // this.updateFileSystem(serverReply$, appDetails);
-            });
-          }
+    this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
+      if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
+        this.messages = { "action": "AddFile", "path": appDetails.data.extraConfig.projectName, "content": newRow };
+        this.socketService.sendMessage(this.directoryManager, this.messages);
+        const serverReply$ = this.socketService?.on(this.refreshDirectory);
+        if (serverReply$) {
+          this.directorySubscription = serverReply$.subscribe((response: any) => {
+            console.log('Received add new file from server:', response);
+            this.updateFileSystem(serverReply$, appDetails);
+          });
         }
-      })
+      }
+    })
   }
 
   updateFileSystem(serverReply$: any, appObject: any) {
@@ -296,7 +293,6 @@ export class DirectoryListComponent {
           const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
           this.dataSource = this.dataSourceBuilder.create(formatedTree);
           this.webContainerService.mountFiles(response.data[appObject.data.extraConfig.projectName]['directory']);
-          
         } else {
           console.log('Unable to receive webContainerFiles from server: Invalid response data');
         }
