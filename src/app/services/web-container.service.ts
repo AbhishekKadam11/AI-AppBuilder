@@ -173,7 +173,7 @@ export class WebContainerService {
 
       // 3. Move all files into the new nested folder
       const excludedFolders = ['.pnpm', 'bin', 'local', 'lib'];
-      const excludedFiles = ['bash', 'cp', 'chmod', 'mv', 'cat', 'echo', 'hostname', 'jsh', 'ls', 'mkdir', 'pwd', 'rm', 'tar', 'touch', 'whoami', '.editorconfig', '.pnpmfile.cjs', 'cd', 'alias', 'clear', 'curl', 'false', 'env', 'getconf', 'head', 'sort', 'tail', 'true', 'uptime', 'which'];
+      const excludedFiles = ['bash', 'cp', 'chmod', 'mv', 'cat', 'echo', 'hostname', 'jsh', 'ls', 'mkdir', 'pwd', 'rm', 'tar', 'touch', 'whoami', '.pnpmfile.cjs', 'cd', 'alias', 'clear', 'curl', 'false', 'env', 'getconf', 'head', 'sort', 'tail', 'true', 'uptime', 'which', 'node_modules'];
 
       sourceZip.forEach((relativePath, file) => {
         // 1. Strip the random parent folder 

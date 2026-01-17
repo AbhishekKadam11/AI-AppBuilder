@@ -19,6 +19,7 @@ import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component'
 import { BrowserWindowComponent } from '../browser-window/browser-window.component';
 import { ApiService } from '../services/api.service';
 import { StorageService } from '../services/storage.service';
+import { WebContainerService } from '../services/web-container.service';
 
 type FileEvent = {
   data: string;
@@ -115,6 +116,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     public windowService: WindowService,
     private apiService: ApiService,
     private storageService: StorageService,
+    private webContainerService: WebContainerService,
     private progressControlService: ProgressControlService) {
     // Sidebar menu item click handling
     this.menuService.onItemClick()
@@ -233,8 +235,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     return windows.findIndex(w => w.id === windowId);
   }
 
-  downloadProject() {
-
+  async downloadProject(): Promise<void> {
+    this.appWorkflowService.appObject$.subscribe(async (appDetails: any) => {
+      if (appDetails && appDetails.data.extraConfig.projectName) {
+        await this.webContainerService.downloadProject(appDetails.data.extraConfig.projectName);
+      }
+    })
   }
 
   executeSonar() {
@@ -282,7 +288,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       return; // Prevent opening duplicate window
     }
     this.windowService.openWindow({
-      title: 'Browser',
+      title: 'Web Container',
       contentComponent: BrowserWindowComponent,
       data: {},
       placeholder: 'h-full w-full col-start-2 col-end-2 row-span-2',
@@ -297,13 +303,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     const userData = this.storageService.getItem('user');
     if (userData) {
       const userPreferences = JSON.parse(userData).preferences;
-      this.apiService.post('userPreferences', { userPreferences }).subscribe((response: any)=>{
-      console.log(response);
-    }, (error: any) => {
-      console.error(error);
-    });
+      this.apiService.post('userPreferences', { userPreferences }).subscribe((response: any) => {
+        console.log(response);
+      }, (error: any) => {
+        console.error(error);
+      });
     }
-    
   }
 
 }

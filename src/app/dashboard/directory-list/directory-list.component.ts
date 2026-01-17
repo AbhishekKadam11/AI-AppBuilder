@@ -59,6 +59,7 @@ export class DirectoryListComponent {
   addNewInputRow: string = '';
   insertNewRowIndicator: string = '';
   private webContainerSubscription: Subscription | undefined;
+  private setKind: string = '';
 
   contextMenuItems: NbMenuItem[] = [
     { title: 'View Details', icon: 'eye-outline' },
@@ -86,11 +87,10 @@ export class DirectoryListComponent {
           console.log('Delete');
           break;
         case 'Add Folder':
-          console.log('Add Folder');
+          this.addFileAndFolder(menuItem.item.data, 'directory');
           break;
         case 'Add File':
-          console.log('Add File');
-          this.addFile(menuItem.item.data);
+          this.addFileAndFolder(menuItem.item.data, 'file');
           break;
       }
     });
@@ -254,35 +254,35 @@ export class DirectoryListComponent {
     return item.data.id;
   }
 
-  addFile(row: any) {
-
+  addFileAndFolder(row: any, kind: string) {
     this.insertNewRowIndicator = row.name;
+    this.setKind = kind;
   }
 
   addNewDirectoryRow(row: any) {
     const newRow = {
       name: this.addNewInputRow,
-      kind: 'file',
+      kind: this.setKind,
       path: row.data.path,
     }
     this.insertNewRowIndicator = '';
-    console.log('After Add new directory to row:', newRow, this.addNewInputRow);
+    const setAction = this.setKind === 'file' ? 'AddFile' : 'AddFolder';
     this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
       if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
-        this.messages = { "action": "AddFile", "path": appDetails.data.extraConfig.projectName, "content": newRow };
+        this.messages = { "action": setAction, "path": appDetails.data.extraConfig.projectName, "content": newRow };
         this.socketService.sendMessage(this.directoryManager, this.messages);
         const serverReply$ = this.socketService?.on(this.refreshDirectory);
         if (serverReply$) {
           this.directorySubscription = serverReply$.subscribe((response: any) => {
             console.log('Received add new file from server:', response);
-            this.updateFileSystem(serverReply$, appDetails);
+            this.updateFileSystem(appDetails);
           });
         }
       }
     })
   }
 
-  updateFileSystem(serverReply$: any, appObject: any) {
+  updateFileSystem(appObject: any) {
     this.messages = { "action": "getContainerFiles", "path": appObject.data.extraConfig.projectName };
     this.socketService.sendMessage(this.directoryManager, this.messages);
     const webContainerFiles$ = this.socketService?.on(this.directoryManager);
