@@ -58,6 +58,8 @@ export class ConsoleWindowComponent {
           }
         });
       }
+    } else {
+      console.warn('Socket is not connected. Cannot fetch server logs.');
     }
   }
 

@@ -18,7 +18,7 @@ export class SocketService {
         // Initialize the Socket.IO connection with the server address
         this.isBrowser = isPlatformBrowser(this.platformId)
         if (this.isBrowser) {
-            this.socket = io(environment.socketUrl);
+            this.socket = io(environment.socketUrl, { transports: ['websocket'], autoConnect: true, timeout: 20000 });
         }
     }
 
@@ -47,6 +47,7 @@ export class SocketService {
 
     // Method to send a message to the server
     public sendMessage(event: string, message: any) {
+        if(this.socket)
         this.socket.emit(event, message);
     }
 

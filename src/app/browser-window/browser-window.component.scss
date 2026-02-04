@@ -18,7 +18,7 @@
 }
 
 .header-container {
-  padding-bottom: 10px !important;
+  padding-bottom: 16px !important;
   padding-top: 10px !important;
 }
 
@@ -34,6 +34,10 @@
   font-weight: normal;
   display: flex;
   width: 50%;
+}
+
+::ng-deep nb-card-body {
+  padding: unset !important;
 }
 
 // :host ::ng-deep {

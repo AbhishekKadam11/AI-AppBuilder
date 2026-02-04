@@ -24,8 +24,8 @@
             <div class="content">
                 <div class="iframe-pane">
                     <iframe *ngIf="iframeUrl" [src]="iframeUrl" width="100%" height="100%" #webcontainerIframe></iframe>
-                    <div class="progress-container">
-                        <div class="progress-gif" *ngIf="progressGifUrl && progressGifUrl !== ''">
+                    <div class="progress-container" *ngIf="progressGifUrl && progressGifUrl !== ''">
+                        <div class="progress-gif">
                             <img [src]="progressGifUrl" />
                         </div>
                         <div class="progress-text" *ngIf="progressInfo && progressInfo !== ''">

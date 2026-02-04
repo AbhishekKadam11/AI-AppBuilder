@@ -18,7 +18,6 @@ import { AppWorkflowService } from '../services/app-workflow.service';
 
 export class BrowserWindowComponent implements OnInit, AfterViewInit {
 
-  title = 'My Browser Window';
   isMinimized = false;
   isMaximized = false;
   iframeUrl: SafeResourceUrl | string = "";
