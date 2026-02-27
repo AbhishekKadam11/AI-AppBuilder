@@ -78,19 +78,22 @@ export class MessageSchema {
   }
 
   setComponentMessage(response: any): void {
-    const result = response.flatMap((ele: any) => {
+    if (!response.data || !response.data.messages) {
+      this.componentDetails = null;
+      return;
+    }
+    const result = response.data.messages.reduce((acc: any[], ele: any) => {
       const { kwargs } = ele;
-
-      // Single-pass condition check
-      if (kwargs?.type === 'ai' && kwargs.tool_calls?.length > 0) {
-        // Return only the specific tools matching the name
-        return kwargs.tool_calls.filter(
-          (tool: any) => tool.name === 'create_angular_component'
-        );
+      console.log("kwargs", kwargs.type);
+      if (kwargs?.type === 'ai' && kwargs.tool_calls) {
+        for (const tool of kwargs.tool_calls) {
+          if (tool.name === 'create_angular_component') {
+            acc.push(tool);
+          }
+        }
       }
-
-      return [];
-    });
+      return acc;
+    }, [] as any[]);
 
     if (result.length > 0) {
       this.componentDetails = result[result.length - 1];
