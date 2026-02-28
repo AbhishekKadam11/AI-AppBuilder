@@ -46,10 +46,12 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     this.subscriptions.add(
       this.webContainerService.iframeUrl$.subscribe(url => {
         if (url) {
-          const path = this.appObject.data.extraConfig.path ? `/${this.appObject.data.extraConfig.path}` : '';
-          this.containerUrl = url;
-          this.appUrl = this.placeholderUrl + path;
-          this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url+path);
+          const path = this.appObject.data.extraConfig.routePath ? `/${this.appObject.data.extraConfig.routePath}` : '';
+          console.log('Received iframe path from WebContainerService:', path);
+          // this.containerUrl = url;
+          // this.appUrl = this.placeholderUrl + path;
+          this.appUrl = url + path;
+          this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.appUrl);
         }
       })
     );
@@ -123,16 +125,15 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   }
 
   openUrl(): void {
-
+    if (this.appUrl) {
+      this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.appUrl);
+      window.open(this.appUrl, '_blank');
+    }
   }
 
   navigateToUrl(): void {
     if (this.appUrl) {
-      const url = new URL(this.appUrl);
-      const pathName = url.pathname;
-      const containerUrl = new URL(this.containerUrl);
-      this.containerUrl = containerUrl.origin + pathName;
-      this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.containerUrl);
+      this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.appUrl);
     }
   }
 

@@ -47,8 +47,12 @@ export class ChatShowcaseComponent implements AfterViewInit {
           this.chatSubscription = serverReply$.subscribe((response: any) => {
             console.log('Received chatSource from server:', response);
             serverMessage.setServerMessage(response);
+            serverMessage.setComponentMessage(response);
             this.messages.update(currentItems => [...new Set([...currentItems, serverMessage.getMessage()])]);
-            response.data.uiMessages = this.messages();
+            if (response.data) {
+              response.data.uiMessages = this.messages();
+              response.data.extraConfig = serverMessage.componentDetails;
+            }
             this.appWorkflowService.processState('appRecived', response);
           }, (error) => {
             console.error("Received chatSource error from server:", error)
@@ -83,14 +87,14 @@ export class ChatShowcaseComponent implements AfterViewInit {
     let payload: any = {
       data: this.messages(),
     };
-     this.droppedFiles = [];
-    if (this.appObject && this.appObject.data.extraConfig.projectName) { 
+    this.droppedFiles = [];
+    if (this.appObject && this.appObject.data.extraConfig.projectName) {
       payload.projectName = this.appObject.data.extraConfig.projectName;
-      payload.path = this.appObject.data.extraConfig.path;
+      payload.path = this.appObject.data.extraConfig.routePath;
       payload.chat_history = this.appObject.data.chat_history;
     }
 
-   this.socketService.sendMessage(this.chatSource, payload);
+    this.socketService.sendMessage(this.chatSource, payload);
   }
 
   fileOverEvent(event: any) {

@@ -84,19 +84,18 @@ export class MessageSchema {
     }
     const result = response.data.messages.reduce((acc: any[], ele: any) => {
       const { kwargs } = ele;
-      console.log("kwargs", kwargs.type);
       if (kwargs?.type === 'ai' && kwargs.tool_calls) {
         for (const tool of kwargs.tool_calls) {
           if (tool.name === 'create_angular_component') {
+            delete tool.args.generatedCode;
             acc.push(tool);
           }
         }
       }
       return acc;
     }, [] as any[]);
-
     if (result.length > 0) {
-      this.componentDetails = result[result.length - 1];
+      this.componentDetails = result[result.length - 1].args;
     }
   }
 

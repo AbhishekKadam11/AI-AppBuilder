@@ -1,39 +1,41 @@
-<div class="card-window" >
-    <nb-card class="browser-window-card">
-        <nb-card-header class="header-container">
-            <div class="title-bar">
-                <div class="">
-                    <button nbButton ghost><nb-icon icon="arrow-ios-back-outline"></nb-icon></button>
-                    <button nbButton ghost><nb-icon icon="arrow-ios-forward-outline"></nb-icon></button>
-                </div>
-                <div class="window-url">
-                    <input nbInput type="text" placeholder="http://" fullWidth [(ngModel)]="appUrl" />
-                    <button nbButton ghost (click)="navigateToUrl()" (keyup.enter)="navigateToUrl()"><nb-icon
-                            icon="corner-down-left-outline"></nb-icon></button>
-                </div>
-                <!-- <div class="">
+<div class="card-window">
+  <nb-card class="browser-window-card">
+    <nb-card-header class="header-container">
+      <div class="title-bar">
+        <div class="">
+          <button nbButton ghost><nb-icon icon="arrow-ios-back-outline"></nb-icon></button>
+          <button nbButton ghost><nb-icon icon="arrow-ios-forward-outline"></nb-icon></button>
+        </div>
+        <div class="window-url p-1">
+          <input nbInput type="text" placeholder="http://" fullWidth [(ngModel)]="appUrl" />
+          <button nbButton ghost (click)="navigateToUrl()" (keyup.enter)="navigateToUrl()"><nb-icon
+              icon="corner-down-left-outline"></nb-icon></button>
+          <button nbButton ghost (click)="openUrl()"><nb-icon
+              icon="external-link-outline"></nb-icon></button>
+        </div>
+        <!-- <div class="">
                     <button nbButton ghost><nb-icon icon="minus-outline"></nb-icon></button>
                     <button nbButton ghost><nb-icon icon="square-outline"></nb-icon></button>
                     <button nbButton ghost status="danger"><nb-icon icon="close-square-outline"></nb-icon></button>
                 </div> -->
+      </div>
+    </nb-card-header>
+    <nb-card-body>
+      <!-- Content to be displayed within the window -->
+      <!-- <ng-content></ng-content> -->
+      <div class="content">
+        <div class="iframe-pane">
+          <iframe *ngIf="iframeUrl" [src]="iframeUrl" width="100%" height="100%" #webcontainerIframe></iframe>
+          <div class="progress-container" *ngIf="progressGifUrl && progressGifUrl !== ''">
+            <div class="progress-gif">
+              <img [src]="progressGifUrl" />
             </div>
-        </nb-card-header>
-        <nb-card-body>
-            <!-- Content to be displayed within the window -->
-            <!-- <ng-content></ng-content> -->
-            <div class="content">
-                <div class="iframe-pane">
-                    <iframe *ngIf="iframeUrl" [src]="iframeUrl" width="100%" height="100%" #webcontainerIframe></iframe>
-                    <div class="progress-container" *ngIf="progressGifUrl && progressGifUrl !== ''">
-                        <div class="progress-gif">
-                            <img [src]="progressGifUrl" />
-                        </div>
-                        <div class="progress-text" *ngIf="progressInfo && progressInfo !== ''">
-                            <span class="text-hint">{{progressInfo}}</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="progress-text" *ngIf="progressInfo && progressInfo !== ''">
+              <span class="text-hint">{{progressInfo}}</span>
             </div>
-        </nb-card-body>
-    </nb-card>
+          </div>
+        </div>
+      </div>
+    </nb-card-body>
+  </nb-card>
 </div>
