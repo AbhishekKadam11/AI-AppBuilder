@@ -51,8 +51,12 @@ export class ChatShowcaseComponent implements AfterViewInit {
             this.messages.update(currentItems => [...new Set([...currentItems, serverMessage.getMessage()])]);
             if (response.data) {
               response.data.uiMessages = this.messages();
+              if (response.data.extraConfig && response.data.extraConfig.projectName && serverMessage.componentDetails.projectName !== response.data.extraConfig.projectName) {
+                delete serverMessage.componentDetails.projectName;
+              }
               response.data.extraConfig = serverMessage.componentDetails;
             }
+            console.log("response.data.extraConfig", response.data.extraConfig)
             this.appWorkflowService.processState('appRecived', response);
           }, (error) => {
             console.error("Received chatSource error from server:", error)
@@ -88,6 +92,7 @@ export class ChatShowcaseComponent implements AfterViewInit {
       data: this.messages(),
     };
     this.droppedFiles = [];
+    debugger
     if (this.appObject && this.appObject.data.extraConfig.projectName) {
       payload.projectName = this.appObject.data.extraConfig.projectName;
       payload.path = this.appObject.data.extraConfig.routePath;

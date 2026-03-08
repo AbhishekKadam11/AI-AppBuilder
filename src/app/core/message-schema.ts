@@ -86,7 +86,7 @@ export class MessageSchema {
       const { kwargs } = ele;
       if (kwargs?.type === 'ai' && kwargs.tool_calls) {
         for (const tool of kwargs.tool_calls) {
-          if (tool.name === 'create_angular_component') {
+          if (tool.name === 'create_angular_component' || tool.name === 'writeFileContentTool') {
             delete tool.args.generatedCode;
             acc.push(tool);
           }

@@ -13,7 +13,7 @@
 <div class="message-row">
     <input nbInput fullWidth [status]="getInputStatus()" (focus)="inputFocus = true" (blur)="inputFocus = false"
         (mouseenter)="inputHover = true" (mouseleave)="inputHover = false" [(ngModel)]="message"
-        (ngModelChange)="onModelChange($event)" [class.with-button]="showButton" type="text" maxlength="3000"
+        (ngModelChange)="onModelChange($event)" [class.with-button]="showButton" type="textarea" maxlength="5000"
         placeholder="{{ fileOver ? dropFilePlaceholder : messagePlaceholder }}" (keyup.enter)="sendMessage()" />
     <button nbButton ghost class="floating-attach-btn" (click)="fileInput.click()">
         <nb-icon icon="attach-2-outline"></nb-icon>
