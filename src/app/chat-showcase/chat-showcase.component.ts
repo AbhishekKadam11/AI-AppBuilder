@@ -54,7 +54,9 @@ export class ChatShowcaseComponent implements AfterViewInit {
               if (response.data.extraConfig && response.data.extraConfig.projectName && serverMessage.componentDetails.projectName !== response.data.extraConfig.projectName) {
                 delete serverMessage.componentDetails.projectName;
               }
-              response.data.extraConfig = serverMessage.componentDetails;
+              if (serverMessage.componentDetails.projectName) {
+                response.data.extraConfig = serverMessage.componentDetails;
+              }
             }
             console.log("response.data.extraConfig", response.data.extraConfig)
             this.appWorkflowService.processState('appRecived', response);
@@ -92,7 +94,6 @@ export class ChatShowcaseComponent implements AfterViewInit {
       data: this.messages(),
     };
     this.droppedFiles = [];
-    debugger
     if (this.appObject && this.appObject.data.extraConfig.projectName) {
       payload.projectName = this.appObject.data.extraConfig.projectName;
       payload.path = this.appObject.data.extraConfig.routePath;
