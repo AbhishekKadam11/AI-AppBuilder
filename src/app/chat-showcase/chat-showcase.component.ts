@@ -54,7 +54,7 @@ export class ChatShowcaseComponent implements AfterViewInit {
               if (response.data.extraConfig && response.data.extraConfig.projectName && serverMessage.componentDetails.projectName !== response.data.extraConfig.projectName) {
                 delete serverMessage.componentDetails.projectName;
               }
-              if (serverMessage.componentDetails.projectName) {
+              if (serverMessage.componentDetails && serverMessage.componentDetails.projectName) {
                 response.data.extraConfig = serverMessage.componentDetails;
               }
             }
@@ -90,14 +90,20 @@ export class ChatShowcaseComponent implements AfterViewInit {
       files: this.droppedFiles
     });
     this.messages.update(currentItems => [...currentItems, this.messageSchema.getMessage()]);
+
+    this.droppedFiles = [];
     let payload: any = {
       data: this.messages(),
     };
-    this.droppedFiles = [];
+
+    if (payload.data.length === 0) {
+      payload.thread_id = new Date().getTime();
+    }
+
     if (this.appObject && this.appObject.data.extraConfig.projectName) {
       payload.projectName = this.appObject.data.extraConfig.projectName;
       payload.path = this.appObject.data.extraConfig.routePath;
-      payload.chat_history = this.appObject.data.chat_history;
+      payload.chat_history = this.appObject.data.messages;
     }
 
     this.socketService.sendMessage(this.chatSource, payload);

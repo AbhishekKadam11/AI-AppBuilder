@@ -3,8 +3,8 @@
     <nb-card-header class="header-container">
       <div class="title-bar">
         <div class="">
-          <button nbButton ghost><nb-icon icon="arrow-ios-back-outline"></nb-icon></button>
-          <button nbButton ghost><nb-icon icon="arrow-ios-forward-outline"></nb-icon></button>
+          <button nbButton ghost (click)="navigateToBack()"><nb-icon icon="arrow-ios-back-outline"></nb-icon></button>
+          <button nbButton ghost (click)="navigateToForward()"><nb-icon icon="arrow-ios-forward-outline"></nb-icon></button>
         </div>
         <div class="window-url p-1">
           <input nbInput type="text" placeholder="http://" fullWidth [(ngModel)]="appUrl" />

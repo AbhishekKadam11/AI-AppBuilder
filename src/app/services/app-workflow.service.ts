@@ -28,22 +28,22 @@ export class AppWorkflowService {
   // setAppObjInLocalStorage(appObject: any): void {
   //   this.storageService.setItem('appObject', JSON.stringify(appObject));
   // }
+
   saveAppObjInLocalStorage(appDetails: any): void {
     const appObject = this.storageService.getItem('appObject');
     if (appObject) {
       const appList = JSON.parse(appObject);
-      if (appList && Array.isArray(appList)) {
-        const userAppIndex = appList.findIndex(app => app.data.extraConfig.projectName === appDetails.data.extraConfig.projectName);
-        if (userAppIndex === -1) {
-          appList.push(appDetails);
-          return this.storageService.setItem('appObject', JSON.stringify(appList));
-        } else if (userAppIndex !== -1) {
-          appList.splice(userAppIndex, 1, appDetails);
-          return this.storageService.setItem('appObject', JSON.stringify(appList));
-        }
+      const appIndex = appList?.findIndex(( app: any) => app.data.extraConfig.projectName === appDetails.data.extraConfig.projectName);
+      if (appIndex === -1) {
+        // appDetails.thread_id = new Date().getTime();
+        appList?.push(appDetails);
+      } else if (appIndex !== -1) {
+        appList?.splice(appIndex, 1, appDetails);
       }
+      this.storageService.setItem('appObject', JSON.stringify(appList));
+    } else {
+      this.storageService.setItem('appObject', JSON.stringify([appDetails]));
     }
-    return this.storageService.setItem('appObject', JSON.stringify([appDetails]));
   }
 
   fetchAppObjFromLocalStorage() {

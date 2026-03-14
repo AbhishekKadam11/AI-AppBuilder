@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NbButtonModule, NbCardModule, NbIconModule, NbInputModule, NbLayoutModule } from "@nebular/theme";
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -32,7 +32,9 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   public appUrl: string | null = null;
   placeholderUrl: string = 'https://webcontainer.io';
   private containerUrl: string = '';
-  private appObject: any = {}
+  private appObject: any = {};
+  @ViewChild('webcontainerIframe', { static: false }) iframeRef!: ElementRef<HTMLIFrameElement>;
+
 
   constructor(private webContainerService: WebContainerService,
     private progressControlService: ProgressControlService,
@@ -134,6 +136,20 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   navigateToUrl(): void {
     if (this.appUrl) {
       this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.appUrl);
+    }
+  }
+
+  navigateToBack(): void {
+    const iframeWindow = this.iframeRef.nativeElement.contentWindow;
+    if (iframeWindow) {
+      iframeWindow.history.back();
+    }
+  }
+
+  navigateToForward(): void {
+    const iframeWindow = this.iframeRef.nativeElement.contentWindow;
+    if (iframeWindow) {
+      iframeWindow.history.forward();
     }
   }
 
