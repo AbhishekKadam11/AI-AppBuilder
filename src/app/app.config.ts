@@ -10,11 +10,11 @@ import { UserService } from './services/users.service';
 import { provideMonacoEditor } from 'ngx-monaco-editor-v2';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { AQUAMARINE_THEME, GOLDEN_DARK_THEME } from '../themes/custom.theme';
-
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }), 
+    provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     importProvidersFrom(
       NbThemeModule.forRoot({ name: 'default' },
@@ -26,6 +26,7 @@ export const appConfig: ApplicationConfig = {
       NbToastrModule.forRoot(),
       NbEvaIconsModule,
     ),
+    provideCharts(withDefaultRegisterables()),
     provideHttpClient(withFetch()),
     provideAnimations(),
     provideClientHydration(withEventReplay()),

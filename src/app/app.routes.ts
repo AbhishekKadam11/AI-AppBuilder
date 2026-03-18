@@ -4,6 +4,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { WorkbenchComponent } from './dashboard/workbench/workbench.component';
 import { ExtensionsComponent } from './settings/extensions/extensions.component';
 import { PreferencesComponent } from './settings/preferences/preferences.component';
+import { AnalyticsComponent } from './analytics/analytics.component';
 
 export const routes: Routes = [
   {
@@ -14,11 +15,12 @@ export const routes: Routes = [
         children: [
           { path: '', component: ExtensionsComponent, title: 'Extensions' },
           { path: 'preferences', component: PreferencesComponent, title: 'Preferences' },
+          { path: 'analytics', component: AnalyticsComponent, title: 'Analytics' },
           // { path: '', redirectTo: 'extensions', pathMatch: 'full' },
         ]
       },
       { path: '', component: WorkbenchComponent, title: 'Workbench' },
     ],
-  }, 
+  },
   { path: '', redirectTo: 'workspace', pathMatch: 'full' },
 ];
