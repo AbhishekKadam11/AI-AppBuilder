@@ -1,0 +1,11 @@
+<nb-card>
+  <nb-card-header>{{data?.appName}}</nb-card-header>
+  <nb-card-body>
+    <div class="chart-container" style="position: relative; height:40vh; width:100%">
+      <canvas baseChart [data]="doughnutChartData" [type]="doughnutChartType" [options]="doughnutChartOptions"
+        [plugins]="chartPlugins">
+      </canvas>
+    </div>
+  </nb-card-body>
+</nb-card>
+

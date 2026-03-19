@@ -28,7 +28,7 @@ export class SettingsComponent {
      {
       title: 'Developer',
       icon: 'layers-outline',
-      link: '/workspace/settings/developer'
+      link: '/workspace/settings/analytics'
     },
     {
       title: 'Close',

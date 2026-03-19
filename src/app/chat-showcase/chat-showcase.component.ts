@@ -57,6 +57,10 @@ export class ChatShowcaseComponent implements AfterViewInit {
               if (serverMessage.componentDetails && serverMessage.componentDetails.projectName) {
                 response.data.extraConfig = serverMessage.componentDetails;
               }
+              if (!response.data.extraConfig) {
+                response.data.extraConfig = {};
+                response.data.extraConfig.projectName = new Date().getTime().toString();
+              }
             }
             console.log("response.data.extraConfig", response.data.extraConfig)
             this.appWorkflowService.processState('appRecived', response);
