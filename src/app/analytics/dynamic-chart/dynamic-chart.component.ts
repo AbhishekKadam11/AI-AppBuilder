@@ -1,9 +1,11 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { ChartConfiguration, ChartData, ChartEvent, ChartOptions, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
-import { NbButtonModule, NbCardModule } from "@nebular/theme";
-// import { MatButton } from '@angular/material/button';
-// import { ChartHostComponent } from '../chart-host/chart-host.component';
+import { NbButtonModule, NbCardModule, NbJSThemesRegistry, NbThemeService } from "@nebular/theme";
+import { JsonPipe } from '@angular/common';
+import { takeUntil } from 'rxjs/internal/operators/takeUntil';
+import { Subject } from 'rxjs/internal/Subject';
+import  * as customThemes  from '../../../themes/custom.theme';
 
 const centerTextPlugin = {
   id: 'centerText',
@@ -42,17 +44,20 @@ const centerTextPlugin = {
   imports: [BaseChartDirective, NbButtonModule, NbButtonModule, NbCardModule],
 })
 export class DynamicChartComponent implements OnInit, AfterViewInit {
+
   @ViewChild(BaseChartDirective) chart: BaseChartDirective | undefined;
-  // @Input() data: any;
+  private destroy$ = new Subject<void>();
+  appAnalytics: any = {};
 
   @Input() set data(data: any) {
     if (data) {
+      this.appAnalytics = data;
       this.updateChartData(data);
     }
   }
 
 
-  constructor() {
+  constructor(private themeService: NbThemeService, private nbThemesRegistry: NbJSThemesRegistry,) {
 
   }
 
@@ -61,10 +66,41 @@ export class DynamicChartComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    this.themeService.onThemeChange()
+      // .subscribe((theme: any) => {
+      //   // this.themeName = theme.name;
+      //   console.log(`The current theme is: ${JSON.stringify(theme.name)}, customThemes: ${JSON.stringify(customThemes)} `);
+      //     const themeDetails = this.nbThemesRegistry.get('dark');
+      // console.log("themeDetails",themeDetails);
+      // });
 
+      this.themeService.getJsTheme()
+  .subscribe((theme: any) => {
+ //   const primaryColor = theme.variables.primary;
+    console.log('Theme Variables:', theme);
+  });
+
+    //  this.themeService.onThemeChange()
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe(config => {
+    //     const colors: any = config.variables; // Nebular's JS color variables
+    //     console.log("config",config)
+    //     this.doughnutChartOptions = {
+    //       responsive: true,
+    //       plugins: {
+    //         legend: {
+    //           labels: {
+    //             // 'fgText' is Nebular's standard foreground text variable
+    //             color: colors.fgText,
+    //           //  font: { size: 14 }
+    //           }
+    //         }
+    //       }
+    //     };
+    //   });
   }
 
- public doughnutChartType: ChartType = 'doughnut';
+  public doughnutChartType: ChartType = 'doughnut';
 
   // 2. Register the plugin in a public array to bind in HTML
   public chartPlugins = [centerTextPlugin];
@@ -96,6 +132,20 @@ export class DynamicChartComponent implements OnInit, AfterViewInit {
             return label + value + ' (' + percentage + ')';
           }
         }
+      },
+      subtitle: {
+        display: true,
+        text: 'Chart Subtitle',
+        color: 'blue',
+        font: {
+          size: 14,
+          family: 'tahoma',
+          weight: 'normal',
+          style: 'italic'
+        },
+        padding: {
+          bottom: 10
+        }
       }
     }
   };
@@ -120,6 +170,26 @@ export class DynamicChartComponent implements OnInit, AfterViewInit {
 
     // Update the text to be displayed in the center
     //@ts-ignore
-    this.doughnutChartData.datasets[0].totalText =  data.metadata.usage.total_tokens.toString();
+    this.doughnutChartData.datasets[0].totalText = data.metadata.usage.total_tokens.toString();
+  }
+
+  updateChartConfig(themeVars: any) {
+    console.log("themeVars-->", themeVars);
+    this.doughnutChartOptions = {
+      scales: {
+        //   xAxes: [{ ticks: { fontColor: themeVars.colorBasic600 } }],
+        //   yAxes: [{ ticks: { fontColor: themeVars.colorBasic600 } }]
+        // },
+        legend: {
+          // labels: { fontColor: themeVars.colorBasic600 }
+        }
+      }
+      // If using ng2-charts, trigger a chart update here if necessary
+    }
+  }
+
+   ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

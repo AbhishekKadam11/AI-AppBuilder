@@ -1,5 +1,5 @@
 <nb-card>
-  <nb-card-header>{{data?.appName}}</nb-card-header>
+  <nb-card-header>{{ appAnalytics?.appName }}</nb-card-header>
   <nb-card-body>
     <div class="chart-container" style="position: relative; height:40vh; width:100%">
       <canvas baseChart [data]="doughnutChartData" [type]="doughnutChartType" [options]="doughnutChartOptions"
@@ -8,4 +8,3 @@
     </div>
   </nb-card-body>
 </nb-card>
-
