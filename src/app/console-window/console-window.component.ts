@@ -51,7 +51,6 @@ export class ConsoleWindowComponent {
       const serverReply$ = this.socketService?.on(this.userLogService);
       if (serverReply$) {
         this.serverLogSubscription = serverReply$.subscribe((response: any) => {
-          console.log('Received serverLogSubscription from server:', response);
           if (response.data == undefined || response.data.length == 0) return;
           if (!this.collectionLogs.includes(`[server] ${response.data}`)) {
             this.collectionLogs.push(`[server] ${response.data}`)

@@ -1,11 +1,14 @@
-<nb-card>
-  <nb-card-header>Analytics</nb-card-header>
-  <nb-card-body>
-    <div class="flex flex-wrap gap-4">
-      @for (appData of appDetails; track i; let i = $index) {
-      <app-dynamic-chart [data]="appData"></app-dynamic-chart>
-      }
-
-    </div>
-  </nb-card-body>
-</nb-card>
+<nb-layout>
+  <nb-layout-column style="height: 100vh; padding: 0;">
+    <nb-card class="h-5/6 ">
+      <nb-card-header>Analytics</nb-card-header>
+      <nb-card-body>
+        <div class="flex flex-wrap gap-4 h-fit overflow-y-auto">
+          @for (appData of appDetails; track i; let i = $index) {
+          <app-dynamic-chart [data]="appData"></app-dynamic-chart>
+          }
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>

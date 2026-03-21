@@ -1,11 +1,8 @@
-import { AfterViewInit, ChangeDetectorRef, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { ChartConfiguration, ChartData, ChartEvent, ChartOptions, ChartType } from 'chart.js';
+import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { ChartData, ChartOptions, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { NbButtonModule, NbCardModule, NbJSThemesRegistry, NbThemeService } from "@nebular/theme";
-import { JsonPipe } from '@angular/common';
-import { takeUntil } from 'rxjs/internal/operators/takeUntil';
 import { Subject } from 'rxjs/internal/Subject';
-import  * as customThemes  from '../../../themes/custom.theme';
 
 const centerTextPlugin = {
   id: 'centerText',
@@ -28,8 +25,8 @@ const centerTextPlugin = {
     // We cast to 'any' here to avoid TypeScript errors regarding custom properties
     var text = (chart.data.datasets[0] as any).totalText;
 
-    var textX = Math.round((width - ctx.measureText(text).width) / 2) - 1.5;
-    var textY = height / 2 - 10;
+    var textX = Math.round((width - ctx.measureText(text).width) / 2) - 1;
+    var textY = height / 2 + 30;
 
     ctx.fillText(text, textX, textY);
     ctx.save();
@@ -67,37 +64,10 @@ export class DynamicChartComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.themeService.onThemeChange()
-      // .subscribe((theme: any) => {
-      //   // this.themeName = theme.name;
-      //   console.log(`The current theme is: ${JSON.stringify(theme.name)}, customThemes: ${JSON.stringify(customThemes)} `);
-      //     const themeDetails = this.nbThemesRegistry.get('dark');
-      // console.log("themeDetails",themeDetails);
-      // });
-
-      this.themeService.getJsTheme()
-  .subscribe((theme: any) => {
- //   const primaryColor = theme.variables.primary;
-    console.log('Theme Variables:', theme);
-  });
-
-    //  this.themeService.onThemeChange()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(config => {
-    //     const colors: any = config.variables; // Nebular's JS color variables
-    //     console.log("config",config)
-    //     this.doughnutChartOptions = {
-    //       responsive: true,
-    //       plugins: {
-    //         legend: {
-    //           labels: {
-    //             // 'fgText' is Nebular's standard foreground text variable
-    //             color: colors.fgText,
-    //           //  font: { size: 14 }
-    //           }
-    //         }
-    //       }
-    //     };
-    //   });
+      .subscribe((theme: any) => {
+        const themeDetails = this.nbThemesRegistry.get(theme.name);
+        this.updateChartConfig(themeDetails.variables);
+      });
   }
 
   public doughnutChartType: ChartType = 'doughnut';
@@ -132,20 +102,6 @@ export class DynamicChartComponent implements OnInit, AfterViewInit {
             return label + value + ' (' + percentage + ')';
           }
         }
-      },
-      subtitle: {
-        display: true,
-        text: 'Chart Subtitle',
-        color: 'blue',
-        font: {
-          size: 14,
-          family: 'tahoma',
-          weight: 'normal',
-          style: 'italic'
-        },
-        padding: {
-          bottom: 10
-        }
       }
     }
   };
@@ -174,21 +130,32 @@ export class DynamicChartComponent implements OnInit, AfterViewInit {
   }
 
   updateChartConfig(themeVars: any) {
-    console.log("themeVars-->", themeVars);
     this.doughnutChartOptions = {
-      scales: {
-        //   xAxes: [{ ticks: { fontColor: themeVars.colorBasic600 } }],
-        //   yAxes: [{ ticks: { fontColor: themeVars.colorBasic600 } }]
-        // },
+      plugins: {
         legend: {
-          // labels: { fontColor: themeVars.colorBasic600 }
+          labels: {
+            color: themeVars['text-basic-color'],
+          },
+        },
+        subtitle: {
+          display: true,
+          text: `Model: ${this.appAnalytics.metadata.response.model_name} | Provider: ${this.appAnalytics.metadata.response.model_provider}`,
+          color: themeVars['text-basic-color'],
+          font: {
+            size: 14,
+            family: 'sans-serif',
+            weight: 'bold',
+            style: 'italic'
+          },
+          padding: {
+            bottom: 10
+          }
         }
       }
-      // If using ng2-charts, trigger a chart update here if necessary
-    }
+    };
   }
 
-   ngOnDestroy() {
+  ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
