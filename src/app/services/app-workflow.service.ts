@@ -35,9 +35,9 @@ export class AppWorkflowService {
       const appList = JSON.parse(appObject);
       const appIndex = appList?.findIndex(( app: any) => app.data.extraConfig.projectName === appDetails.data.extraConfig.projectName);
       if (appIndex === -1) {
-        // appDetails.thread_id = new Date().getTime();
         appList?.push(appDetails);
       } else if (appIndex !== -1) {
+        appDetails.data.messages.concat(appList[appIndex].data.messages);
         appList?.splice(appIndex, 1, appDetails);
       }
       this.storageService.setItem('appObject', JSON.stringify(appList));

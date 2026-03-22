@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router, RouterModule } from "@angular/router";
-import { NbContextMenuModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbSidebarModule } from '@nebular/theme';
+import { NbContextMenuModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbSidebarModule, NbSidebarService } from '@nebular/theme';
 
 @Component({
   selector: 'app-settings',
@@ -41,6 +41,7 @@ export class SettingsComponent {
   constructor(
     private router: Router,
     private menuService: NbMenuService,
+    private sidebarService: NbSidebarService,
   ) {
     // this.menuService.onItemClick()
     //   .pipe(
@@ -70,5 +71,7 @@ export class SettingsComponent {
     //         console.log(`No action defined for menu item: ${item.title}`);
     //     }
     //   });
+
+    this.sidebarService.collapse('dynamicSidebar');
   }
 }

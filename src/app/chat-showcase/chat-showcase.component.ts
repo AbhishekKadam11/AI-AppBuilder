@@ -57,6 +57,12 @@ export class ChatShowcaseComponent implements AfterViewInit {
               if (serverMessage.componentDetails && serverMessage.componentDetails.projectName) {
                 response.data.extraConfig = serverMessage.componentDetails;
               }
+              if (this.appObject && this.appObject.data.extraConfig && this.appObject.data.extraConfig.projectName) {
+                if (!response.data.extraConfig) {
+                  response.data.extraConfig = {};
+                }
+                response.data.extraConfig.projectName = this.appObject.data.extraConfig.projectName;
+              }
               if (!response.data.extraConfig) {
                 response.data.extraConfig = {};
                 response.data.extraConfig.projectName = new Date().getTime().toString();
