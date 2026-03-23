@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NbActionsModule, NbIconModule, NbMediaBreakpointsService, NbMenuService, NbOptionModule, NbSelectModule, NbSidebarService, NbThemeService, NbUserModule } from '@nebular/theme';
+import { NbActionsModule, NbIconModule, NbJSThemesRegistry, NbMediaBreakpointsService, NbMenuService, NbOptionModule, NbSelectModule, NbSidebarService, NbThemeService, NbUserModule } from '@nebular/theme';
 import { UserData } from '../../../app/core/users';
 import { map, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -50,6 +50,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // private layoutService: LayoutService,
     private storageService: StorageService,
     private appWorkflowService: AppWorkflowService,
+    private nbThemesRegistry: NbJSThemesRegistry,
     private breakpointService: NbMediaBreakpointsService) {
   }
 
@@ -76,6 +77,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
       )
       .subscribe(themeName => this.currentTheme = themeName);
 
+    //  const theme = this.nbThemesRegistry.get(this.currentTheme);
+    //     console.log("theme",theme);
+    this.registerThemeVariables();
     this.themePreference();
     this.appList = this.appWorkflowService.fetchAppObjFromLocalStorage();
   }
@@ -105,6 +109,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     }
     return;
+  }
+
+  registerThemeVariables() {
+    for (const theme of this.themes) {
+      this.nbThemesRegistry.register({
+        name: theme.value, // or 'dark', 'cosmic', etc.
+        variables: theme.variables
+      }, theme.name, theme.name);
+    }
   }
 
   changeAppObj(appObject: any) {

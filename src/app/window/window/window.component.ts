@@ -27,18 +27,18 @@ export class WindowComponent {
   }
 
   minimize(): void {
-    console.log('Minimize called for window ID:', this.window.title);
+    // console.log('Minimize called for window ID:', this.window.title);
     this.windowService.minimizeWindow(this.window.id);
   }
 
   maximize(): void {
-    console.log('Maximize called for window ID:', this.window.title);
+    // console.log('Maximize called for window ID:', this.window.title);
     this.window.placeholder = this.windowService.windowPlaceholderMap[this.window.title];
     this.windowService.maximizeWindow(this.window.id);
   }
 
   restore(): void {
-    console.log('Restore called for window ID:', this.window.title);
+    // console.log('Restore called for window ID:', this.window.title);
     this.window.placeholder = 'w-full h-full overflow-hidden absolute';
     this.windowService.restoreWindow(this.window.id);
   }
@@ -47,9 +47,9 @@ export class WindowComponent {
     this.windowService.closeWindow(this.window.id);
   }
 
-@HostListener('mousedown')  
+@HostListener('mousedown')
   onWindowClick(): void {
-    console.log('onWindowClick called for window ID:', this.window.id);
+    // console.log('onWindowClick called for window ID:', this.window.id);
     this.windowService.bringToFront(this.window.id);
   }
 }
