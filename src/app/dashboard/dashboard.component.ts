@@ -13,7 +13,7 @@ import { AppWorkflowService } from '../services/app-workflow.service';
 import { WindowService } from '../services/window.service';
 import { WindowComponent } from '../window/window/window.component';
 import { FooterComponent } from "../common/footer/footer.component";
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, RouterState } from '@angular/router';
 import { ConsoleWindowComponent } from '../console-window/console-window.component';
 import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
 import { BrowserWindowComponent } from '../browser-window/browser-window.component';
@@ -25,6 +25,11 @@ type FileEvent = {
   data: string;
   success: boolean
 };
+
+type ISocketMessages = {
+  action: string;
+  path: string
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -38,7 +43,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   private readonly directoryManager = 'DirectoryManager';
   private directorySubscription: Subscription | undefined;
-  messages: any = { "action": "getAll", "path": "newTech" };
+  messages: ISocketMessages = { "action": "", "path": "" };
   minimize = true;
   maximize = true;
   fullScreen = true;
@@ -71,6 +76,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     {
       title: 'Chat',
       icon: 'message-circle-outline',
+    },
+    {
+      title: 'Swimlane',
+      icon: 'shuffle-2-outline',
+      link: '/workspace/swimlane',
     },
     {
       title: 'Settings',
@@ -132,6 +142,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             // this.router.navigate(['/']);
             // item.selected = true;
             break;
+          case 'Swimlane':
+
+            // this.router.navigate(['/']);
+            // item.selected = true;
+            break;
           case 'Console':
             //   this.windowService.openWindow('consoleWindow', ConsoleWindowComponent, { title: 'Console', width: '600px', height: '400px' });
             this.openConsoleWindow();
@@ -185,7 +200,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
         if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
           // this.messages = { "action": "getAll", "path": appDetails.projectName };
+          // const state = this.router.routerState.snapshot.url;
+          // if (state === '/workspace') {
           this.isExplorerReady = true;
+          // }
         }
       })
     );
@@ -245,9 +263,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   executeSonar() {
     this.appWorkflowService.webContainerCommandRunner(['npm', 'run', 'test']);
-    setTimeout(() => {
-      this.appWorkflowService.webContainerCommandRunner(['npm', 'run', 'sonar']);
-    }, 15000);
+    // setTimeout(() => {
+    //   this.appWorkflowService.webContainerCommandRunner(['npm', 'run', 'sonar']);
+    // }, 15000);
   }
 
   checkWindowExists(title: string): boolean {

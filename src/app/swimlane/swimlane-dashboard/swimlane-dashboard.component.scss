@@ -1,0 +1,26 @@
+.card-window {
+  height: 94% !important;
+}
+
+.swimlane-window-card {
+  height: inherit !important;
+  padding: 0px !important;
+}
+
+.diagram {
+  display: flex;
+  height: var(--ng-diagram-height);
+  border: var(--ng-diagram-border);
+}
+
+.grid-background {
+  // background-color: var(--ng-diagram-background-color);
+  background-image: var(--ng-diagram-background-image);
+  background-color: black;
+}
+
+.swimlane-window-card {
+  --ngd-diagram-background-color: nb-theme(background-basic-color-1);
+  --ngd-node-stroke-primary-default: nb-theme(color-primary-default);
+  --ngd-node-bg-primary-default: nb-theme(color-primary-default);
+}

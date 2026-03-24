@@ -1,0 +1,18 @@
+<nb-layout data-theme="dark">
+  <nb-layout-column>
+    <div class="card-window">
+      <nb-card class="swimlane-window-card">
+        <nb-card-header class="header-container">
+          Swimlane View
+        </nb-card-header>
+        <nb-card-body class="swimlane-window-card">
+          <ng-diagram-node-resize-adornment >
+            <ng-diagram [model]="model" [config]="config" [nodeTemplateMap]="nodeTemplateMap">
+              <ng-diagram-background config="backgroundConfig" />
+            </ng-diagram>
+          </ng-diagram-node-resize-adornment>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </nb-layout-column>
+</nb-layout>

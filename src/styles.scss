@@ -2,6 +2,8 @@
 @use '@nebular/theme/styles/globals' as *;
 @use "tailwindcss";
 
+@import 'ng-diagram/styles.css';
+
 @include nb-install() {
   @include nb-theme-global();
 
