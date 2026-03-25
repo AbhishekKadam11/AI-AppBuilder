@@ -1,0 +1,61 @@
+<nb-card >
+  <nb-card-header> {{ node().data.appName }}</nb-card-header>
+  <nb-card-body>
+<table [nbTreeGrid]="dataSource" [nbSort]="dataSource" [trackBy]="trackByFn" (sort)="updateSort($event)">
+
+  <tr nbTreeGridRow *nbTreeGridRowDef="let row; columns: allColumns"></tr>
+
+  <ng-container [nbTreeGridColumnDef]="customColumn">
+    <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(customColumn)" *nbTreeGridHeaderCellDef>
+      {{customColumn}}
+    </th>
+    <td nbTreeGridCell *nbTreeGridCellDef="let row; let i = dataIndex" (dblclick)="onRowClick(row)">
+      <div style="display: flex; align-items: center; gap: 10px;" #popoverHost [nbPopover]="popoverContent"
+        nbPopoverTrigger="noop" #popover="nbPopover" nbPopoverPlacement="bottom"
+        (contextmenu)="openOnRightClick($event, popover, row.data)">
+
+        <div class="grid">
+          <!-- Input 1 Wrapper -->
+          <div class="grid grid-cols-[30px_1fr] gap-0.5" *ngIf="!row.isAddNewRow">
+            <div class="w-2.5">
+              <app-fs-icon [kind]="row.data.kind" [expanded]="row.expanded"></app-fs-icon>
+            </div>
+            <div>
+              <input nbInput class="directory-item" [(ngModel)]="row.data[customColumn]"
+                [attr.readonly]="row.data.setReadOnly ? row.data.setReadOnly : null" [id]="row.data[customColumn]"
+                [attr.data-index]="row.data[customColumn]" (focusout)="focusOutInput(row.data)"
+                [ngClass]="{'input-heighlighter': !row.data.setReadOnly}" />
+            </div>
+          </div>
+
+          <!-- Input 2 Wrapper -->
+          <div class="" *ngIf="row.data[customColumn] === insertNewRowIndicator">
+            <input nbInput class="" fieldSize="tiny" [(ngModel)]="addNewInputRow" (keydown.enter)="addNewDirectoryRow(row)" [attr.data-index]="row.data[customColumn]" />
+          </div>
+        </div>
+      </div>
+    </td>
+
+    <ng-template #popoverContent>
+      <nb-card class="directory-menu-card">
+        <nb-card-body class="directory-menu-card-body">
+          <div style="min-width: 150px;">
+            <nb-menu [items]="contextMenuItems" placement="bottom-end"></nb-menu>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </ng-template>
+  </ng-container>
+
+
+  <ng-container *ngFor="let column of defaultColumns; let index = index" [nbTreeGridColumnDef]="column"
+    [showOn]="getShowOn(index)">
+    <!-- <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(column)" *nbTreeGridHeaderCellDef>
+          {{column}}
+        </th> -->
+    <td nbTreeGridCell *nbTreeGridCellDef="let row">{{row.data[column] || '-'}}</td>
+  </ng-container>
+
+</table>
+  </nb-card-body>
+</nb-card>

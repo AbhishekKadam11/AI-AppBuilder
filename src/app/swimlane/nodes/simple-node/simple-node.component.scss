@@ -1,0 +1,55 @@
+:host {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--ngd-node-stroke-primary-default);
+  background-color: var(--ngd-node-bg-primary-default);
+}
+
+.node {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border-radius: 10px;
+
+  &-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    vertical-align: middle;
+    align-items: center;
+    justify-items: center;
+
+    nb-chip {
+      color: white !important;
+    }
+  }
+
+  &-body {
+    font-size: 12px;
+    cursor: help;
+
+    p {
+      width: 180px;
+    }
+
+    nb-expansion-panel {
+      --nb-expansion-header-bg: var(--ngd-node-stroke-primary-default);
+      --nb-expansion-content-bg: var(--ngd-node-stroke-primary-default);
+      --nb-expansion-text-color: var(--ngd-txt-primary-default);
+      --nb-expansion-header-text-color: var(--ngd-txt-primary-default);
+      --nb-expansion-header-icon-color: var(--ngd-txt-primary-default);
+    }
+
+    form {
+      height: 50px;
+      margin-top: 8px;
+
+      nb-form-field {
+        min-width: 120px;
+      }
+    }
+  }
+}
