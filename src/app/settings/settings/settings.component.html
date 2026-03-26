@@ -1,17 +1,17 @@
 <nb-layout withScroll="false" class="app-container">
 
-<nb-sidebar tag="settingDynamicSidebar" *ngIf="isExplorerReady">
-  <!-- <nb-sidebar-header>
-    <div class="explorer-header">
-
-
-    </div>
-  </nb-sidebar-header> -->
-  <nb-menu [items]="SideItems" tag="settingSideMenu"></nb-menu>
-</nb-sidebar>
+  @if (isExplorerReady) {
+    <nb-sidebar tag="settingDynamicSidebar">
+      <!-- <nb-sidebar-header>
+      <div class="explorer-header">
+      </div>
+    </nb-sidebar-header> -->
+    <nb-menu [items]="SideItems" tag="settingSideMenu"></nb-menu>
+  </nb-sidebar>
+}
 
 <nb-layout-column>
-<router-outlet />
+  <router-outlet />
 </nb-layout-column>
 
 </nb-layout>

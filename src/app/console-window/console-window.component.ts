@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { NbButtonModule, NbCardModule, NbIconModule, NbLayoutModule } from '@nebular/theme';
 import { WebContainerService } from '../services/web-container.service';
@@ -8,7 +7,7 @@ import { Subscription } from 'rxjs/internal/Subscription';
 
 @Component({
   selector: 'app-console-window',
-  imports: [NbLayoutModule, NbCardModule, NbIconModule, NbButtonModule, CommonModule, AutoScrollDirective],
+  imports: [NbLayoutModule, NbCardModule, NbIconModule, NbButtonModule, AutoScrollDirective],
   standalone: true,
   templateUrl: './console-window.component.html',
   styleUrl: './console-window.component.scss'

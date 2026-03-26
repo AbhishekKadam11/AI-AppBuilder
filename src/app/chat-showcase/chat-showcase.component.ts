@@ -1,7 +1,6 @@
 import { AfterViewInit, Component, signal, WritableSignal } from '@angular/core';
 import { ChatShowcaseService } from '../services/chat-showcase.service';
 import { NbChatModule, NbIconModule } from '@nebular/theme';
-import { CommonModule, NgFor } from '@angular/common';
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { MessageSchema } from '../core/message-schema';
@@ -13,7 +12,7 @@ import { ChatFormComponent } from './chat-form/chat-form.component';
 @Component({
   selector: 'app-chat-showcase',
   standalone: true,
-  imports: [NbChatModule, NgFor, NbIconModule, CommonModule, ChatFormComponent],
+  imports: [NbChatModule, NbIconModule, ChatFormComponent],
   templateUrl: './chat-showcase.component.html',
   styleUrl: './chat-showcase.component.scss'
 })

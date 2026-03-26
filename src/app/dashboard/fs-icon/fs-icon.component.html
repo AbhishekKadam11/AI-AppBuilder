@@ -1,12 +1,13 @@
-<span *ngIf="isDir(); else fileIcon">
+@if (isDir()) {
+  <span>
     <button nbTreeGridRowToggle class="icon-button">
-        <nb-icon [icon]="expanded ? 'chevron-down-outline' : 'chevron-right-outline'" aria-hidden="true">
-        </nb-icon>
+      <nb-icon [icon]="expanded ? 'chevron-down-outline' : 'chevron-right-outline'" aria-hidden="true">
+      </nb-icon>
     </button>
-</span>
-<ng-template #fileIcon>
-    <nb-icon icon="file-text-outline"></nb-icon>
-</ng-template>
+  </span>
+} @else {
+  <nb-icon icon="file-text-outline"></nb-icon>
+}
 <ng-template #folderIcon>
-    <nb-icon icon="folder-outline"></nb-icon>
+  <nb-icon icon="folder-outline"></nb-icon>
 </ng-template>

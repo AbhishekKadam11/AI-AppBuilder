@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -15,7 +14,7 @@ import { NbButtonModule, NbComponentOrCustomStatus, NbIconModule, NbInputModule 
 
 @Component({
   selector: 'app-chat-form',
-  imports: [NbIconModule, CommonModule, NbInputModule, NbButtonModule, FormsModule],
+  imports: [NbIconModule, NbInputModule, NbButtonModule, FormsModule],
   standalone: true,
   templateUrl: './chat-form.component.html',
   styleUrl: './chat-form.component.scss',
@@ -27,7 +26,7 @@ export class ChatFormComponent {
   inputHover: boolean = false;
   droppedFiles: any[] = [];
   imgDropTypes = ['image/png', 'image/jpeg', 'image/gif'];
-  
+
   /**
    * Send files is uploaded event
    * @type {any}

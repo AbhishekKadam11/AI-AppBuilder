@@ -3,7 +3,6 @@ import { NbActionsModule, NbButtonModule, NbContextMenuModule, NbIconModule, NbL
 import { Subject } from 'rxjs/internal/Subject';
 import { filter } from 'rxjs/internal/operators/filter';
 import { map } from 'rxjs/internal/operators/map';
-import { CommonModule } from '@angular/common';
 import { HeaderComponent } from "../common/header/header.component";
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -34,7 +33,7 @@ type ISocketMessages = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NbLayoutModule, NbSidebarModule, NbIconModule, NbMenuModule, CommonModule, NbActionsModule, HeaderComponent, DirectoryListComponent, WindowComponent, FooterComponent, NbPopoverModule, NbButtonModule, NbContextMenuModule, RouterModule],
+  imports: [NbLayoutModule, NbSidebarModule, NbIconModule, NbMenuModule, NbActionsModule, HeaderComponent, DirectoryListComponent, WindowComponent, FooterComponent, NbPopoverModule, NbButtonModule, NbContextMenuModule, RouterModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })

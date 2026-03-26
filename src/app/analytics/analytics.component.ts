@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
 import { NbButtonModule, NbCardModule, NbIconModule, NbLayoutModule } from '@nebular/theme';
-import { CommonModule } from '@angular/common';
 import { DynamicChartComponent } from './dynamic-chart/dynamic-chart.component';
 import { AppWorkflowService } from '../services/app-workflow.service';
 
 @Component({
   selector: 'app-analytics',
-  imports: [NbCardModule, CommonModule, NbIconModule, NbButtonModule, DynamicChartComponent, NbLayoutModule],
+  imports: [NbCardModule, NbIconModule, NbButtonModule, DynamicChartComponent, NbLayoutModule],
   templateUrl: './analytics.component.html',
   styleUrl: './analytics.component.scss',
 })

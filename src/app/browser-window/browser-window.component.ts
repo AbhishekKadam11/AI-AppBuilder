@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NbButtonModule, NbCardModule, NbIconModule, NbInputModule, NbLayoutModule } from "@nebular/theme";
@@ -11,7 +10,7 @@ import { AppWorkflowService } from '../services/app-workflow.service';
 
 @Component({
   selector: 'app-browser-window',
-  imports: [NbLayoutModule, NbCardModule, NbIconModule, NbButtonModule, NbInputModule, CommonModule, FormsModule],
+  imports: [NbLayoutModule, NbCardModule, NbIconModule, NbButtonModule, NbInputModule, FormsModule],
   templateUrl: './browser-window.component.html',
   styleUrl: './browser-window.component.scss'
 })

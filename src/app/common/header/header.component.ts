@@ -3,7 +3,6 @@ import { NbActionsModule, NbIconModule, NbJSThemesRegistry, NbMediaBreakpointsSe
 import { UserData } from '../../../app/core/users';
 import { map, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { NgFor } from '@angular/common';
 import { StorageService } from '../../services/storage.service';
 import { AppWorkflowService } from '../../services/app-workflow.service';
 
@@ -28,7 +27,7 @@ export const themes = [
 
 @Component({
   selector: 'app-header',
-  imports: [NbIconModule, NbActionsModule, NbSelectModule, NbUserModule, NgFor, NbOptionModule],
+  imports: [NbIconModule, NbActionsModule, NbSelectModule, NbUserModule, NbOptionModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })

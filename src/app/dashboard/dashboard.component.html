@@ -7,20 +7,22 @@
     <nb-menu [items]="SideItems" tag="sideMenu"></nb-menu>
   </nb-sidebar>
 
-  <nb-sidebar tag="dynamicSidebar" *ngIf="isExplorerReady">
-    <nb-sidebar-header>
-      <div class="explorer-header">
-        <strong>File Explorer</strong>
-        <div class="explorer-menu-button">
-          <button nbButton ghost [nbContextMenu]="fileExplorerMenuItems" nbContextMenuTag="fileExplorerMenu"
-            [nbContextMenuPlacement]="contextMenuPlacement" nbContextMenuTrigger="click" aria-label="Open menu">
-            <nb-icon icon="more-vertical-outline"></nb-icon>
-          </button>
+  @if (isExplorerReady) {
+    <nb-sidebar tag="dynamicSidebar">
+      <nb-sidebar-header>
+        <div class="explorer-header">
+          <strong>File Explorer</strong>
+          <div class="explorer-menu-button">
+            <button nbButton ghost [nbContextMenu]="fileExplorerMenuItems" nbContextMenuTag="fileExplorerMenu"
+              [nbContextMenuPlacement]="contextMenuPlacement" nbContextMenuTrigger="click" aria-label="Open menu">
+              <nb-icon icon="more-vertical-outline"></nb-icon>
+            </button>
+          </div>
         </div>
-      </div>
-    </nb-sidebar-header>
-    <app-directory-list (openFile)="onFileClick($event)" ngSkipHydration />
-  </nb-sidebar>
+      </nb-sidebar-header>
+      <app-directory-list (openFile)="onFileClick($event)" ngSkipHydration />
+    </nb-sidebar>
+  }
 
   <nb-layout-column class="workbench-container">
     <router-outlet></router-outlet>
@@ -29,9 +31,9 @@
   <nb-layout-footer class="footer">
     <div class="stacked-window nb-global-scroll flex-shrink-0">
       @for (window of windowService.getWindows()(); track window.id; let i = $index) {
-      @if (window.isMinimized()) {
-      <app-window [window]="window" [index]="i" [style.--window-index]="i"></app-window>
-      }
+        @if (window.isMinimized()) {
+          <app-window [window]="window" [index]="i" [style.--window-index]="i"></app-window>
+        }
       }
     </div>
     <app-footer></app-footer>

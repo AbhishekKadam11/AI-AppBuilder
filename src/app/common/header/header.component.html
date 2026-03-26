@@ -5,7 +5,9 @@
 
   <div class="menu-selection">
     <nb-select [selected]="selectedApp" placeholder="Create New App" (selectedChange)="changeAppObj($event)" status="primary">
-      <nb-option *ngFor="let app of appList" [value]="app"> {{ app.data.extraConfig.projectName }}</nb-option>
+      @for (app of appList; track app) {
+        <nb-option [value]="app"> {{ app.data.extraConfig.projectName }}</nb-option>
+      }
     </nb-select>
   </div>
 </div>
@@ -13,7 +15,9 @@
 <div class="header-container">
   <div class="menu-selection">
     <nb-select [selected]="currentTheme" (selectedChange)="changeTheme($event)" status="primary">
-      <nb-option *ngFor="let theme of themes" [value]="theme.value"> {{ theme.name }}</nb-option>
+      @for (theme of themes; track theme) {
+        <nb-option [value]="theme.value"> {{ theme.name }}</nb-option>
+      }
     </nb-select>
   </div>
   <nb-actions size="small">

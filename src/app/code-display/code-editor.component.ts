@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NbCardModule, NbLayoutModule, NbWindowRef } from '@nebular/theme';
@@ -10,7 +9,7 @@ import { SocketService } from '../services/socket.service';
 
 @Component({
   selector: 'app-code-editor',
-  imports: [MonacoEditorModule, CommonModule, FormsModule, NbLayoutModule, NbCardModule],
+  imports: [MonacoEditorModule, FormsModule, NbLayoutModule, NbCardModule],
   templateUrl: './code-editor.component.html',
   styleUrl: './code-editor.component.scss'
 })

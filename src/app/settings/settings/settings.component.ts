@@ -1,11 +1,10 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router, RouterModule } from "@angular/router";
 import { NbContextMenuModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbSidebarModule, NbSidebarService } from '@nebular/theme';
 
 @Component({
   selector: 'app-settings',
-  imports: [RouterModule, NbLayoutModule, NbSidebarModule, NbIconModule, NbMenuModule, CommonModule, NbContextMenuModule],
+  imports: [RouterModule, NbLayoutModule, NbSidebarModule, NbIconModule, NbMenuModule, NbContextMenuModule],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
 })
