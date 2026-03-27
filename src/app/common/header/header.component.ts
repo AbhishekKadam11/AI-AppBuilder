@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NbActionsModule, NbIconModule, NbJSThemesRegistry, NbMediaBreakpointsService, NbMenuService, NbOptionModule, NbSelectModule, NbSidebarService, NbThemeService, NbUserModule } from '@nebular/theme';
+import { NbActionsModule, NbIconLibraries, NbIconModule, NbJSThemesRegistry, NbMediaBreakpointsService, NbMenuService, NbOptionModule, NbSelectModule, NbSidebarService, NbThemeService, NbUserModule } from '@nebular/theme';
 import { UserData } from '../../../app/core/users';
 import { map, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -50,6 +50,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private storageService: StorageService,
     private appWorkflowService: AppWorkflowService,
     private nbThemesRegistry: NbJSThemesRegistry,
+    private iconsLibrary: NbIconLibraries,
     private breakpointService: NbMediaBreakpointsService) {
   }
 
@@ -76,10 +77,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
       )
       .subscribe(themeName => this.currentTheme = themeName);
 
-    //  const theme = this.nbThemesRegistry.get(this.currentTheme);
-    //     console.log("theme",theme);
     this.registerThemeVariables();
     this.themePreference();
+
+     this.iconsLibrary.registerSvgPack('custom-icons', {
+      'angular-logo': '<img src="assets/images/angular-gradient.png" width="24px">',
+      'bot-avatar': '<img src="assets/images/bot.png" width="24px">',
+    });
+
     this.appList = this.appWorkflowService.fetchAppObjFromLocalStorage();
   }
 

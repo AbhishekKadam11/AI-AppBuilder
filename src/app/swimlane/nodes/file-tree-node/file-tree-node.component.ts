@@ -29,17 +29,19 @@ interface FSEntry {
   items?: number;
 }
 
+type IAttribute = { type: string; label: string; icon: string };
+
 export type NodeData = {
   appName: string;
-  fileDetails: any;
-  description?: string;
-  tooltip?: string;
+  status: string;
+  description: string;
+  tooltip: string;
+  attribute: IAttribute;
 };
-
 
 @Component({
   selector: 'app-file-tree-node',
-  imports: [NbCardModule,NbTreeGridModule, NbIconModule,CommonModule, FsIconComponent, NbMenuModule, NbPopoverModule, NbCdkMappingModule, NbInputModule, FormsModule, NbFormFieldModule],
+  imports: [NbCardModule, NbTreeGridModule, NbIconModule,CommonModule, FsIconComponent, NbMenuModule, NbPopoverModule, NbCdkMappingModule, NbInputModule, FormsModule, NbFormFieldModule],
   hostDirectives: [
     { directive: NgDiagramNodeSelectedDirective, inputs: ['node'] },
   ],
@@ -116,9 +118,9 @@ export class FileTreeNodeComponent {
 
   ngAfterViewInit() {
 
-    this.subscriptions.add(
-      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
-        if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
+    // this.subscriptions.add(
+    //   this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
+    //     if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
           // this.messages = { "action": "getContainerFiles", "path": appDetails.data.extraConfig.projectName };
           this.messages = { "action": "getContainerFiles", "path": 'loginApp5' };
           this.socketService.sendMessage(this.directoryManager, this.messages);
@@ -130,9 +132,9 @@ export class FileTreeNodeComponent {
               this.dataSource = this.dataSourceBuilder.create(formatedTree);
             });
           }
-        }
-      })
-    );
+      //   }
+      // })
+    // );
   }
 
 updateSort(sortRequest: NbSortRequest): void {
