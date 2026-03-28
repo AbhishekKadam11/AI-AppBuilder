@@ -1,0 +1,15 @@
+<div class="flex flex-col w-full overflow-hidden h-auto px-3 py-2">
+  <ng-diagram-base-node-template [node]="node()">
+    <nb-card class="file-node-card" size="small">
+      <nb-card-header>
+      </nb-card-header>
+      <nb-card-body>
+         <nb-list>
+        <nb-list-item *ngFor="let route of routes">
+          {{ route }}
+        </nb-list-item>
+      </nb-list>
+      </nb-card-body>
+    </nb-card>
+  </ng-diagram-base-node-template>
+</div>

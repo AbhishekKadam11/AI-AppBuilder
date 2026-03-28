@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, ElementRef, EventEmitter, HostListener, inject, input, Output, signal, ViewChild } from '@angular/core';
-import { NbCardModule, NbCdkMappingModule, NbFormFieldModule, NbIconModule, NbInputModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverDirective, NbPopoverModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule } from "@nebular/theme";
+import { NbButtonModule, NbCardModule, NbCdkMappingModule, NbFormFieldModule, NbIconModule, NbInputModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverDirective, NbPopoverModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule } from "@nebular/theme";
 import {
+  NgDiagramBaseNodeTemplateComponent,
   NgDiagramModelService,
   NgDiagramNodeRotateAdornmentComponent,
   NgDiagramNodeSelectedDirective,
@@ -16,6 +17,7 @@ import { WindowService } from '../../../services/window.service';
 import { AppWorkflowService } from '../../../services/app-workflow.service';
 import { FormsModule } from '@angular/forms';
 import { CodeEditorComponent } from '../../../code-display/code-editor.component';
+import { NodeData } from '../../../core/common';
 
 interface TreeNode<T> {
   data: T;
@@ -29,19 +31,10 @@ interface FSEntry {
   items?: number;
 }
 
-type IAttribute = { type: string; label: string; icon: string };
-
-export type NodeData = {
-  appName: string;
-  status: string;
-  description: string;
-  tooltip: string;
-  attribute: IAttribute;
-};
 
 @Component({
   selector: 'app-file-tree-node',
-  imports: [NbCardModule, NbTreeGridModule, NbIconModule,CommonModule, FsIconComponent, NbMenuModule, NbPopoverModule, NbCdkMappingModule, NbInputModule, FormsModule, NbFormFieldModule],
+  imports: [NbCardModule, NbTreeGridModule, NbIconModule, CommonModule, FsIconComponent, NbMenuModule, NbPopoverModule, NbCdkMappingModule, NbInputModule, FormsModule, NbFormFieldModule, NgDiagramBaseNodeTemplateComponent, NbButtonModule],
   hostDirectives: [
     { directive: NgDiagramNodeSelectedDirective, inputs: ['node'] },
   ],
@@ -49,7 +42,7 @@ export type NodeData = {
   styleUrl: './file-tree-node.component.scss',
 })
 export class FileTreeNodeComponent {
-   customColumn = 'name';
+  customColumn = 'name';
   defaultColumns = ['kind', 'items'];
   allColumns = [this.customColumn];
 
@@ -57,7 +50,7 @@ export class FileTreeNodeComponent {
   sortColumn!: string;
   sortDirection: NbSortDirection = NbSortDirection.NONE;
   private readonly directoryManager: string = 'DirectoryManager';
-   private readonly refreshDirectory: string = 'RefreshDirectory';
+  private readonly refreshDirectory: string = 'RefreshDirectory';
   private directorySubscription: Subscription | undefined;
   messages: any = { "action": "getAll", "path": "" };
   private subscriptions: Subscription = new Subscription();
@@ -93,9 +86,9 @@ export class FileTreeNodeComponent {
     private webContainerService: WebContainerService,
     private windowService: WindowService,
     private menuService: NbMenuService,
-    private appWorkflowService: AppWorkflowService) {}
+    private appWorkflowService: AppWorkflowService) { }
 
-      ngOnInit() {
+  ngOnInit() {
     this.menuService.onItemClick().subscribe((menuItem) => {
       console.log(menuItem);
       switch (menuItem.item.title) {
@@ -121,23 +114,25 @@ export class FileTreeNodeComponent {
     // this.subscriptions.add(
     //   this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
     //     if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
-          // this.messages = { "action": "getContainerFiles", "path": appDetails.data.extraConfig.projectName };
-          this.messages = { "action": "getContainerFiles", "path": 'loginApp5' };
-          this.socketService.sendMessage(this.directoryManager, this.messages);
-          const serverReply$ = this.socketService?.on(this.directoryManager);
-          if (serverReply$) {
-            this.directorySubscription = serverReply$.subscribe((response: any) => {
-              console.log('Received directorySubscription from server:', response);
-              const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
-              this.dataSource = this.dataSourceBuilder.create(formatedTree);
-            });
-          }
-      //   }
-      // })
+    // this.messages = { "action": "getContainerFiles", "path": appDetails.data.extraConfig.projectName };
+    // this.messages = { "action": "getContainerFiles", "path": 'loginApp5' };
+    // this.socketService.sendMessage(this.directoryManager, this.messages);
+    // const serverReply$ = this.socketService?.on(this.directoryManager);
+    // if (serverReply$) {
+    //   this.directorySubscription = serverReply$.subscribe((response: any) => {
+    //     console.log('Received directorySubscription from server:', response);
+    //     const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
+    //     this.dataSource = this.dataSourceBuilder.create(formatedTree);
+    //   });
+    // }
+    //   }
+    // })
     // );
+     this.dataSource = this.dataSourceBuilder.create(this.node().data.dataSource);
+    console.log('this.node', this.node());
   }
 
-updateSort(sortRequest: NbSortRequest): void {
+  updateSort(sortRequest: NbSortRequest): void {
     this.sortColumn = sortRequest.column;
     this.sortDirection = sortRequest.direction;
   }

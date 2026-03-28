@@ -1,12 +1,17 @@
 import { NbChatMessageFile } from "@nebular/theme";
 
+export type TreeNode<T> = {
+  data: T;
+  children?: TreeNode<T>[];
+};
+
 export interface IChatMessage {
-   text: any; 
+   text: any;
    date: Date;
    reply: boolean;
    type: string;
    files: NbChatMessageFile[];
-   user: {  
+   user: {
       name: string;
       avatar: string;
    };
@@ -14,3 +19,26 @@ export interface IChatMessage {
    latitude: number;
    longitude: number;
 }
+
+type IAttribute = { type: string; label: string; icon: string, url: string };
+
+export type NodeData = {
+  appName: string;
+  status: string;
+  description: string;
+  tooltip: string;
+  dataSource: TreeNode<FSEntry>[];
+  attribute: IAttribute;
+};
+
+export type FSEntry = {
+  name: string;
+  type: string;
+  path: string;
+};
+
+export type IData = {
+  type: string;
+  label: string;
+  icon: string;
+};

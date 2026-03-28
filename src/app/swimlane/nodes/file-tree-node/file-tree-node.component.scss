@@ -1,0 +1,170 @@
+@use '../../../../themes/styles/themes' as *;
+
+:host {
+  display: flex;
+  // width: 100%;
+  // height: 100%;
+  border-radius: 10px;
+  // border: 1px solid var(--border-basic-color-2); /* Nebular border color */
+  background-color: var(--background-basic-color-1); /* Nebular background */
+
+  .node {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    border-radius: 10px;
+
+    &-header {
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      vertical-align: middle;
+      align-items: center;
+      justify-items: center;
+
+      /* Replace Material chip with Nebular tag */
+      nb-tag {
+        --text-control-color: white !important;
+        --tag-text-color: white !important;
+      }
+    }
+
+    &-body {
+      font-size: 12px;
+      cursor: help;
+
+      p {
+        width: 180px;
+      }
+
+      /* Replace Material expansion panel with Nebular accordion */
+      nb-accordion {
+        --accordion-header-text-color: var(--text-basic-color);
+        --accordion-item-background-color: var(--background-basic-color-2);
+        --accordion-item-text-color: var(--text-basic-color);
+      }
+
+      /* If using nb-accordion-item directly */
+      nb-accordion-item {
+        background-color: var(--background-basic-color-2);
+        color: var(--text-basic-color);
+
+        nb-accordion-item-header {
+          color: var(--text-basic-color);
+
+          .expansion-indicator {
+            color: var(--text-basic-color);
+          }
+        }
+      }
+
+      form {
+        height: 50px;
+        margin-top: 8px;
+
+        /* Replace Material form field with Nebular input */
+        nb-form-field {
+          min-width: 120px;
+
+          /* If you need to style the input specifically */
+          input {
+            background-color: var(--background-basic-color-1);
+            border-color: var(--border-basic-color-3);
+            color: var(--text-basic-color);
+          }
+        }
+      }
+    }
+  }
+}
+
+button[nbTreeGridRowToggle] {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.search-label {
+  display: block;
+}
+
+.search-input {
+  margin-bottom: 1rem;
+}
+
+.nb-column-name {
+  width: 100%;
+}
+
+@media screen and (min-width: 400px) {
+
+  .nb-column-name,
+  .nb-column-size {
+    width: 50%;
+  }
+}
+
+@media screen and (min-width: 500px) {
+
+  .nb-column-name,
+  .nb-column-size,
+  .nb-column-kind {
+    width: 33.333%;
+  }
+}
+
+@media screen and (min-width: 600px) {
+  .nb-column-name {
+    width: 31%;
+  }
+
+  .nb-column-size,
+  .nb-column-kind,
+  .nb-column-items {
+    width: 23%;
+  }
+}
+
+
+@include nb-install-component {
+  .nb-tree-grid-cell {
+    height: 1rem;
+    padding-left: 0rem;
+  }
+}
+
+::ng-deep {
+  .nb-tree-grid-cell {
+    border-width: 0 !important;
+    border-style: none !important;
+  }
+
+  .directory-menu-card,
+  .directory-menu-card-body {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid nb-theme(color-primary-600) !important;
+    border-radius: nb-theme(card-border-radius);
+  }
+
+  .directory-item {
+    padding: 0px !important;
+    margin: 0px !important;
+    border-radius: unset !important;
+    max-width: unset !important;
+    font-weight: unset !important;
+    line-height: unset !important;
+    background-color: unset !important;
+    border: unset !important;
+    caret-color: transparent;
+    cursor: default;
+  }
+
+  .input-heighlighter {
+    border: 1px solid nb-theme(color-primary-600) !important;
+    width: 100% !important;
+    caret-color: auto !important;
+    cursor: default;
+  }
+}

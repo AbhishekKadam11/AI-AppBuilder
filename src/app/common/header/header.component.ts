@@ -81,7 +81,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.themePreference();
 
      this.iconsLibrary.registerSvgPack('custom-icons', {
-      'angular-logo': '<img src="assets/images/angular-gradient.png" width="24px">',
+      'angular-logo': '<img src="assets/images/angular_gradient.png" width="24px">',
       'bot-avatar': '<img src="assets/images/bot.png" width="24px">',
     });
 
