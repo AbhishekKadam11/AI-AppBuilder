@@ -1,14 +1,15 @@
 <div class="flex flex-col w-full overflow-hidden h-auto px-3 py-2">
   <ng-diagram-base-node-template [node]="node()">
-    <nb-card class="file-node-card" size="small">
+    <nb-card class="node-card">
       <nb-card-header>
+        <nb-tag status="danger" appearance="filled" [text]="node().data.label"></nb-tag>
       </nb-card-header>
       <nb-card-body>
-         <nb-list>
-        <nb-list-item *ngFor="let route of routes">
-          {{ route }}
-        </nb-list-item>
-      </nb-list>
+        <nb-list>
+          <nb-list-item *ngFor=" let route of node().data.dataSource;">
+            <strong class="text-normal" (click)="selectRoute(route)">{{ route['component'] }}</strong>
+          </nb-list-item>
+        </nb-list>
       </nb-card-body>
     </nb-card>
   </ng-diagram-base-node-template>

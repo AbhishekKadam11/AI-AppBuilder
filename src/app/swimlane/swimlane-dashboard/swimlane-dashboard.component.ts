@@ -76,11 +76,11 @@ export class SwimlaneDashboardComponent {
   //     ],
   //   });
 
-// 1. Register the component map
-nodeTemplateMap = new Map<string, typeof FileTreeNodeComponent | typeof RoutingNodeComponent>([
-  ['fileTree', FileTreeNodeComponent],
-  ['routeTree', RoutingNodeComponent],
-]);
+  // 1. Register the component map
+  nodeTemplateMap = new Map<string, typeof FileTreeNodeComponent | typeof RoutingNodeComponent>([
+    ['fileTree', FileTreeNodeComponent],
+    ['routeTree', RoutingNodeComponent],
+  ]);
 
   // 2. Initialize model with the 'fileTree' type
   // model = initializeModel({
@@ -109,7 +109,7 @@ nodeTemplateMap = new Map<string, typeof FileTreeNodeComponent | typeof RoutingN
   messages: any = { "action": "getContainerFiles", "path": "" }
   private directorySubscription: Subscription | undefined
   dataSource: any
-  // private webContainerService = new WebContainerService();
+  appDiagramSchema: any = {};
 
   constructor(private socketService: SocketService,
     private webContainerService: WebContainerService
@@ -124,6 +124,7 @@ nodeTemplateMap = new Map<string, typeof FileTreeNodeComponent | typeof RoutingN
         console.log('Received directorySubscription from server:', response);
         const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
         console.log('formatedTree', formatedTree);
+        this.destructringAssignment(formatedTree);
         this.model = initializeModel({
           nodes: [
             {
@@ -133,16 +134,16 @@ nodeTemplateMap = new Map<string, typeof FileTreeNodeComponent | typeof RoutingN
               size: { width: 360, height: 320 },
               autoSize: false,
               resizable: true,
-              data: { appName: 'loginApp5', label: '', type: 'rootNode', dataSource: formatedTree, attribute: { icon: 'angular-logo', url: '' } }
+              data: { appName: 'loginApp5', label: '', type: 'rootNode', dataSource: this.appDiagramSchema.dataSource, attribute: { icon: 'angular-logo', url: '' } }
             },
-             {
+            {
               id: '2',
               type: 'routeTree', // Matches the map key
               position: { x: 500, y: 100 },
               size: { width: 360, height: 200 },
               autoSize: false,
               resizable: true,
-              data: { appName: 'loginApp5', label: '', type: 'rootNode', dataSource: formatedTree, attribute: { icon: 'angular-logo', url: '' } }
+              data: { appName: 'loginApp5', label: 'Routing', type: 'routingNode', dataSource: this.appDiagramSchema.routes, attribute: { icon: 'angular-logo', url: '' } }
             },
           ]
         }, this.injector);
@@ -150,5 +151,38 @@ nodeTemplateMap = new Map<string, typeof FileTreeNodeComponent | typeof RoutingN
       });
     }
   }
+
+  destructringAssignment(formatedTree: TreeNode<FSEntry>[]) {
+    // Example of destructuring assignment to extract specific properties from the formatted tree
+    this.appDiagramSchema = { dataSource: formatedTree }; // Store the entire tree if needed
+    const [rootNode] = formatedTree;
+    const { data: rootData, children: rootChildren } = rootNode;
+    console.log('Root Node Data:', rootData);
+    console.log('Root Node Children:', rootChildren);
+    //get the routes from the file tree and set it to the routing node make json structure like this { path: 'routePath', component: 'ComponentName', path: 'importPath' }
+    const routes = this.extractRoutesFromFileTree(formatedTree);
+
+    console.log('App Routes:', routes);
+    this.appDiagramSchema.routes = routes; // Store the routes in the schema for later use
+  }
+
+  extractRoutesFromFileTree(tree: TreeNode<FSEntry>[], parentPath: string = ''): any[] {
+    let routes: any[] = [];
+    // extract routes from the file tree and make json structure like this { path: 'routePath', component: 'ComponentName' }
+    for (const node of tree) {
+      const currentPath = `${parentPath}/${node.data.name}`;
+      if (node.data.kind === 'directory') {
+        //@ts-ignore
+        routes = [...routes, ...this.extractRoutesFromFileTree(node.children, currentPath)];
+      } else if (node.data.kind === 'file' && node.data.name.endsWith('.component.ts')) {
+        const componentName = node.data.name.replace('.component.ts', '');
+        //@ts-ignore
+        routes.push({ path: currentPath, component: componentName });
+      }
+    }
+    return routes;
+  }
+
+
 
 }

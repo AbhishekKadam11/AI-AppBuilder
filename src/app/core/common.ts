@@ -25,9 +25,10 @@ type IAttribute = { type: string; label: string; icon: string, url: string };
 export type NodeData = {
   appName: string;
   status: string;
+  label: string;
   description: string;
   tooltip: string;
-  dataSource: TreeNode<FSEntry>[];
+  dataSource: Record<string, any>[];
   attribute: IAttribute;
 };
 
