@@ -12,15 +12,15 @@ import { NodeData } from '../../../core/common';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-routing-node',
+  selector: 'app-component-node',
   imports: [NbCardModule, NgDiagramBaseNodeTemplateComponent, NbListModule, NbTagModule, CommonModule, NbIconModule],
   hostDirectives: [
     { directive: NgDiagramNodeSelectedDirective, inputs: ['node'] },
   ],
-  templateUrl: './routing-node.component.html',
-  styleUrl: './routing-node.component.scss',
+  templateUrl: './component-node.component.html',
+  styleUrl: './component-node.component.scss',
 })
-export class RoutingNodeComponent {
+export class ComponentNodeComponent {
   node = input.required<Node<NodeData>>();
   routes = [];
 
