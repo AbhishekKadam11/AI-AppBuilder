@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs/internal/Subscription';
 import { SocketService } from '../../services/socket.service';
 import { WebContainerService } from '../../services/web-container.service';
 import { RoutingNodeComponent } from '../nodes/routing-node/routing-node.component';
+import { ComponentNodeComponent } from '../nodes/component-node/component-node.component';
 
 enum NodeTemplateType {
   CustomNodeType = 'customNodeType',
@@ -27,6 +28,18 @@ interface FSEntry {
   items?: number;
 }
 
+enum NodeTypes {
+  FileTree = 'fileTree',
+  RouteTree = 'routeTree',
+  ComponentTree = 'componentTree',
+}
+
+enum NodeLabels {
+  FileTree = 'File Tree',
+  RouteTree = 'Routing',
+  ComponentTree = 'Component Files',
+}
+
 @Component({
   selector: 'app-swimlane-dashboard',
   providers: [provideNgDiagram()],
@@ -36,9 +49,6 @@ interface FSEntry {
 })
 
 export class SwimlaneDashboardComponent {
-  //  nodeTemplateMap = new NgDiagramNodeTemplateMap([
-  //     [NodeTemplateType.CustomNodeType, FileTreeNodeComponent],
-  //   ]);
 
   config = {
     zoom: {
@@ -58,52 +68,15 @@ export class SwimlaneDashboardComponent {
   //     // class: 'grid-background',
   //   };
 
-  //   model = initializeModel({
-  //     nodes: [
-  //       {
-  //         id: '1',
-  //         position: { x: 50, y: 100 },
-  //         type: 'customNodeType',
-  //         data: {
-  //           appName: 'loginApp5',
-  //           description:
-  //             'This is Node 1. This node is a custom node with a custom template.',
-  //           tooltip: 'Node 1 is a custom node',
-  //           status: 'Active',
-  //         },
-  //       },
-
-  //     ],
-  //   });
-
   // 1. Register the component map
-  nodeTemplateMap = new Map<string, typeof FileTreeNodeComponent | typeof RoutingNodeComponent>([
+  nodeTemplateMap = new Map<string, typeof FileTreeNodeComponent | typeof RoutingNodeComponent | typeof ComponentNodeComponent>([
     ['fileTree', FileTreeNodeComponent],
     ['routeTree', RoutingNodeComponent],
+    ['componentTree', ComponentNodeComponent],
   ]);
 
-  // 2. Initialize model with the 'fileTree' type
-  // model = initializeModel({
-  //   nodes: [
-  //     {
-  //       id: '1',
-  //       type: 'fileTree', // Matches the map key
-  //       position: { x: 400, y: 100 },
-  //       size: { width: 360, height: 320 },
-  //       autoSize: false,
-  //       resizable: true,
-  //       data: { appName: 'loginApp5', label: '', type: 'rootNode', dataSource:[], attribute: { icon: 'angular-logo', url: '' } }
-  //     },
-  //     // {
-  //     //   id: '2',
-  //     //   type: 'fileTree',
-  //     //   position: { x: 400, y: 100 },
-  //     //   data: { label: 'src/app', type: 'Directory', icon: 'folder-outline' }
-  //     // }
-  //   ]
-  // });
-
   model: any = initializeModel();
+  nodes: any[] = [];
   private readonly injector = inject(Injector);
   private readonly directoryManager: string = 'DirectoryManager';
   messages: any = { "action": "getContainerFiles", "path": "" }
@@ -125,45 +98,21 @@ export class SwimlaneDashboardComponent {
         const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
         console.log('formatedTree', formatedTree);
         this.destructringAssignment(formatedTree);
-        this.model = initializeModel({
-          nodes: [
-            {
-              id: '1',
-              type: 'fileTree', // Matches the map key
-              position: { x: 100, y: 100 },
-              size: { width: 360, height: 320 },
-              autoSize: false,
-              resizable: true,
-              data: { appName: 'loginApp5', label: '', type: 'rootNode', dataSource: this.appDiagramSchema.dataSource, attribute: { icon: 'angular-logo', url: '' } }
-            },
-            {
-              id: '2',
-              type: 'routeTree', // Matches the map key
-              position: { x: 500, y: 100 },
-              size: { width: 360, height: 200 },
-              autoSize: false,
-              resizable: true,
-              data: { appName: 'loginApp5', label: 'Routing', type: 'routingNode', dataSource: this.appDiagramSchema.routes, attribute: { icon: 'angular-logo', url: '' } }
-            },
-          ]
-        }, this.injector);
-        // this.dataSource = this.dataSourceBuilder.create(formatedTree);
+        this.nodeGeneration(); // Generate nodes after processing the file tree and routes
       });
     }
   }
 
   destructringAssignment(formatedTree: TreeNode<FSEntry>[]) {
-    // Example of destructuring assignment to extract specific properties from the formatted tree
-    this.appDiagramSchema = { dataSource: formatedTree }; // Store the entire tree if needed
-    const [rootNode] = formatedTree;
-    const { data: rootData, children: rootChildren } = rootNode;
-    console.log('Root Node Data:', rootData);
-    console.log('Root Node Children:', rootChildren);
-    //get the routes from the file tree and set it to the routing node make json structure like this { path: 'routePath', component: 'ComponentName', path: 'importPath' }
-    const routes = this.extractRoutesFromFileTree(formatedTree);
+    this.appDiagramSchema = Object.assign(this.appDiagramSchema, { [NodeTypes.FileTree]: { dataSource: formatedTree } }); // Store the entire tree if needed
 
-    console.log('App Routes:', routes);
-    this.appDiagramSchema.routes = routes; // Store the routes in the schema for later use
+    const routes = this.extractRoutesFromFileTree(formatedTree);
+    this.appDiagramSchema = Object.assign(this.appDiagramSchema, { [NodeTypes.RouteTree]: { dataSource: routes } }); // Store the routes in the schema for later use
+
+    const componentNodes = this.extractComponentNodesFromFileTree(formatedTree);
+    this.appDiagramSchema = Object.assign(this.appDiagramSchema, { [NodeTypes.ComponentTree]: { dataSource: componentNodes } }); // Store the component nodes in the schema for later use
+
+    console.log('App Diagram Schema after destructuring assignment:', this.appDiagramSchema);
   }
 
   extractRoutesFromFileTree(tree: TreeNode<FSEntry>[], parentPath: string = ''): any[] {
@@ -184,5 +133,63 @@ export class SwimlaneDashboardComponent {
   }
 
 
+  extractComponentNodesFromFileTree(tree: TreeNode<FSEntry>[], parentPath: string = ''): any[] {
+    // extract component files from the file tree and make json structure like this { name: 'ComponentName', files: ['fileName', 'fileName2'] }
+    let components: any[] = [];
+    for (const node of tree) {
+      const currentPath = `${parentPath}/${node.data.name}`;
+      if (node.data.kind === 'directory') {
+        //@ts-ignore
+        components = [...components, ...this.extractComponentNodesFromFileTree(node.children, currentPath)];
+      } else if (node.data.kind === 'file' && (node.data.name.endsWith('.component.ts') || node.data.name.endsWith('.component.html') || node.data.name.endsWith('.component.scss'))) {
+        //append of files path to the component if the component already exists in the components array otherwise create a new component object and push it to the components array
+        const componentName = node.data.name.replace('.component.ts', '').replace('.component.html', '').replace('.component.scss', '');
+        const existingComponent = components.find(c => c.name === componentName);
+        if (existingComponent) {
+          existingComponent.files.push(currentPath);
+        } else {
+          components.push({ name: componentName, files: [currentPath] });
+        }
+      }
+    }
+    return components;
+  }
 
+  nodeGeneration() {
+    //iterate over enum NodeTypes and generate nodes for each type
+    for (const nodeType in NodeTypes) {
+      console.log('Generating nodes for type:', NodeTypes[nodeType as keyof typeof NodeTypes]);
+      const dataSource = this.appDiagramSchema[NodeTypes[nodeType as keyof typeof NodeTypes]]?.dataSource || [];
+      //break component tre to sperate nodes for each component
+      if (NodeTypes[nodeType as keyof typeof NodeTypes] === NodeTypes.ComponentTree) {
+        const componentDataSource = this.appDiagramSchema[NodeTypes.ComponentTree]?.dataSource || [];
+        for (const component of componentDataSource) {
+          this.nodes.push({
+            id: `id-${nodeType}-${component.name}`,
+            type: NodeTypes[nodeType as keyof typeof NodeTypes],
+            position: { x: 100 + Object.keys(NodeTypes).indexOf(nodeType) * 400, y: 100 + componentDataSource.indexOf(component) * 370 },
+            size: { width: 360, height: 320 },
+            autoSize: false,
+            resizable: true,
+            data: { appName: 'loginApp5', label: NodeLabels[nodeType as keyof typeof NodeLabels], type: 'rootNode', dataSource: [component], attribute: { icon: 'angular-logo', url: '' } }
+          });
+        }
+        continue;
+      }
+      this.nodes.push({
+        id: `id-${nodeType}`,
+        type: NodeTypes[nodeType as keyof typeof NodeTypes],
+        position: { x: 100 + Object.keys(NodeTypes).indexOf(nodeType) * 400, y: 100 },
+        size: { width: 360, height: 320 },
+        autoSize: false,
+        resizable: true,
+        data: { appName: 'loginApp5', label: NodeLabels[nodeType as keyof typeof NodeLabels], type: 'rootNode', dataSource: dataSource, attribute: { icon: 'angular-logo', url: '' } }
+      });
+    }
+
+    console.log('Generated nodes:', this.nodes);
+    this.model = initializeModel({
+      nodes: this.nodes
+    }, this.injector);
+  }
 }

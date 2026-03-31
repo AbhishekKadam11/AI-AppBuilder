@@ -4,7 +4,7 @@
       <nb-card-header>
         <nb-tag status="danger" appearance="filled" [text]="node().data.label"></nb-tag>
       </nb-card-header>
-      <nb-card-body>
+      <nb-card-body class="node-body">
         <nb-list>
           <nb-list-item *ngFor=" let route of node().data.dataSource;">
            <nb-icon icon="arrowhead-right-outline"></nb-icon> <strong class="text-normal" (click)="selectRoute(route)">{{ route['component'] }}</strong>
