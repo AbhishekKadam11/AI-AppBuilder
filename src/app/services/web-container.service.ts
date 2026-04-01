@@ -48,10 +48,10 @@ export class WebContainerService {
       this.outputSubject.next('WebContainer booted successfully.');
       await this.mountFiles(files);
       this.progressControlService.showProgressGif('dependency');
-      await this.runCommands(['npm', 'install', '--legacy-peer-deps']);
+    //  await this.runCommands(['npm', 'install', '--legacy-peer-deps']);
       this.listenForServerReady();
       this.progressControlService.showProgressGif('templating');
-      await this.runCommands(['npm', 'run', 'start']);
+    // await this.runCommands(['npm', 'run', 'start']);
     } catch (error) {
       console.error('Failed to boot and run WebContainer:', error);
       this.outputSubject.next(`Error: ${error}`);
@@ -176,7 +176,7 @@ export class WebContainerService {
       const excludedFiles = ['bash', 'cp', 'chmod', 'mv', 'cat', 'echo', 'hostname', 'jsh', 'ls', 'mkdir', 'pwd', 'rm', 'tar', 'touch', 'whoami', '.pnpmfile.cjs', 'cd', 'alias', 'clear', 'curl', 'false', 'env', 'getconf', 'head', 'sort', 'tail', 'true', 'uptime', 'which', 'node_modules'];
 
       sourceZip.forEach((relativePath, file) => {
-        // 1. Strip the random parent folder 
+        // 1. Strip the random parent folder
         const parts = relativePath.split('/');
         const cleanPathParts = parts.slice(1);
         const cleanPath = cleanPathParts.join('/');
