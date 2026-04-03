@@ -2,7 +2,7 @@
   <ng-diagram-base-node-template [node]="node()">
     <nb-card class="node-card">
       <nb-card-header>
-        <nb-tag status="info" appearance="filled" [text]="node().data.label"></nb-tag>
+        <nb-tag status="info" appearance="filled" [text]="node().data.dataSource[0]['name']"></nb-tag>
       </nb-card-header>
       <nb-card-body class="node-body">
         <!-- {{node().data.dataSource[0]['name']}} -->

@@ -129,7 +129,7 @@ export class FileTreeNodeComponent {
     // })
     // );
     this.dataSource = this.dataSourceBuilder.create(this.node().data.dataSource as TreeNode<FSEntry>[]);
-    console.log('this.node', this.node());
+    // console.log('this.node', this.node());
   }
 
   updateSort(sortRequest: NbSortRequest): void {
