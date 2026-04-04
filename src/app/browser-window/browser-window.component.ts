@@ -9,7 +9,9 @@ import {
   ChangeDetectionStrategy,
   effect,
   signal,
-  ViewChild
+  ViewChild,
+  Signal,
+  SecurityContext
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NbButtonModule, NbCardModule, NbIconModule, NbInputModule, NbLayoutModule } from "@nebular/theme";
@@ -64,13 +66,14 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   @ViewChild('webcontainerIframe', { static: false }) iframeRef!: ElementRef<HTMLIFrameElement>;
 
   // --- Inputs ---
-  @Input() set navigationUrl(url: string) {
-    // Logic can be added here if needed in the future
+  @Input() set navigationUrl(url: SafeResourceUrl | string) {
+    this.appUrl = this.sanitizer.sanitize(SecurityContext.RESOURCE_URL, url);
+    this.iframeUrl.set(url);
   }
 
   @Input() set browserInstanceData(appDetails: AppDetails | null) {
     if (appDetails) {
-      this.appObject.set(appDetails);
+   //   this.appObject.set(appDetails);
     }
   }
 
@@ -119,6 +122,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(url => {
         if (url) {
+          console.log('Received new iframe URL:', url);
           this.updateIframeUrl(url);
         }
       });

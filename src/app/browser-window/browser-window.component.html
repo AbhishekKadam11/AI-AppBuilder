@@ -7,7 +7,7 @@
           <button nbButton ghost (click)="navigateToForward()"><nb-icon
               icon="arrow-ios-forward-outline"></nb-icon></button>
         </div>
-        <input nbInput type="text" placeholder="http://" fullWidth [(ngModel)]="appUrl" />
+        <input nbInput type="text" placeholder="https://" fullWidth [(ngModel)]="appUrl" />
         <button nbButton ghost (click)="navigateToUrl()" (keyup.enter)="navigateToUrl()"><nb-icon
             icon="corner-down-left-outline"></nb-icon></button>
         <button nbButton ghost (click)="openUrl()"><nb-icon icon="external-link-outline"></nb-icon></button>

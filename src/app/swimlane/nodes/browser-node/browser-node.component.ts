@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, input } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, Output, inject, input, signal } from '@angular/core';
 import { NbCardModule, NbIconModule, NbListModule, NbTagModule } from '@nebular/theme';
 import {
   NgDiagramBaseNodeTemplateComponent,
@@ -11,6 +11,9 @@ import {
 import { NodeData } from '../../../core/common';
 import { CommonModule } from '@angular/common';
 import { BrowserWindowComponent } from '../../../browser-window/browser-window.component';
+import { WebContainerService } from '../../../services/web-container.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-browser-node',
@@ -23,12 +26,25 @@ import { BrowserWindowComponent } from '../../../browser-window/browser-window.c
 })
 export class BrowserNodeComponent {
 
+  iframeUrl = signal<SafeResourceUrl | string>('');
   node = input.required<Node<NodeData>>();
   routes = [];
   @Output() navigateUrlEvent = new EventEmitter<string>();
+  private destroyRef = inject(DestroyRef);
+  private sanitizer = inject(DomSanitizer);
 
-  constructor(private modelService: NgDiagramModelService,) {
+  constructor(private modelService: NgDiagramModelService,
+    private webContainerService: WebContainerService
+  ) {
 
+    this.webContainerService.iframeUrl$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(url => {
+        if (url) {
+           console.log('Received new iframe URL:', url);
+          this.updateIframeUrl(url);
+        }
+      });
   }
 
   selectRoute(route: any) {
@@ -46,5 +62,13 @@ export class BrowserNodeComponent {
       // this.browserWindowComponent.navigateToUrl(url);
       this.navigateUrlEvent.emit(url);
     }
+  }
+
+   private updateIframeUrl(baseUrl: string): void {
+
+    const path = this.node().data.dataSource[0]['component'] || '';
+    const appUrl = baseUrl + '/' + path;
+    console.log('Updating iframe URL to:', appUrl);
+    this.iframeUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(appUrl));
   }
 }

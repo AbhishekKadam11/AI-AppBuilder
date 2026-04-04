@@ -1,11 +1,11 @@
-<div class="flex flex-col w-full overflow-hidden h-auto px-3 py-2">
-  <ng-diagram-base-node-template [node]="node()">
+<div class="flex flex-col w-full overflow-hidden h-full px-3 py-2">
+  <ng-diagram-base-node-template [node]="node()" class="h-full">
     <nb-card class="node-card">
-      <nb-card-header>
-        <nb-tag status="danger" appearance="filled" [text]="node().data.label"></nb-tag>
-      </nb-card-header>
+      <!-- <nb-card-header>
+        <nb-tag status="primary" appearance="filled" [text]="node().data.dataSource[0]['component']"></nb-tag>
+      </nb-card-header> -->
       <nb-card-body class="node-body">
-        <app-browser-window [navigationUrl]="node().data.dataSource[0]['component']" ></app-browser-window>
+        <app-browser-window [navigationUrl]="iframeUrl()" [browserInstanceData]="node().data"  ></app-browser-window>
       </nb-card-body>
     </nb-card>
   </ng-diagram-base-node-template>
