@@ -7,7 +7,7 @@
         </nb-card-header>
         <nb-card-body class="swimlane-window-card">
           <ng-diagram-node-resize-adornment >
-            <ng-diagram [model]="model" [config]="config" [nodeTemplateMap]="nodeTemplateMap">
+            <ng-diagram [model]="model()" [config]="config" [nodeTemplateMap]="nodeTemplateMap">
               <ng-diagram-background config="backgroundConfig" />
             </ng-diagram>
           </ng-diagram-node-resize-adornment>

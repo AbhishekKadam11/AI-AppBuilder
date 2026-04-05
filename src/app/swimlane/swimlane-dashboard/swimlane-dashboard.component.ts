@@ -1,30 +1,24 @@
-import { Component, inject, Injector } from '@angular/core';
+import { Component, inject, Injector, signal, DestroyRef, OnInit } from '@angular/core';
 import { NbCardModule, NbIconModule, NbLayoutModule } from "@nebular/theme";
-import { initializeModel, NgDiagramBackgroundComponent, NgDiagramComponent, NgDiagramConfig, NgDiagramNodeTemplateMap, provideNgDiagram, NgDiagramNodeResizeAdornmentComponent } from 'ng-diagram';
+import {
+  initializeModel,
+  NgDiagramBackgroundComponent,
+  NgDiagramComponent,
+  NgDiagramConfig,
+  NgDiagramNodeResizeAdornmentComponent,
+  provideNgDiagram
+} from 'ng-diagram';
 import { FileTreeNodeComponent } from '../nodes/file-tree-node/file-tree-node.component';
-import { Subscription } from 'rxjs/internal/Subscription';
 import { SocketService } from '../../services/socket.service';
 import { WebContainerService } from '../../services/web-container.service';
 import { RoutingNodeComponent } from '../nodes/routing-node/routing-node.component';
 import { ComponentNodeComponent } from '../nodes/component-node/component-node.component';
 import { BrowserNodeComponent } from '../nodes/browser-node/browser-node.component';
 import { AppWorkflowService } from '../../services/app-workflow.service';
+import { filter, switchMap, tap, take, debounceTime } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-enum NodeTemplateType {
-  CustomNodeType = 'customNodeType',
-}
-
-interface TreeNode<T> {
-  data: T;
-  children?: TreeNode<T>[];
-  expanded?: boolean;
-}
-
-interface FSEntry {
-  name: string;
-  kind: string;
-  items?: number;
-}
+// --- Enums & Constants ---
 
 enum NodeTypes {
   FileTree = 'fileTree',
@@ -33,24 +27,80 @@ enum NodeTypes {
   BrowserTree = 'browserTree',
 }
 
-enum NodeLabels {
-  FileTree = 'File Tree',
-  RouteTree = 'Routing',
-  ComponentTree = 'Component Files',
-  BrowserTree = 'Browser window',
+const NodeLabels: Record<NodeTypes, string> = {
+  [NodeTypes.FileTree]: 'File Tree',
+  [NodeTypes.RouteTree]: 'Routing',
+  [NodeTypes.ComponentTree]: 'Component Files',
+  [NodeTypes.BrowserTree]: 'Browser window',
+};
+
+// --- Interfaces ---
+
+interface FSEntry {
+  name: string;
+  kind: string;
+  items?: number;
+}
+
+interface TreeNode<T> {
+  data: T;
+  children?: TreeNode<T>[];
+  expanded?: boolean;
+}
+
+interface DiagramNode {
+  id: string;
+  type: string;
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+  autoSize: boolean;
+  resizable: boolean;
+  data: {
+    appName: string;
+    label: string;
+    type: string;
+    dataSource: any[];
+    attribute: { icon: string; url: string };
+  };
+}
+
+interface DiagramEdge {
+  id: string;
+  source: string;
+  sourcePort: string;
+  target: string;
+  targetPort: string;
+  type: string;
+}
+
+interface RouteData {
+  path: string;
+  component: string;
+}
+
+interface ComponentData {
+  name: string;
+  files: string[];
 }
 
 @Component({
   selector: 'app-swimlane-dashboard',
   providers: [provideNgDiagram()],
-  imports: [NbCardModule, NbLayoutModule, NgDiagramComponent, NgDiagramBackgroundComponent, NgDiagramNodeResizeAdornmentComponent, NbIconModule],
+  imports: [
+    NbCardModule,
+    NbLayoutModule,
+    NgDiagramComponent,
+    NgDiagramBackgroundComponent,
+    NgDiagramNodeResizeAdornmentComponent,
+    NbIconModule
+  ],
   templateUrl: './swimlane-dashboard.component.html',
   styleUrl: './swimlane-dashboard.component.scss',
 })
+export class SwimlaneDashboardComponent implements OnInit {
 
-export class SwimlaneDashboardComponent {
-
-  config = {
+  // --- Configuration ---
+  config: NgDiagramConfig = {
     zoom: {
       max: 1,
       zoomToFit: {
@@ -58,206 +108,333 @@ export class SwimlaneDashboardComponent {
         padding: 100,
       },
     },
-  } satisfies NgDiagramConfig;
+  };
 
-  //   backgroundConfig = {
-  //     type: 'grid',
-  //     config: {
-  //      // cellSize: 50,
-  //     },
-  //     // class: 'grid-background',
-  //   };
-
-  // 1. Register the component map
-  nodeTemplateMap = new Map<string, typeof FileTreeNodeComponent | typeof RoutingNodeComponent | typeof ComponentNodeComponent | typeof BrowserNodeComponent>([
+  readonly nodeTemplateMap = new Map<string, any>([
     [NodeTypes.FileTree, FileTreeNodeComponent],
     [NodeTypes.RouteTree, RoutingNodeComponent],
     [NodeTypes.ComponentTree, ComponentNodeComponent],
     [NodeTypes.BrowserTree, BrowserNodeComponent],
   ]);
 
-  model: any = initializeModel();
-  nodes: any[] = [];
-  private readonly injector = inject(Injector);
-  private readonly directoryManager: string = 'DirectoryManager';
-  messages: any = { "action": "getContainerFiles", "path": "" }
-  private directorySubscription: Subscription | undefined
-  dataSource: any
-  appDiagramSchema: any = {};
-  private isWebContainerActive: boolean = false;
-  collectionLogs: string[] = [];
-  samelineLogs!: string;
+  // Define the flow of connections
+  readonly nodeAssociationMap = new Map<NodeTypes, NodeTypes[]>([
+    [NodeTypes.FileTree, [NodeTypes.RouteTree]],
+    [NodeTypes.RouteTree, [NodeTypes.ComponentTree]],
+    [NodeTypes.ComponentTree, [NodeTypes.BrowserTree]],
+  ]);
 
-  constructor(private socketService: SocketService,
+  // --- State ---
+  model = signal(initializeModel({ nodes: [], edges: [] }));
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
+  private projectName!: string;
+
+  private isWebContainerActive = false;
+  private collectionLogs: string[] = [];
+  private samelineLogs: string = ''; // Note: currently unused in UI, but kept for logic
+
+  // Grouped data for diagram generation
+  private appDiagramSchema: Partial<Record<NodeTypes, { dataSource: any[] }>> = {};
+
+  constructor(
+    private socketService: SocketService,
     private webContainerService: WebContainerService,
     private appWorkflowService: AppWorkflowService,
-  ) {
-    // console.log("appObject in swimlane constructor:", this.appWorkflowService.appObject$);
+  ) {}
+
+  ngOnInit(): void {
+    this.setupDataStream();
   }
 
-  ngAfterViewInit() {
-    // this.messages = { "action": "getContainerFiles", "path": 'loginApp5' };
-    // this.socketService.sendMessage(this.directoryManager, this.messages);
-    // const serverReply$ = this.socketService?.on(this.directoryManager);
-    // if (serverReply$) {
-    //   this.directorySubscription = serverReply$.subscribe((response: any) => {
-    //     console.log('Received directorySubscription from server:', response);
-    //     const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
-    //     console.log('formatedTree', formatedTree);
-    //     this.destructringAssignment(formatedTree);
-    //     this.nodeGeneration(); // Generate nodes after processing the file tree and routes
-    //   });
-    // }
-    this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
-      // console.log('Received appDetails in SwimlaneDashboardComponent:', appDetails);
-      if (appDetails && appDetails.data.extraConfig.projectName) {
-        this.messages = { "action": "getContainerFiles", "path": appDetails.data.extraConfig.projectName };
-        this.socketService.sendMessage(this.directoryManager, this.messages);
-        const serverReply$ = this.socketService?.on(this.directoryManager);
-        if (serverReply$) {
-          this.directorySubscription = serverReply$.subscribe((response: any) => {
-            // console.log('Received directorySubscription from server:', response);
-            const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
-            // console.log('formatedTree', formatedTree);
-            if (!this.isWebContainerActive) {
-              this.webContainerService.bootAndRun(response.data[appDetails.data.extraConfig.projectName]['directory']);
-              this.isWebContainerActive = true;
-              this.webContainerService.output$.subscribe(log => {
-                this.appendLog(log);
-              });
-            } else {
-              console.log('WebContainer is already active. Skipping boot.');
-              this.webContainerService.mountFiles(response.data[appDetails.data.extraConfig.projectName]['directory']);
+  /**
+   * Sets up the reactive pipeline: AppDetails -> Socket Request -> Data Processing -> Diagram Generation
+   */
+  private setupDataStream(): void {
+    this.appWorkflowService.appObject$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+
+      // 1. Debounce: Prevent rapid-fire requests if appObject emits quickly
+      debounceTime(300),
+
+      // 2. Filter: Ensure we have valid project details
+      //@ts-ignore
+      filter((appDetails): appDetails is { data: { extraConfig: { projectName: string } } } =>!!appDetails?.data?.extraConfig?.projectName),
+
+      // 3. Side Effect: Send the socket message
+      tap((appDetails) => {
+        //@ts-ignore
+        this.projectName = appDetails.data.extraConfig.projectName;
+        this.socketService.sendMessage('DirectoryManager', {
+          action: "getContainerFiles",
+          path: this.projectName
+        });
+      }),
+
+      // 4. SwitchMap: Listen for the response
+      // This prevents the 'multiple calls' crash if the socket emits multiple status updates.
+      //@ts-ignore
+      switchMap(() => this.socketService.on('DirectoryManager').pipe(
+        take(1),
+        filter(res => !!res?.data) // Ensure the response actually contains data
+      ))
+    ).subscribe({
+      next: (response) => this.handleSocketResponse(response),
+      error: (err) => console.error('Error in data stream:', err)
+    });
+  }
+
+  private handleSocketResponse(response: any): void {
+    if (!this.projectName || !response.data?.[this.projectName]?.directory) {
+      console.warn('Directory not found in response for:', this.projectName);
+      return;
+    }
+
+    const directory = response.data[this.projectName].directory;
+    const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
+    // console.log('Received directory structure:', formatedTree);
+    // Handle WebContainer boot/mount
+    if (!this.isWebContainerActive) {
+      this.webContainerService.bootAndRun(directory);
+      this.isWebContainerActive = true;
+
+      // Subscribe to logs only once
+      this.webContainerService.output$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(log => {
+        this.appendLog(log);
+      });
+    } else {
+      this.webContainerService.mountFiles(directory);
+    }
+
+    // Process Data and Generate Diagram
+    this.processSchemaData(formatedTree);
+    this.generateDiagram();
+  }
+
+  /**
+   * Transforms raw file tree into structured data for each node type
+   */
+  private processSchemaData(formatedTree: TreeNode<FSEntry>[]): void {
+    // 1. Store File Tree
+    this.appDiagramSchema[NodeTypes.FileTree] = { dataSource: formatedTree };
+
+    // 2. Extract Routes
+    const routes = this.extractRoutesFromFileTree(formatedTree);
+    this.appDiagramSchema[NodeTypes.RouteTree] = { dataSource: routes };
+    this.appDiagramSchema[NodeTypes.BrowserTree] = { dataSource: routes }; // Browser tree uses routes as source
+
+    // 3. Extract Components
+    const componentNodes = this.extractComponentNodesFromFileTree(formatedTree);
+    this.appDiagramSchema[NodeTypes.ComponentTree] = { dataSource: componentNodes };
+  }
+
+  /**
+   * Optimized Route Extraction (Pass array by reference)
+   */
+  private extractRoutesFromFileTree(tree: TreeNode<FSEntry>[], parentPath: string = '', output: RouteData[] = []): RouteData[] {
+    for (const node of tree) {
+      const currentPath = `${parentPath}/${node.data.name}`;
+      if (node.data.kind === 'directory' && node.children) {
+        this.extractRoutesFromFileTree(node.children, currentPath, output);
+      } else if (node.data.kind === 'file' && node.data.name.endsWith('.component.ts')) {
+        const componentName = node.data.name.replace('.component.ts', '');
+        output.push({ path: currentPath, component: componentName });
+      }
+    }
+    return output;
+  }
+
+  /**
+   * Optimized Component Extraction (Uses Map for O(N) grouping)
+   */
+  private extractComponentNodesFromFileTree(tree: TreeNode<FSEntry>[], parentPath: string = ''): ComponentData[] {
+    const componentMap = new Map<string, string[]>();
+
+    const traverse = (nodes: TreeNode<FSEntry>[], currentPath: string) => {
+      for (const node of nodes) {
+        const nodePath = `${currentPath}/${node.data.name}`;
+        if (node.data.kind === 'directory' && node.children) {
+          traverse(node.children, nodePath);
+        } else if (node.data.kind === 'file') {
+          const match = node.data.name.match(/(.+)\.(component\.(ts|html|scss))/);
+          if (match) {
+            const componentName = match[1];
+            const files = componentMap.get(componentName) || [];
+            files.push(nodePath);
+            componentMap.set(componentName, files);
+          }
+        }
+      }
+    };
+
+    traverse(tree, parentPath);
+
+    return Array.from(componentMap.entries()).map(([name, files]) => ({ name, files }));
+  }
+
+  /**
+   * Generates Nodes and Edges and updates the Model
+   */
+  private generateDiagram(): void {
+    const nodes: DiagramNode[] = [];
+    const edges: DiagramEdge[] = [];
+
+    // Helper to track nodes by type for edge generation
+    const nodesByType = new Map<NodeTypes, DiagramNode[]>();
+
+    // --- Node Generation ---
+
+    // 1. File Tree Node
+    this.createNode(
+      nodes,
+      NodeTypes.FileTree,
+      this.appDiagramSchema[NodeTypes.FileTree]?.dataSource || [],
+      0, // Column Index
+      0  // Row Index
+    );
+
+    // 2. Route Tree Node
+    this.createNode(
+      nodes,
+      NodeTypes.RouteTree,
+      this.appDiagramSchema[NodeTypes.RouteTree]?.dataSource || [],
+      1, // Column Index
+      0  // Row Index
+    );
+
+    // 3. Component Nodes (Multiple)
+    const components = this.appDiagramSchema[NodeTypes.ComponentTree]?.dataSource || [];
+    components.forEach((comp, index) => {
+      this.createNode(
+        nodes,
+        NodeTypes.ComponentTree,
+        [comp], // Single component data
+        2, // Column Index
+        index,
+        `-${comp.name}` // ID Suffix
+      );
+    });
+
+    // 4. Browser Nodes (Multiple)
+    const routes = this.appDiagramSchema[NodeTypes.BrowserTree]?.dataSource || [];
+    routes.forEach((route, index) => {
+      this.createNode(
+        nodes,
+        NodeTypes.BrowserTree,
+        [route], // Single route data
+        3, // Column Index
+        index,
+        `-${route.path}` // ID Suffix
+      );
+    });
+
+    // Populate nodesByType map for edge generation
+    nodes.forEach(node => {
+      const type = node.type as NodeTypes;
+      if (!nodesByType.has(type)) nodesByType.set(type, []);
+      nodesByType.get(type)!.push(node);
+    });
+
+    // --- Edge Generation ---
+
+    nodesByType.forEach((sourceNodes, sourceType) => {
+      const targetTypes = this.nodeAssociationMap.get(sourceType) || [];
+
+      targetTypes.forEach(targetType => {
+        const targetNodes = nodesByType.get(targetType) || [];
+
+        // Special Logic: Component -> Browser (1-to-1 mapping based on data)
+        if (sourceType === NodeTypes.ComponentTree && targetType === NodeTypes.BrowserTree) {
+          sourceNodes.forEach(sourceNode => {
+            const componentData = sourceNode.data.dataSource[0] as ComponentData;
+            // Find matching browser node
+            const matchingTarget = targetNodes.find(tn => {
+              const routeData = tn.data.dataSource[0] as RouteData;
+              return routeData.component === componentData.name;
+            });
+
+            if (matchingTarget) {
+              edges.push(this.createEdge(sourceNode.id, matchingTarget.id));
             }
-            this.destructringAssignment(formatedTree);
-            this.nodeGeneration(); // Generate nodes after processing the file tree and routes
           });
         }
+        // Default Logic: All-to-All (Mesh) connection between columns
+        else {
+          sourceNodes.forEach(sourceNode => {
+            targetNodes.forEach(targetNode => {
+              edges.push(this.createEdge(sourceNode.id, targetNode.id));
+            });
+          });
+        }
+      });
+    });
+
+    // Update Model
+     //@ts-ignore
+    this.model.set(initializeModel({ nodes, edges }, this.injector));
+  }
+
+  /**
+   * Helper to create a standardized node object
+   */
+  private createNode(
+    nodesList: DiagramNode[],
+    type: NodeTypes,
+    dataSource: any[],
+    colIndex: number,
+    rowIndex: number,
+    idSuffix: string = ''
+  ): void {
+    const id = `id-${type}${idSuffix}`;
+
+    // Calculate Position
+    // X: Base offset + (Column Index * Column Width)
+    // Y: Base offset + (Row Index * Row Spacing)
+    const x = 100 + (colIndex * 400);
+    const y = 100 + (rowIndex * (type === NodeTypes.BrowserTree ? 570 : 370));
+
+    // Specific Size adjustments
+    const width = type === NodeTypes.BrowserTree ? 460 : 360;
+    const height = type === NodeTypes.BrowserTree ? 570 : 320;
+
+    nodesList.push({
+      id,
+      type,
+      position: { x, y },
+      size: { width, height },
+      autoSize: false,
+      resizable: true,
+      data: {
+        appName: this.projectName, // Consider making dynamic
+        label: NodeLabels[type],
+        type: 'rootNode',
+        dataSource,
+        attribute: { icon: 'angular-logo', url: '' }
       }
     });
   }
 
-  destructringAssignment(formatedTree: TreeNode<FSEntry>[]) {
-    this.appDiagramSchema = Object.assign(this.appDiagramSchema, { [NodeTypes.FileTree]: { dataSource: formatedTree } }); // Store the entire tree if needed
-
-    const routes = this.extractRoutesFromFileTree(formatedTree);
-    this.appDiagramSchema = Object.assign(this.appDiagramSchema, { [NodeTypes.RouteTree]: { dataSource: routes } }, { [NodeTypes.BrowserTree]: { dataSource: routes } }); // Store the routes in the schema for later use
-
-    const componentNodes = this.extractComponentNodesFromFileTree(formatedTree);
-    this.appDiagramSchema = Object.assign(this.appDiagramSchema, { [NodeTypes.ComponentTree]: { dataSource: componentNodes } }); // Store the component nodes in the schema for later use
-
-    console.log('App Diagram Schema after destructuring assignment:', this.appDiagramSchema);
-
-
+  private createEdge(sourceId: string, targetId: string): DiagramEdge {
+    return {
+      id: `edge-${sourceId}-${targetId}`,
+      source: sourceId,
+      sourcePort: 'port-right',
+      target: targetId,
+      targetPort: 'port-left',
+      type: 'smoothstep',
+    };
   }
 
-  extractRoutesFromFileTree(tree: TreeNode<FSEntry>[], parentPath: string = ''): any[] {
-    let routes: any[] = [];
-    // extract routes from the file tree and make json structure like this { path: 'routePath', component: 'ComponentName' }
-    for (const node of tree) {
-      const currentPath = `${parentPath}/${node.data.name}`;
-      if (node.data.kind === 'directory') {
-        //@ts-ignore
-        routes = [...routes, ...this.extractRoutesFromFileTree(node.children, currentPath)];
-      } else if (node.data.kind === 'file' && node.data.name.endsWith('.component.ts')) {
-        const componentName = node.data.name.replace('.component.ts', '');
-        //@ts-ignore
-        routes.push({ path: currentPath, component: componentName });
-      }
-    }
-    return routes;
-  }
-
-
-  extractComponentNodesFromFileTree(tree: TreeNode<FSEntry>[], parentPath: string = ''): any[] {
-    // extract component files from the file tree and make json structure like this { name: 'ComponentName', files: ['fileName', 'fileName2'] }
-    let components: any[] = [];
-    for (const node of tree) {
-      const currentPath = `${parentPath}/${node.data.name}`;
-      if (node.data.kind === 'directory') {
-        //@ts-ignore
-        components = [...components, ...this.extractComponentNodesFromFileTree(node.children, currentPath)];
-      } else if (node.data.kind === 'file' && (node.data.name.endsWith('.component.ts') || node.data.name.endsWith('.component.html') || node.data.name.endsWith('.component.scss'))) {
-        //append of files path to the component if the component already exists in the components array otherwise create a new component object and push it to the components array
-        const componentName = node.data.name.replace('.component.ts', '').replace('.component.html', '').replace('.component.scss', '');
-        const existingComponent = components.find(c => c.name === componentName);
-        if (existingComponent) {
-          existingComponent.files.push(currentPath);
-        } else {
-          components.push({ name: componentName, files: [currentPath] });
-        }
-      }
-    }
-    return components;
-  }
-
-  nodeGeneration() {
-    //iterate over enum NodeTypes and generate nodes for each type
-    for (const nodeType in NodeTypes) {
-      // console.log('Generating nodes for type:', NodeTypes[nodeType as keyof typeof NodeTypes]);
-      const dataSource = this.appDiagramSchema[NodeTypes[nodeType as keyof typeof NodeTypes]]?.dataSource || [];
-      //break component tre to sperate nodes for each component
-      if (NodeTypes[nodeType as keyof typeof NodeTypes] === NodeTypes.ComponentTree) {
-        const componentDataSource = this.appDiagramSchema[NodeTypes.ComponentTree]?.dataSource || [];
-        for (const component of componentDataSource) {
-          this.nodes.push({
-            id: `id-${nodeType}-${component.name}`,
-            type: NodeTypes[nodeType as keyof typeof NodeTypes],
-            position: { x: 100 + Object.keys(NodeTypes).indexOf(nodeType) * 400, y: 100 + componentDataSource.indexOf(component) * 370 },
-            size: { width: 360, height: 320 },
-            autoSize: false,
-            resizable: true,
-            data: { appName: 'loginApp5', label: NodeLabels[nodeType as keyof typeof NodeLabels], type: 'rootNode', dataSource: [component], attribute: { icon: 'angular-logo', url: '' } }
-          });
-        }
-        continue;
-      }
-      //breake browser tre to sperate nodes for each route
-      if (NodeTypes[nodeType as keyof typeof NodeTypes] === NodeTypes.BrowserTree) {
-        const routeDataSource = this.appDiagramSchema[NodeTypes.RouteTree]?.dataSource || [];
-        for (const route of routeDataSource) {
-          this.nodes.push({
-            id: `id-${nodeType}-${route.path}`,
-            type: NodeTypes[nodeType as keyof typeof NodeTypes],
-            position: { x: 100 + Object.keys(NodeTypes).indexOf(nodeType) * 400, y: 100 + routeDataSource.indexOf(route) * 570 },
-            size: { width: 860, height: 860 },
-            autoSize: false,
-            resizable: true,  // Enable resizing for the node
-            data: { appName: 'loginApp5', label: NodeLabels[nodeType as keyof typeof NodeLabels], type: 'rootNode', dataSource: [route], attribute: { icon: 'angular-logo', url: '' } }
-          });
-        }
-        continue;
-      }
-
-      this.nodes.push({
-        id: `id-${nodeType}`,
-        type: NodeTypes[nodeType as keyof typeof NodeTypes],
-        position: { x: 100 + Object.keys(NodeTypes).indexOf(nodeType) * 400, y: 100 },
-        size: { width: 360, height: 320 },
-        autoSize: false,
-        resizable: true,
-        data: { appName: 'loginApp5', label: NodeLabels[nodeType as keyof typeof NodeLabels], type: 'rootNode', dataSource: dataSource, attribute: { icon: 'angular-logo', url: '' } }
-      });
-    }
-
-    // console.log('Generated nodes:', this.nodes);
-    this.model = initializeModel({
-      nodes: this.nodes
-    }, this.injector);
-  }
   private appendLog(log: string): void {
     const samelineWords = ['/', '-', '\\', '|', '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
     const timestamp = `[${new Date().toISOString()}]`;
+
     if (samelineWords.includes(log.trim().charAt(0))) {
-      // Handle carriage return: overwrite the last line
-      // console.log('sameline log:', log);
-      this.samelineLogs = log != undefined ? `[client] ${timestamp}: ${log.trim()}` : '';
+      this.samelineLogs = log ? `[client] ${timestamp}: ${log.trim()}` : '';
     } else {
-      if (log != undefined && log.trim() != '') {
+      if (log && log.trim() !== '') {
         this.collectionLogs.push(`[client] ${timestamp}: ${log}`);
       }
     }
-    console.log("this.collectionLogs in swimlane:", this.collectionLogs);
   }
-
 }

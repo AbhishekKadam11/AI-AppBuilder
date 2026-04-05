@@ -122,7 +122,6 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(url => {
         if (url) {
-          console.log('Received new iframe URL:', url);
           this.updateIframeUrl(url);
         }
       });
