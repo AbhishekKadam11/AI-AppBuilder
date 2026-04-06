@@ -12,7 +12,7 @@ import { AppWorkflowService } from '../services/app-workflow.service';
 import { WindowService } from '../services/window.service';
 import { WindowComponent } from '../window/window/window.component';
 import { FooterComponent } from "../common/footer/footer.component";
-import { Router, RouterModule, RouterState } from '@angular/router';
+import { NavigationEnd, Router, RouterModule, RouterState } from '@angular/router';
 import { ConsoleWindowComponent } from '../console-window/console-window.component';
 import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
 import { BrowserWindowComponent } from '../browser-window/browser-window.component';
@@ -127,6 +127,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private storageService: StorageService,
     private webContainerService: WebContainerService,
     private progressControlService: ProgressControlService) {
+
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.isExplorerReady = false; // Resets on every route completion
+    });
+
     // Sidebar menu item click handling
     this.menuService.onItemClick()
       .pipe(
@@ -199,10 +206,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
         if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
           // this.messages = { "action": "getAll", "path": appDetails.projectName };
-          // const state = this.router.routerState.snapshot.url;
-          // if (state === '/workspace') {
-          this.isExplorerReady = true;
-          // }
+          const state = this.router.routerState.snapshot.url;
+          console.log('Router State on appObject$ update:', state);
+          if (state === '/workspace') {
+            this.isExplorerReady = true;
+          }
         }
       })
     );
