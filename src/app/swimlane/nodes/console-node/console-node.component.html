@@ -1,0 +1,28 @@
+<!-- @if (node().data.visibility) { -->
+<ng-diagram-base-node-template [node]="node()">
+  <nb-card class="file-node-card">
+    <nb-card-body class="node-content">
+      <!-- Logo/Icon based on file type -->
+      <!-- <div class="logo-container">
+        <nb-icon [icon]="node().data.data.icon || 'file-text-outline'" status="primary"></nb-icon>
+      </div>
+
+      <div class="details">
+        <span class="file-name">{{ node().data.data.label }}</span>
+        <span class="file-info text-hint">{{ node().data.data.type }}</span>
+      </div> -->
+
+      <!-- Interactive Elements -->
+      <div class="actions">
+        <button nbButton ghost size="tiny" status="info" nbTooltip="Settings">
+          <nb-icon icon="settings-2-outline"></nb-icon>
+        </button>
+        <button nbButton ghost size="tiny" status="danger" (click)="onDelete($event)" nbTooltip="Delete">
+          <nb-icon icon="trash-2-outline"></nb-icon>
+        </button>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</ng-diagram-base-node-template>
+<!-- } -->
+
