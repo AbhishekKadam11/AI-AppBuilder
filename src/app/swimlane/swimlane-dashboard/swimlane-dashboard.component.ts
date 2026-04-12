@@ -1,5 +1,5 @@
 import { Component, inject, Injector, signal, DestroyRef, OnInit } from '@angular/core';
-import { NbCardModule, NbIconModule, NbLayoutModule } from "@nebular/theme";
+import { NbCardModule, NbIconModule, NbLayoutModule, NbSidebarService } from "@nebular/theme";
 import {
   initializeModel,
   NgDiagramBackgroundComponent,
@@ -17,6 +17,7 @@ import { BrowserNodeComponent } from '../nodes/browser-node/browser-node.compone
 import { AppWorkflowService } from '../../services/app-workflow.service';
 import { filter, switchMap, tap, take, debounceTime } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ConsoleNodeComponent } from '../nodes/console-node/console-node.component';
 
 // --- Enums & Constants ---
 
@@ -25,6 +26,7 @@ enum NodeTypes {
   RouteTree = 'routeTree',
   ComponentTree = 'componentTree',
   BrowserTree = 'browserTree',
+  ConsoleTree = 'consoleTree'
 }
 
 const NodeLabels: Record<NodeTypes, string> = {
@@ -32,6 +34,7 @@ const NodeLabels: Record<NodeTypes, string> = {
   [NodeTypes.RouteTree]: 'Routing',
   [NodeTypes.ComponentTree]: 'Component Files',
   [NodeTypes.BrowserTree]: 'Browser window',
+  [NodeTypes.ConsoleTree]: 'Console'
 };
 
 // --- Interfaces ---
@@ -58,6 +61,7 @@ interface DiagramNode {
   data: {
     appName: string;
     label: string;
+    status: boolean;
     type: string;
     dataSource: any[];
     attribute: { icon: string; url: string };
@@ -115,13 +119,22 @@ export class SwimlaneDashboardComponent implements OnInit {
     [NodeTypes.RouteTree, RoutingNodeComponent],
     [NodeTypes.ComponentTree, ComponentNodeComponent],
     [NodeTypes.BrowserTree, BrowserNodeComponent],
+    [NodeTypes.ConsoleTree, ConsoleNodeComponent],
   ]);
 
   // Define the flow of connections
   readonly nodeAssociationMap = new Map<NodeTypes, NodeTypes[]>([
-    [NodeTypes.FileTree, [NodeTypes.RouteTree]],
+    [NodeTypes.FileTree, [NodeTypes.RouteTree, NodeTypes.ConsoleTree]],
     [NodeTypes.RouteTree, [NodeTypes.ComponentTree]],
     [NodeTypes.ComponentTree, [NodeTypes.BrowserTree]],
+  ]);
+
+  readonly nodeSizeMap = new Map<NodeTypes, { width: number; height: number }>([
+    [NodeTypes.FileTree, { width: 360, height: 320 }],
+    [NodeTypes.RouteTree, { width: 360, height: 320 }],
+    [NodeTypes.ComponentTree, { width: 360, height: 320 }],
+    [NodeTypes.BrowserTree, { width: 560, height: 570 }],
+    [NodeTypes.ConsoleTree, { width: 460, height: 360 }],
   ]);
 
   // --- State ---
@@ -137,14 +150,19 @@ export class SwimlaneDashboardComponent implements OnInit {
   // Grouped data for diagram generation
   private appDiagramSchema: Partial<Record<NodeTypes, { dataSource: any[] }>> = {};
 
+
   constructor(
     private socketService: SocketService,
     private webContainerService: WebContainerService,
     private appWorkflowService: AppWorkflowService,
-  ) {}
+    private sidebarService: NbSidebarService,
+  ) { }
 
   ngOnInit(): void {
+    // this.sidebarService.collapse('dynamicSidebar');
     this.setupDataStream();
+    // this.sidebarService.collapse('dynamicSidebar');
+    // this.sidebarService.toggle(false, 'dynamicSidebar');
   }
 
   /**
@@ -159,7 +177,7 @@ export class SwimlaneDashboardComponent implements OnInit {
 
       // 2. Filter: Ensure we have valid project details
       //@ts-ignore
-      filter((appDetails): appDetails is { data: { extraConfig: { projectName: string } } } =>!!appDetails?.data?.extraConfig?.projectName),
+      filter((appDetails): appDetails is { data: { extraConfig: { projectName: string } } } => !!appDetails?.data?.extraConfig?.projectName),
 
       // 3. Side Effect: Send the socket message
       tap((appDetails) => {
@@ -226,6 +244,9 @@ export class SwimlaneDashboardComponent implements OnInit {
     // 3. Extract Components
     const componentNodes = this.extractComponentNodesFromFileTree(formatedTree);
     this.appDiagramSchema[NodeTypes.ComponentTree] = { dataSource: componentNodes };
+
+    // 4. Console Node doesn't require dynamic data for this example, but could be extended similarly
+    this.appDiagramSchema[NodeTypes.ConsoleTree] = { dataSource: [] };
   }
 
   /**
@@ -328,6 +349,15 @@ export class SwimlaneDashboardComponent implements OnInit {
       );
     });
 
+    // 5. Console Node (Single)
+    this.createNode(
+      nodes,
+      NodeTypes.ConsoleTree,
+      this.appDiagramSchema[NodeTypes.ConsoleTree]?.dataSource || [], // No dynamic data for console
+      0, // Column Index
+      2  // Row Index
+    );
+
     // Populate nodesByType map for edge generation
     nodes.forEach(node => {
       const type = node.type as NodeTypes;
@@ -357,6 +387,13 @@ export class SwimlaneDashboardComponent implements OnInit {
               edges.push(this.createEdge(sourceNode.id, matchingTarget.id));
             }
           });
+        } else if (targetType === NodeTypes.ConsoleTree) {
+          sourceNodes.forEach(sourceNode => {
+            targetNodes.forEach(targetNode => {
+              console.log("sourceNode.id: ", sourceNode.id, "targetNode.id: ", targetNode.id)
+              edges.push(this.createEdge(sourceNode.id, targetNode.id, 'port-bottom', 'port-top'));
+            });
+          });
         }
         // Default Logic: All-to-All (Mesh) connection between columns
         else {
@@ -370,7 +407,7 @@ export class SwimlaneDashboardComponent implements OnInit {
     });
 
     // Update Model
-     //@ts-ignore
+    //@ts-ignore
     this.model.set(initializeModel({ nodes, edges }, this.injector));
   }
 
@@ -394,8 +431,9 @@ export class SwimlaneDashboardComponent implements OnInit {
     const y = 100 + (rowIndex * (type === NodeTypes.BrowserTree ? 570 : 370));
 
     // Specific Size adjustments
-    const width = type === NodeTypes.BrowserTree ? 460 : 360;
-    const height = type === NodeTypes.BrowserTree ? 570 : 320;
+    const width = this.nodeSizeMap.get(type)?.width || 360;
+    const height = this.nodeSizeMap.get(type)?.height || 320;
+    const status = type === NodeTypes.ConsoleTree ? false : true; // Example status logic, can be customized
 
     nodesList.push({
       id,
@@ -408,19 +446,20 @@ export class SwimlaneDashboardComponent implements OnInit {
         appName: this.projectName, // Consider making dynamic
         label: NodeLabels[type],
         type: 'rootNode',
+        status,
         dataSource,
         attribute: { icon: 'angular-logo', url: '' }
       }
     });
   }
 
-  private createEdge(sourceId: string, targetId: string): DiagramEdge {
+  private createEdge(sourceId: string, targetId: string, sourcePort: string = 'port-right', targetPort: string = 'port-left'): DiagramEdge {
     return {
       id: `edge-${sourceId}-${targetId}`,
       source: sourceId,
-      sourcePort: 'port-right',
+      sourcePort: sourcePort,
       target: targetId,
-      targetPort: 'port-left',
+      targetPort: targetPort,
       type: 'smoothstep',
     };
   }

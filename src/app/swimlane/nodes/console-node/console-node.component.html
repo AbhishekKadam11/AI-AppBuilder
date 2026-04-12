@@ -1,7 +1,11 @@
-<!-- @if (node().data.visibility) { -->
+@if (node().data.status) {
 <ng-diagram-base-node-template [node]="node()">
-  <nb-card class="file-node-card">
+    <ng-diagram-port id="port-top" type="both" side="top" />
+    <ng-diagram-port id="port-bottom" type="both" side="bottom" />
+
+  <nb-card class="">
     <nb-card-body class="node-content">
+      <app-console-window></app-console-window>
       <!-- Logo/Icon based on file type -->
       <!-- <div class="logo-container">
         <nb-icon [icon]="node().data.data.icon || 'file-text-outline'" status="primary"></nb-icon>
@@ -13,16 +17,16 @@
       </div> -->
 
       <!-- Interactive Elements -->
-      <div class="actions">
+      <!-- <div class="actions">
         <button nbButton ghost size="tiny" status="info" nbTooltip="Settings">
           <nb-icon icon="settings-2-outline"></nb-icon>
         </button>
         <button nbButton ghost size="tiny" status="danger" (click)="onDelete($event)" nbTooltip="Delete">
           <nb-icon icon="trash-2-outline"></nb-icon>
-        </button>
-      </div>
+        </button> -->
+      <!-- </div> -->
     </nb-card-body>
   </nb-card>
 </ng-diagram-base-node-template>
-<!-- } -->
+}
 

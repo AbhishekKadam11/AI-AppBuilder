@@ -190,7 +190,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
       this.isWebContainerActive = true;
     } else {
       console.log('WebContainer is already active. Mounting files.');
-      // this.webContainerService.mountFiles(directory);
+      this.webContainerService.mountFiles(directory);
     }
   }
 

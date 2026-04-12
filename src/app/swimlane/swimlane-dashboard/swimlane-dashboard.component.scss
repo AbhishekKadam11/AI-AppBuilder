@@ -24,3 +24,7 @@
   --ngd-node-stroke-primary-default: nb-theme(color-primary-default);
   --ngd-node-bg-primary-default: nb-theme(color-primary-default);
 }
+
+::ng-deep nb-card {
+  margin: 0px !important;
+}

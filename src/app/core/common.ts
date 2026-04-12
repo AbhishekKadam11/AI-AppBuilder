@@ -24,8 +24,9 @@ type IAttribute = { type: string; label: string; icon: string, url: string };
 
 export type NodeData = {
   appName: string;
-  status: string;
+  status: boolean;
   label: string;
+  type: string;
   description: string;
   tooltip: string;
   dataSource: Record<string, any>[];

@@ -48,7 +48,7 @@ export class ChatShowcaseComponent implements AfterViewInit {
             serverMessage.setServerMessage(response);
             serverMessage.setComponentMessage(response);
             this.messages.update(currentItems => [...new Set([...currentItems, serverMessage.getMessage()])]);
-            if (response.data) {
+            if (response.data && response.data.supervisorMesssage.length !== 0) {
               response.data.uiMessages = this.messages();
               if (response.data.extraConfig && response.data.extraConfig.projectName && serverMessage.componentDetails.projectName !== response.data.extraConfig.projectName) {
                 delete serverMessage.componentDetails.projectName;

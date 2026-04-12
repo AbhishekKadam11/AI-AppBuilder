@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
-import { NgDiagramBaseNodeTemplateComponent, NgDiagramNodeTemplate, type Node } from 'ng-diagram';
+import { NgDiagramBaseNodeTemplateComponent, NgDiagramNodeTemplate, NgDiagramPortComponent, type Node } from 'ng-diagram';
 import { NbIconModule, NbButtonModule, NbCardModule, NbTooltipModule } from '@nebular/theme';
+import { ConsoleWindowComponent } from '../../../console-window/console-window.component';
 
 type IData = { type: string; label: string; icon: string };
 
@@ -14,7 +15,7 @@ export type NodeData = {
 };
 @Component({
   selector: 'app-console-node',
-  imports: [NgDiagramBaseNodeTemplateComponent, NbIconModule, NbButtonModule, NbCardModule, NbTooltipModule],
+  imports: [NgDiagramBaseNodeTemplateComponent, NgDiagramPortComponent, NbIconModule, NbButtonModule, NbCardModule, NbTooltipModule, ConsoleWindowComponent],
   templateUrl: './console-node.component.html',
   styleUrl: './console-node.component.scss',
 })
