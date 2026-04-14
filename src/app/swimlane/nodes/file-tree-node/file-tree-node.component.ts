@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, ElementRef, EventEmitter, HostListener, inject, input, Output, signal, ViewChild } from '@angular/core';
-import { NbButtonModule, NbCardModule, NbCdkMappingModule, NbFormFieldModule, NbIconModule, NbInputModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverDirective, NbPopoverModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule } from "@nebular/theme";
+import { NbButtonModule, NbCardModule, NbCdkMappingModule, NbFormFieldModule, NbIconModule, NbInputModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverDirective, NbPopoverModule, NbSortDirection, NbSortRequest, NbTooltipModule, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule } from "@nebular/theme";
 import {
   NgDiagramBaseNodeTemplateComponent,
   NgDiagramModelService,
   NgDiagramNodeRotateAdornmentComponent,
   NgDiagramNodeSelectedDirective,
+  NgDiagramPortComponent,
+  NgDiagramService,
   type NgDiagramNodeTemplate,
   type Node,
 } from 'ng-diagram'
@@ -18,6 +20,7 @@ import { AppWorkflowService } from '../../../services/app-workflow.service';
 import { FormsModule } from '@angular/forms';
 import { CodeEditorComponent } from '../../../code-display/code-editor.component';
 import { NodeData } from '../../../core/common';
+import { SwimlaneService } from '../../../services/swimlane.service';
 
 interface TreeNode<T> {
   data: T;
@@ -34,7 +37,7 @@ interface FSEntry {
 
 @Component({
   selector: 'app-file-tree-node',
-  imports: [NbCardModule, NbTreeGridModule, NbIconModule, CommonModule, FsIconComponent, NbMenuModule, NbPopoverModule, NbCdkMappingModule, NbInputModule, FormsModule, NbFormFieldModule, NgDiagramBaseNodeTemplateComponent, NbButtonModule],
+  imports: [NbCardModule, NbTreeGridModule, NbIconModule, CommonModule, FsIconComponent, NbMenuModule, NbPopoverModule, NbCdkMappingModule, NbInputModule, FormsModule, NbFormFieldModule, NgDiagramBaseNodeTemplateComponent, NgDiagramPortComponent, NbButtonModule, NbTooltipModule],
   hostDirectives: [
     { directive: NgDiagramNodeSelectedDirective, inputs: ['node'] },
   ],
@@ -70,6 +73,7 @@ export class FileTreeNodeComponent {
   insertNewRowIndicator: string = '';
   private webContainerSubscription: Subscription | undefined;
   private setKind: string = '';
+  private toggleConsoleVisibility = signal(true);
 
   contextMenuItems: NbMenuItem[] = [
     { title: 'View Details', icon: 'eye-outline' },
@@ -78,8 +82,11 @@ export class FileTreeNodeComponent {
   ];
 
   private readonly modelService = inject(NgDiagramModelService);
+  private diagramService = inject(NgDiagramService);
+  private swimlaneService = inject(SwimlaneService);
   readonly panelOpenState = signal(false);
   node = input.required<Node<NodeData>>();
+
 
   constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>,
     private socketService: SocketService,
@@ -129,7 +136,7 @@ export class FileTreeNodeComponent {
     // })
     // );
     this.dataSource = this.dataSourceBuilder.create(this.node().data.dataSource as TreeNode<FSEntry>[]);
-    // console.log('this.node', this.node());
+    console.log('this.node', this.modelService.getNodeById('id-consoleTree'));
   }
 
   updateSort(sortRequest: NbSortRequest): void {
@@ -305,6 +312,12 @@ export class FileTreeNodeComponent {
         }
       });
     }
+  }
+
+  updateNode() {
+    this.toggleConsoleVisibility.update(visible => !visible);
+    this.swimlaneService.setNodeVisibility('id-consoleTree', this.toggleConsoleVisibility());
+
   }
 
   ngOnDestroy(): void {

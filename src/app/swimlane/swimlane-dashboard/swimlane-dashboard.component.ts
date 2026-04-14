@@ -18,6 +18,7 @@ import { AppWorkflowService } from '../../services/app-workflow.service';
 import { filter, switchMap, tap, take, debounceTime } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ConsoleNodeComponent } from '../nodes/console-node/console-node.component';
+import { SwimlaneService } from '../../services/swimlane.service';
 
 // --- Enums & Constants ---
 
@@ -61,10 +62,11 @@ interface DiagramNode {
   data: {
     appName: string;
     label: string;
-    status: boolean;
+    // status: boolean;
     type: string;
     dataSource: any[];
     attribute: { icon: string; url: string };
+    visible?: boolean;
   };
 }
 
@@ -75,6 +77,16 @@ interface DiagramEdge {
   target: string;
   targetPort: string;
   type: string;
+  data?: {
+    label?: string;
+    color?: string;
+    [key: string]: any;
+  };
+  options?: {
+    stroke?: string;
+    strokeWidth?: number;
+    [key: string]: any;
+  };
 }
 
 interface RouteData {
@@ -141,6 +153,7 @@ export class SwimlaneDashboardComponent implements OnInit {
   model = signal(initializeModel({ nodes: [], edges: [] }));
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly swimlaneService = inject(SwimlaneService);
   private projectName!: string;
 
   private isWebContainerActive = false;
@@ -163,6 +176,21 @@ export class SwimlaneDashboardComponent implements OnInit {
     this.setupDataStream();
     // this.sidebarService.collapse('dynamicSidebar');
     // this.sidebarService.toggle(false, 'dynamicSidebar');
+    this.swimlaneService.nodeEvent$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
+      console.log('Node Event:', event);
+
+      const node = this.swimlaneService.getNodeById(event.nodeId);
+      //update model with new node data
+      // this.model.update((model: any) => {
+
+        // const updatedNodes = model.nodes.map((n: any) => n.id === event.nodeId ? { ...n, data: { ...n.data, ...node?.data } } : n);
+        // console.log('Updated Nodes:', updatedNodes);
+        // return { ...model, nodes: updatedNodes };
+      // });
+
+      //@ts-ignore
+      // this.model.set(initializeModel({ nodes: this.swimlaneService.getNodes(), edges: this.swimlaneService.getEdges() as DiagramEdge[] }, this.injector));
+    });
   }
 
   /**
@@ -407,6 +435,7 @@ export class SwimlaneDashboardComponent implements OnInit {
     });
 
     // Update Model
+    this.swimlaneService.initializeDiagramModel(nodes, edges); // Update service with new model data
     //@ts-ignore
     this.model.set(initializeModel({ nodes, edges }, this.injector));
   }
@@ -433,7 +462,7 @@ export class SwimlaneDashboardComponent implements OnInit {
     // Specific Size adjustments
     const width = this.nodeSizeMap.get(type)?.width || 360;
     const height = this.nodeSizeMap.get(type)?.height || 320;
-    const status = type === NodeTypes.ConsoleTree ? false : true; // Example status logic, can be customized
+    const visible = type === NodeTypes.ConsoleTree ? false : true; // Example status logic, can be customized
 
     nodesList.push({
       id,
@@ -446,7 +475,7 @@ export class SwimlaneDashboardComponent implements OnInit {
         appName: this.projectName, // Consider making dynamic
         label: NodeLabels[type],
         type: 'rootNode',
-        status,
+        visible,
         dataSource,
         attribute: { icon: 'angular-logo', url: '' }
       }

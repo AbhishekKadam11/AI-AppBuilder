@@ -1,5 +1,6 @@
-import { Injectable, EventEmitter } from '@angular/core';
+import { Injectable, EventEmitter, Injector, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { initializeModel } from 'ng-diagram';
 
 export interface NodePosition {
   x: number;
@@ -97,6 +98,7 @@ export class SwimlaneService {
   // PRIVATE STATE
   // ============================================
 
+  private readonly injector = inject(Injector);
   private nodesSubject = new BehaviorSubject<DiagramNode[]>([]);
   private edgesSubject = new BehaviorSubject<DiagramEdge[]>([]);
   private selectedNodeSubject = new BehaviorSubject<string | null>(null);
@@ -642,6 +644,17 @@ export class SwimlaneService {
       data,
       timestamp: new Date()
     });
+  }
+
+  public reInitializeDiagramModel(): void {
+    const edges = this.getEdges().map(edge => ({
+      ...edge,
+      data: edge.data || {}
+    }));
+    debugger
+    this.clearDiagram();
+    initializeModel({ nodes: this.getNodes(), edges }, this.injector);
+
   }
 
 }
