@@ -651,10 +651,8 @@ export class SwimlaneService {
       ...edge,
       data: edge.data || {}
     }));
-    debugger
     this.clearDiagram();
     initializeModel({ nodes: this.getNodes(), edges }, this.injector);
-
   }
 
 }

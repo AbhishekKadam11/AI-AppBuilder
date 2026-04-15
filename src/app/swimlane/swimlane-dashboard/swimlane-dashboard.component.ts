@@ -77,6 +77,7 @@ interface DiagramEdge {
   target: string;
   targetPort: string;
   type: string;
+  visible?: boolean;
   data?: {
     label?: string;
     color?: string;
@@ -150,6 +151,7 @@ export class SwimlaneDashboardComponent implements OnInit {
   ]);
 
   // --- State ---
+
   model = signal(initializeModel({ nodes: [], edges: [] }));
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
@@ -162,6 +164,7 @@ export class SwimlaneDashboardComponent implements OnInit {
 
   // Grouped data for diagram generation
   private appDiagramSchema: Partial<Record<NodeTypes, { dataSource: any[] }>> = {};
+  private edgeVisibilityMap: Map<string, boolean> = new Map(); // Track edge visibility by edge ID
 
 
   constructor(
@@ -178,18 +181,23 @@ export class SwimlaneDashboardComponent implements OnInit {
     // this.sidebarService.toggle(false, 'dynamicSidebar');
     this.swimlaneService.nodeEvent$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
       console.log('Node Event:', event);
+      //filters specific edge visibility based on source and target node IDs      if (event.type === 'toggleVisibility' && event.nodeId) {
+        const relatedEdges = this.swimlaneService.getEdgesByNode(event.nodeId);
+        const toBeToggledEdges = relatedEdges.filter(edge => edge.source === event.nodeId || edge.target === event.nodeId);
+      //hide edges where either source or target matches the nodeId from the event
+        toBeToggledEdges.forEach(edge => {
+          const currentVisibility = this.edgeVisibilityMap.get(edge.id) ?? true; // Default to true if not set
+          const newVisibility = !currentVisibility; // Toggle visibility
+          this.edgeVisibilityMap.set(edge.id, newVisibility); // Update the map
+          edge.visible = newVisibility; // Update the edge visibility
+        });
+        
 
-      const node = this.swimlaneService.getNodeById(event.nodeId);
-      //update model with new node data
-      // this.model.update((model: any) => {
+      console.log('Updated edges after visibility toggle:', relatedEdges);
 
-        // const updatedNodes = model.nodes.map((n: any) => n.id === event.nodeId ? { ...n, data: { ...n.data, ...node?.data } } : n);
-        // console.log('Updated Nodes:', updatedNodes);
-        // return { ...model, nodes: updatedNodes };
-      // });
 
-      //@ts-ignore
-      // this.model.set(initializeModel({ nodes: this.swimlaneService.getNodes(), edges: this.swimlaneService.getEdges() as DiagramEdge[] }, this.injector));
+      // const node = this.swimlaneService.getNodeById(event.nodeId);
+
     });
   }
 
@@ -437,7 +445,7 @@ export class SwimlaneDashboardComponent implements OnInit {
     // Update Model
     this.swimlaneService.initializeDiagramModel(nodes, edges); // Update service with new model data
     //@ts-ignore
-    this.model.set(initializeModel({ nodes, edges }, this.injector));
+    this.model.set(initializeModel({ nodes: this.swimlaneService.getNodes() , edges: this.swimlaneService.getEdges() }, this.injector));
   }
 
   /**
