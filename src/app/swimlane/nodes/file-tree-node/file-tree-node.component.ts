@@ -34,7 +34,6 @@ interface FSEntry {
   items?: number;
 }
 
-
 @Component({
   selector: 'app-file-tree-node',
   imports: [NbCardModule, NbTreeGridModule, NbIconModule, CommonModule, FsIconComponent, NbMenuModule, NbPopoverModule, NbCdkMappingModule, NbInputModule, FormsModule, NbFormFieldModule, NgDiagramBaseNodeTemplateComponent, NgDiagramPortComponent, NbButtonModule, NbTooltipModule],
@@ -73,7 +72,7 @@ export class FileTreeNodeComponent {
   insertNewRowIndicator: string = '';
   private webContainerSubscription: Subscription | undefined;
   private setKind: string = '';
-  private toggleConsoleVisibility = signal(true);
+  private toggleConsoleVisibility = signal(false);
 
   contextMenuItems: NbMenuItem[] = [
     { title: 'View Details', icon: 'eye-outline' },

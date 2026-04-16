@@ -65,10 +65,8 @@ export class BrowserNodeComponent {
   }
 
    private updateIframeUrl(baseUrl: string): void {
-
     const path = this.node().data.dataSource[0]['component'] || '';
     const appUrl = baseUrl + '/' + path;
-    console.log('Updating iframe URL to:', appUrl);
     this.iframeUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(appUrl));
   }
 }

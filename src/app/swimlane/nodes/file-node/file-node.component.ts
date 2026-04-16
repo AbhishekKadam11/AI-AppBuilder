@@ -1,16 +1,7 @@
 import { Component, input } from '@angular/core';
-import { NgDiagramBaseNodeTemplateComponent, NgDiagramNodeTemplate, type Node } from 'ng-diagram';
+import { NgDiagramBaseNodeTemplateComponent, type Node } from 'ng-diagram';
 import { NbIconModule, NbButtonModule, NbCardModule, NbTooltipModule } from '@nebular/theme';
-
-type IData = { type: string; label: string; icon: string };
-
-export type NodeData = {
-  name: string;
-  status: string;
-  description: string;
-  tooltip: string;
-  data: IData;
-};
+import { NodeData } from '../../../core/common';
 
 @Component({
   selector: 'app-file-node',

@@ -1,10 +1,12 @@
 import { Component, inject, Injector, signal, DestroyRef, OnInit } from '@angular/core';
-import { NbCardModule, NbIconModule, NbLayoutModule, NbSidebarService } from "@nebular/theme";
+import { NbCardModule, NbIconModule, NbLayoutModule } from "@nebular/theme";
 import {
+  Edge,
   initializeModel,
   NgDiagramBackgroundComponent,
   NgDiagramComponent,
   NgDiagramConfig,
+  NgDiagramModelService,
   NgDiagramNodeResizeAdornmentComponent,
   provideNgDiagram
 } from 'ng-diagram';
@@ -156,6 +158,7 @@ export class SwimlaneDashboardComponent implements OnInit {
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly swimlaneService = inject(SwimlaneService);
+  private readonly modelService = inject(NgDiagramModelService);
   private projectName!: string;
 
   private isWebContainerActive = false;
@@ -164,41 +167,16 @@ export class SwimlaneDashboardComponent implements OnInit {
 
   // Grouped data for diagram generation
   private appDiagramSchema: Partial<Record<NodeTypes, { dataSource: any[] }>> = {};
-  private edgeVisibilityMap: Map<string, boolean> = new Map(); // Track edge visibility by edge ID
-
 
   constructor(
     private socketService: SocketService,
     private webContainerService: WebContainerService,
     private appWorkflowService: AppWorkflowService,
-    private sidebarService: NbSidebarService,
   ) { }
 
   ngOnInit(): void {
-    // this.sidebarService.collapse('dynamicSidebar');
     this.setupDataStream();
-    // this.sidebarService.collapse('dynamicSidebar');
-    // this.sidebarService.toggle(false, 'dynamicSidebar');
-    this.swimlaneService.nodeEvent$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
-      console.log('Node Event:', event);
-      //filters specific edge visibility based on source and target node IDs      if (event.type === 'toggleVisibility' && event.nodeId) {
-        const relatedEdges = this.swimlaneService.getEdgesByNode(event.nodeId);
-        const toBeToggledEdges = relatedEdges.filter(edge => edge.source === event.nodeId || edge.target === event.nodeId);
-      //hide edges where either source or target matches the nodeId from the event
-        toBeToggledEdges.forEach(edge => {
-          const currentVisibility = this.edgeVisibilityMap.get(edge.id) ?? true; // Default to true if not set
-          const newVisibility = !currentVisibility; // Toggle visibility
-          this.edgeVisibilityMap.set(edge.id, newVisibility); // Update the map
-          edge.visible = newVisibility; // Update the edge visibility
-        });
-        
-
-      console.log('Updated edges after visibility toggle:', relatedEdges);
-
-
-      // const node = this.swimlaneService.getNodeById(event.nodeId);
-
-    });
+    this.setupEventListeners();
   }
 
   /**
@@ -235,6 +213,18 @@ export class SwimlaneDashboardComponent implements OnInit {
     ).subscribe({
       next: (response) => this.handleSocketResponse(response),
       error: (err) => console.error('Error in data stream:', err)
+    });
+  }
+
+  setupEventListeners(): void {
+    this.swimlaneService.nodeEvent$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
+      const relatedEdges = this.swimlaneService.getEdgesByNode(event.nodeId);
+      const toBeToggledEdges = relatedEdges.filter(edge => edge.source === event.nodeId || edge.target === event.nodeId);
+      if (!event.data?.visible) {
+        this.modelService.deleteEdges(toBeToggledEdges.map(edge => edge.id)); // Remove edges from the model to hide them
+      } else {
+        this.modelService.addEdges(toBeToggledEdges as Edge<object>[]); // Re-add edges to the model to show them
+      }
     });
   }
 
@@ -445,7 +435,7 @@ export class SwimlaneDashboardComponent implements OnInit {
     // Update Model
     this.swimlaneService.initializeDiagramModel(nodes, edges); // Update service with new model data
     //@ts-ignore
-    this.model.set(initializeModel({ nodes: this.swimlaneService.getNodes() , edges: this.swimlaneService.getEdges() }, this.injector));
+    this.model.set(initializeModel({ nodes: this.swimlaneService.getNodes(), edges: this.swimlaneService.getEdges() }, this.injector));
   }
 
   /**
