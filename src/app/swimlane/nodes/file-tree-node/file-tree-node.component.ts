@@ -159,17 +159,8 @@ export class FileTreeNodeComponent {
   onRowClick(row: any) {
     if (row && row.data && row.data.kind !== 'directory') {
       this.webContainerService.webContainerFileContent(row.data.path.replace(/\\/g, '/')).then((fileData: string) => {
-        this.currentMaxZIndex.update(z => z + 1);
-        this.windowService.openWindow({
-          title: row.data.name,
-          contentComponent: CodeEditorComponent, // Pass the component class to render
-          data: { fileDetails: { fileContent: fileData, filePath: row.data.path.replace(/\\/g, '/') } },
-          placeholder: 'h-full w-full col-start-1 col-end-2 row-start-1 row-span-2',
-          isMaximized: signal(true),
-          zIndex: signal(this.currentMaxZIndex())
-        });
-      }, error => {
-        console.log('onRowClick error', error);
+        console.log('File content received for', row.data.path, fileData);
+        this.modelService.updateNodeData('id-codeEditorTree', { dataSource: [{ fileContent: fileData, filePath: row.data.path.replace(/\\/g, '/') }], label: row.data.name });
       });
     }
   }
@@ -316,7 +307,6 @@ export class FileTreeNodeComponent {
   updateNode() {
     this.toggleConsoleVisibility.update(visible => !visible);
     this.swimlaneService.setNodeVisibility('id-consoleTree', this.toggleConsoleVisibility());
-
   }
 
   ngOnDestroy(): void {

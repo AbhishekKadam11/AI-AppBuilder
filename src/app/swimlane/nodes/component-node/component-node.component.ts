@@ -1,19 +1,22 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { NbCardModule, NbIconModule, NbListModule, NbTagModule } from '@nebular/theme';
 import {
   NgDiagramBaseNodeTemplateComponent,
   NgDiagramModelService,
   NgDiagramNodeRotateAdornmentComponent,
   NgDiagramNodeSelectedDirective,
+  NgDiagramPortComponent,
   type NgDiagramNodeTemplate,
   type Node,
 } from 'ng-diagram'
 import { NodeData } from '../../../core/common';
 import { CommonModule } from '@angular/common';
+import { WebContainerService } from '../../../services/web-container.service';
+import { SwimlaneService } from '../../../services/swimlane.service';
 
 @Component({
   selector: 'app-component-node',
-  imports: [NbCardModule, NgDiagramBaseNodeTemplateComponent, NbListModule, NbTagModule, CommonModule, NbIconModule],
+  imports: [NbCardModule, NgDiagramBaseNodeTemplateComponent, NgDiagramPortComponent, NbListModule, NbTagModule, CommonModule, NbIconModule],
   hostDirectives: [
     { directive: NgDiagramNodeSelectedDirective, inputs: ['node'] },
   ],
@@ -23,11 +26,21 @@ import { CommonModule } from '@angular/common';
 export class ComponentNodeComponent {
   node = input.required<Node<NodeData>>();
   routes = [];
+  private readonly webContainerService = inject(WebContainerService);
+  private readonly modelService = inject(NgDiagramModelService);
+  private readonly swimlaneService = inject(SwimlaneService);
 
-  constructor(private modelService: NgDiagramModelService) { }
+  constructor() { }
 
-  selectRoute(route: any) {
-    console.log('Selected route:', route);
-    // You can add your logic here to handle the selected route
+  onRowClick(filepath: string) {
+    if (filepath !== '') {
+      this.webContainerService.webContainerFileContent(filepath.replace(/\\/g, '/').split('/').slice(2).join('/')).then((fileData: string) => {
+        this.modelService.updateNodeData('id-codeEditorTree', { dataSource: [{ fileContent: fileData, filePath: filepath.replace(/\\/g, '/') }], label: filepath.split("/").pop() });
+        // const relatedEdges = this.swimlaneService.getEdgesByNode(this.node().id);
+        // console.log('Related edges for node', this.node().id, relatedEdges);
+      }).catch((error) => {
+        console.error('Error fetching file content for', filepath, error);
+      });
+    }
   }
 }

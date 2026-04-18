@@ -1,5 +1,7 @@
 <div class="flex flex-col w-full overflow-hidden h-auto px-3 py-2">
   <ng-diagram-base-node-template [node]="node()">
+    <ng-diagram-port id="port-top" type="both" side="top" />
+    <ng-diagram-port id="port-bottom" type="both" side="bottom" />
     <nb-card class="node-card">
       <nb-card-header>
         <nb-tag status="info" appearance="filled" [text]="node().data.dataSource[0]['name']"></nb-tag>
@@ -7,17 +9,18 @@
       <nb-card-body class="node-body">
         <!-- {{node().data.dataSource[0]['name']}} -->
         <!-- <nb-list> -->
-          <span *ngFor=" let component of node().data.dataSource;">
-            <!-- {{component['name']}} -->
-           <!-- <nb-icon icon="arrow-ios-forward-outline"></nb-icon> <strong class="text-normal" (click)="selectRoute(file)">{{ file['name'] }}</strong> -->
+        <span *ngFor=" let component of node().data.dataSource;">
+          <!-- {{component['name']}} -->
+          <!-- <nb-icon icon="arrow-ios-forward-outline"></nb-icon> <strong class="text-normal" (click)="selectRoute(file)">{{ file['name'] }}</strong> -->
           <nb-list>
-           <nb-list-item *ngFor=" let file of component['files'];">
-           <nb-icon icon="arrow-ios-forward-outline"></nb-icon> <strong class="text-normal" (click)="selectRoute(file)">{{ file.split("/").pop() }}</strong>
+            <nb-list-item *ngFor=" let file of component['files'];">
+              <nb-icon icon="arrow-ios-forward-outline"></nb-icon> <strong class="text-normal"
+                (dblclick)="onRowClick(file)">{{ file.split("/").pop() }}</strong>
 
-          </nb-list-item>
-        </nb-list>
-        <!-- </nb-list-item> -->
-         </span>
+            </nb-list-item>
+          </nb-list>
+          <!-- </nb-list-item> -->
+        </span>
         <!-- </nb-list> -->
       </nb-card-body>
     </nb-card>

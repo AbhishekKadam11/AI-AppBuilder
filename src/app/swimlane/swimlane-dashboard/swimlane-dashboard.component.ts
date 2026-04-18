@@ -21,6 +21,7 @@ import { filter, switchMap, tap, take, debounceTime } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ConsoleNodeComponent } from '../nodes/console-node/console-node.component';
 import { SwimlaneService } from '../../services/swimlane.service';
+import { CodeEditorNodeComponent } from '../nodes/code-editor-node/code-editor-node.component';
 
 // --- Enums & Constants ---
 
@@ -29,7 +30,8 @@ enum NodeTypes {
   RouteTree = 'routeTree',
   ComponentTree = 'componentTree',
   BrowserTree = 'browserTree',
-  ConsoleTree = 'consoleTree'
+  ConsoleTree = 'consoleTree',
+  CodeEditorTree = 'codeEditorTree'
 }
 
 const NodeLabels: Record<NodeTypes, string> = {
@@ -37,7 +39,8 @@ const NodeLabels: Record<NodeTypes, string> = {
   [NodeTypes.RouteTree]: 'Routing',
   [NodeTypes.ComponentTree]: 'Component Files',
   [NodeTypes.BrowserTree]: 'Browser window',
-  [NodeTypes.ConsoleTree]: 'Console'
+  [NodeTypes.ConsoleTree]: 'Console',
+  [NodeTypes.CodeEditorTree]: 'Code Editor'
 };
 
 // --- Interfaces ---
@@ -135,13 +138,14 @@ export class SwimlaneDashboardComponent implements OnInit {
     [NodeTypes.ComponentTree, ComponentNodeComponent],
     [NodeTypes.BrowserTree, BrowserNodeComponent],
     [NodeTypes.ConsoleTree, ConsoleNodeComponent],
+    [NodeTypes.CodeEditorTree, CodeEditorNodeComponent]
   ]);
 
   // Define the flow of connections
   readonly nodeAssociationMap = new Map<NodeTypes, NodeTypes[]>([
-    [NodeTypes.FileTree, [NodeTypes.RouteTree, NodeTypes.ConsoleTree]],
-    [NodeTypes.RouteTree, [NodeTypes.ComponentTree]],
-    [NodeTypes.ComponentTree, [NodeTypes.BrowserTree]],
+    [NodeTypes.FileTree, [NodeTypes.RouteTree, NodeTypes.ConsoleTree, NodeTypes.CodeEditorTree]],
+    [NodeTypes.RouteTree, [NodeTypes.ComponentTree, NodeTypes.CodeEditorTree]],
+    [NodeTypes.ComponentTree, [NodeTypes.BrowserTree, NodeTypes.CodeEditorTree]],
   ]);
 
   readonly nodeSizeMap = new Map<NodeTypes, { width: number; height: number }>([
@@ -150,6 +154,7 @@ export class SwimlaneDashboardComponent implements OnInit {
     [NodeTypes.ComponentTree, { width: 360, height: 320 }],
     [NodeTypes.BrowserTree, { width: 560, height: 570 }],
     [NodeTypes.ConsoleTree, { width: 460, height: 360 }],
+    [NodeTypes.CodeEditorTree, { width: 560, height: 570 }],
   ]);
 
   // --- State ---
@@ -273,6 +278,9 @@ export class SwimlaneDashboardComponent implements OnInit {
 
     // 4. Console Node doesn't require dynamic data for this example, but could be extended similarly
     this.appDiagramSchema[NodeTypes.ConsoleTree] = { dataSource: [] };
+
+    // 5. Code Editor Node doesn't require dynamic data for this example, but could be extended similarly
+    this.appDiagramSchema[NodeTypes.CodeEditorTree] = { dataSource: [] };
   }
 
   /**
@@ -384,6 +392,15 @@ export class SwimlaneDashboardComponent implements OnInit {
       2  // Row Index
     );
 
+    // 6. Code Editor Node (Single)
+    this.createNode(
+      nodes,
+      NodeTypes.CodeEditorTree,
+      this.appDiagramSchema[NodeTypes.CodeEditorTree]?.dataSource || [], // No dynamic data for code editor
+      1, // Column Index
+      2  // Row Index
+    );
+
     // Populate nodesByType map for edge generation
     nodes.forEach(node => {
       const type = node.type as NodeTypes;
@@ -416,7 +433,13 @@ export class SwimlaneDashboardComponent implements OnInit {
         } else if (targetType === NodeTypes.ConsoleTree) {
           sourceNodes.forEach(sourceNode => {
             targetNodes.forEach(targetNode => {
-              console.log("sourceNode.id: ", sourceNode.id, "targetNode.id: ", targetNode.id)
+
+              edges.push(this.createEdge(sourceNode.id, targetNode.id, 'port-bottom', 'port-top'));
+            });
+          });
+        } else if (targetType === NodeTypes.CodeEditorTree) {
+          sourceNodes.forEach(sourceNode => {
+            targetNodes.forEach(targetNode => {
               edges.push(this.createEdge(sourceNode.id, targetNode.id, 'port-bottom', 'port-top'));
             });
           });

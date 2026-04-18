@@ -1,12 +1,10 @@
 @if (node().data.dataSource.length>0 && node().data.dataSource[0]['fileContent']) {
-  test {{node().data.dataSource[0]['fileContent']}}
 <ng-diagram-base-node-template [node]="node()">
   <ng-diagram-port id="port-top" type="both" side="top" />
   <ng-diagram-port id="port-bottom" type="both" side="bottom" />
-
-  <nb-card class="">
+  <nb-card class="node-card">
     <nb-card-body class="node-content">
-      <app-code-editor [fileDetails]="node().data.dataSource[0]['fileContent']"></app-code-editor>
+      <app-code-editor [fileDetails]="node().data.dataSource[0]"></app-code-editor>
     </nb-card-body>
   </nb-card>
 </ng-diagram-base-node-template>

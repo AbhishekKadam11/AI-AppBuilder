@@ -21,11 +21,8 @@ export class CodeEditorNodeComponent {
 
   constructor() {
     this.swimlaneService.nodeEvent$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
-      console.log('CodeEditorNodeComponent Node Event:', event);
-
       this.node().data.visible = this.swimlaneService.getNodeById(event.nodeId)?.data.visible ?? this.node().data.visible; // Update visibility based on the event's nodeId
     });
-    
   }
 
   onDelete(event: MouseEvent) {
