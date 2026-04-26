@@ -33,7 +33,6 @@ export class ExtensionsComponent implements OnDestroy {
   apiPath = 'userPreferences/extensions';
   userPreferences!: any;
 
-
   constructor(private themeService: NbThemeService, private apiService: ApiService, private toastrService: NbToastrService, private storageService: StorageService) {
     this.apiService.get(this.apiPath).subscribe((response: any) => {
       this.commonStatusCardsSet = response;
@@ -45,6 +44,9 @@ export class ExtensionsComponent implements OnDestroy {
         .pipe(takeWhile(() => this.alive))
         .subscribe((theme: any) => {
           this.statusCards = this.statusCardsByThemes[theme.value] || this.statusCardsByThemes['default'];
+          this.userPreferences = this.statusCards.filter((card: any) => card.active).map((card: any) => card.id);
+          this.storeUserExtensionPreference();
+          // this.storageService.setAppExtension(this.statusCards);
         });
     }, (error: any) => {
       console.error(error);
@@ -52,12 +54,12 @@ export class ExtensionsComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.alive = false;
   }
   save() {
-    console.log("post statusCards ", this.statusCards);
+    // console.log("post statusCards ", this.statusCards);
     this.apiService.post(this.apiPath, { extensions: this.statusCards }).subscribe((response: any) => {
-     // console.log("post commonStatusCardsSet ", response);
+      this.userPreferences = this.statusCards.filter((card: any) => card.active).map((card: any) => card.id);
+      this.storeUserExtensionPreference();
       this.toastrService.show('Success', `User preferences updated successfully`, { status: 'success' });
     }, (error: any) => {
       console.log(error);
@@ -65,6 +67,16 @@ export class ExtensionsComponent implements OnDestroy {
     });
   }
   cancel() {
+  }
+
+  storeUserExtensionPreference() {
+    const currentUser = this.storageService.getItem('user');
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      userData.active_extensions = this.userPreferences;
+      this.storageService.setItem('user', JSON.stringify(userData));
+    }
+    return;
   }
 
 
