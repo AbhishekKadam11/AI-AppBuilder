@@ -1,74 +1,134 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID, OnDestroy } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { isPlatformBrowser } from '@angular/common';
-import { Observable } from 'rxjs/internal/Observable';
-import { Subject } from 'rxjs/internal/Subject';
+import { Observable, Subject } from 'rxjs'; // Fixed imports (removed /internal)
 import { environment } from '../../environments/environment';
 
 @Injectable({
-    providedIn: 'root',
+  providedIn: 'root',
 })
-export class SocketService {
+export class SocketService implements OnDestroy {
+  private isBrowser = false;
+  // Store multiple sockets using a Map, keyed by namespace/projectId
+  private sockets = new Map<string, Socket>();
 
-    private isBrowser = false;
-    private socket!: Socket;
-    public socketStatus = new Subject<any>();
+  public socketStatus = new Subject<{ namespace: string; connected: boolean; error?: string }>();
 
-    constructor(@Inject(PLATFORM_ID) private platformId: Object) {
-        // Initialize the Socket.IO connection with the server address
-        this.isBrowser = isPlatformBrowser(this.platformId)
-        if (this.isBrowser) {
-            this.socket = io(environment.socketUrl, { transports: ['websocket'], autoConnect: true, timeout: 20000 });
-        }
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+    this.initSocketConnection();
+  }
+
+  ngOnDestroy(): void {
+    // Clean up all sockets when the service is destroyed
+    this.sockets.forEach((socket) => {
+      socket.removeAllListeners();
+      socket.disconnect();
+    });
+    this.sockets.clear();
+    this.socketStatus.complete();
+  }
+
+  private initSocketConnection() {
+    if (this.isBrowser && environment.activeSocketNamespace?.length > 0) {
+      for (const namespace of environment.activeSocketNamespace) {
+        this.getOrCreateSocket(namespace);
+      }
+    }
+  }
+
+  /**
+   * Core method to get an existing socket or create a new one for a namespace
+   */
+  private getOrCreateSocket(namespace: string): Socket | null {
+    if (!this.isBrowser) return null;
+
+    // Return existing socket if already connected/connecting
+    if (this.sockets.has(namespace)) {
+      return this.sockets.get(namespace)!;
     }
 
-    public connectSocket(projectId: string) {
-        if (this.isBrowser && this.socket) {
-            //@ts-ignore
-            this.socket.nsp = projectId; //'/projectId';
-            this.socket.on('connect', () => {
-                console.log(`socket ${projectId} connected`);
-                this.socketStatus.next({ connected: true });
-            });
+    // Create new socket for the specific namespace
+    const url = `${environment.socketUrl}${namespace}`;
+    const socket = io(url, {
+      transports: ['websocket'],
+      autoConnect: true,
+      timeout: 20000,
+    });
 
-            this.socket.on('connect_error', (err: any) => {
-                console.log("connect_error=>", err.message);
-                console.log("connect_error_description=>", err?.description);
-                this.socketStatus.next({ connected: false, error: err.message });
-            });
+    // Attach listeners once during creation, not on every connect call
+    socket.on('connect', () => {
+      console.log(`Socket [${namespace}] connected`);
+      this.socketStatus.next({ namespace, connected: true });
+    });
 
-            this.socket.on('disconnect', (reason: any, details: any) => {
-                console.log("disconnect_reason=>", reason);
-                console.log("disconnect_message=>", details.message);
-                this.socketStatus.next({ connected: false, error: details.message });
-            });
-        }
+    socket.on('connect_error', (err: Error) => {
+      console.error(`Socket [${namespace}] connect_error:`, err.message);
+      this.socketStatus.next({ namespace, connected: false, error: err.message });
+    });
+
+    socket.on('disconnect', (reason: string) => {
+      console.warn(`Socket [${namespace}] disconnected:`, reason);
+      this.socketStatus.next({ namespace, connected: false, error: reason });
+    });
+
+    this.sockets.set(namespace, socket);
+    return socket;
+  }
+
+  /**
+   * Public method to ensure a socket is connected to a specific project/namespace
+   */
+  public connectSocket(projectId: string): void {
+    this.getOrCreateSocket(projectId);
+  }
+
+  public sendMessage(event: string, message: any, namespace?: string): void {
+    const nsp = namespace || environment.activeSocketNamespace?.[0];
+    if (!nsp) {
+      console.error('No namespace provided and no default namespace configured.');
+      return;
     }
 
-    // Method to send a message to the server
-    public sendMessage(event: string, message: any) {
-        if(this.socket)
-        this.socket.emit(event, message);
+    const socket = this.sockets.get(nsp);
+    if (socket) {
+      socket.emit(event, message);
+    } else {
+      console.warn(`Socket namespace [${nsp}] not initialized. Cannot emit event: ${event}`);
+    }
+  }
+
+  public on(eventName: string, namespace?: string): Observable<any> {
+    const nsp = namespace || environment.activeSocketNamespace?.[0];
+
+    if (!this.isBrowser || !nsp) {
+      return new Observable(); // Return empty observable if not in browser or no namespace
     }
 
-    // Method to listen for incoming messages from the server
-    // public onEvent(event: string): Observable<any> {
-    //     return new Observable((observer) => {
-    //         this.socket.on(event, (data: any) => {
-    //             observer.next(data);
-    //         });
-    //     });
-    // }
+    const socket = this.getOrCreateSocket(nsp);
 
-    // Method to listen for an event
-    on(eventName: string): Observable<any> | undefined {
-        if (this.isBrowser && this.socket) {
-            return new Observable((observer) => {
-                this.socket.on(eventName, (data: any) => {
-                    observer.next(data);
-                });
-            });
-        }
-        return undefined;
+    return new Observable((observer) => {
+      if (!socket) {
+        observer.complete();
+        return;
+      }
+
+      const handler = (data: any) => observer.next(data);
+      socket.on(eventName, handler);
+
+      // Return teardown function to prevent memory leaks when observable is unsubscribed
+      return () => {
+        socket.off(eventName, handler);
+      };
+    });
+  }
+
+  public disconnectSocket(namespace: string): void {
+    const socket = this.sockets.get(namespace);
+    if (socket) {
+      socket.removeAllListeners();
+      socket.disconnect();
+      this.sockets.delete(namespace);
     }
+  }
 }
