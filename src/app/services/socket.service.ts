@@ -116,7 +116,6 @@ export class SocketService implements OnDestroy {
       const handler = (data: any) => observer.next(data);
       socket.on(eventName, handler);
 
-      // Return teardown function to prevent memory leaks when observable is unsubscribed
       return () => {
         socket.off(eventName, handler);
       };

@@ -8,13 +8,13 @@ import { StorageService } from '../../services/storage.service';
 type Platforms = 'client' | 'server';
 
 interface IUserPreferences {
-    logLevel: 'info' | 'debug' | 'error' | 'off';
-    captureLogs: boolean;
-    captureLevels?: string[];
+  logLevel: 'info' | 'debug' | 'error' | 'off';
+  captureLogs: boolean;
+  captureLevels?: string[];
 }
 
-type ICaptureLogs ={
-    [K in Platforms]: IUserPreferences 
+type ICaptureLogs = {
+  [K in Platforms]: IUserPreferences
 }
 
 
@@ -38,7 +38,7 @@ export class PreferencesComponent {
     if (userPreferences) {
       this.userPreferences = JSON.parse(userPreferences).preferences;
     }
-  
+
     this.userPreferences = {
       client: {
         logLevel: 'info',
@@ -54,10 +54,10 @@ export class PreferencesComponent {
 
   save() {
     // console.log(this.userPreferences)
-    this.apiService.post(this.apiPath, { userPreferences: this.userPreferences }).subscribe((response: any)=>{
-      console.log(response);
+    this.apiService.post(this.apiPath, { userPreferences: this.userPreferences }).subscribe((response: any) => {
+      // console.log(response);
       this.storeUserPreference();
-       this.toastrService.show('success', `User preferences updated successfully`, { status: 'success' });
+      this.toastrService.show('success', `User preferences updated successfully`, { status: 'success' });
     }, (error: any) => {
       console.error(error);
       this.toastrService.show('danger', `Unable to update user preferences`, { status: 'danger' });
@@ -66,7 +66,7 @@ export class PreferencesComponent {
   cancel() {
   }
 
-   storeUserPreference() {
+  storeUserPreference() {
     const currentUser = this.storageService.getItem('user');
     if (currentUser) {
       const userData = JSON.parse(currentUser);
