@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, inject, signal, WritableSignal, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ChatShowcaseService } from '../services/chat-showcase.service';
-import { NbChatModule, NbIconModule } from '@nebular/theme';
+import { NbChatModule, NbIconModule, NbLayoutModule } from '@nebular/theme';
 import { SocketService } from '../services/socket.service';
 import { MessageSchema } from '../core/message-schema';
 import { ProgressControlService } from '../services/progress-control.service';
@@ -13,10 +13,11 @@ import { JiraGraberService } from '../services/jira-graber.service';
 @Component({
   selector: 'app-chat-showcase',
   standalone: true,
-  imports: [NbChatModule, NbIconModule, ChatFormComponent],
+  imports: [NbChatModule, NbIconModule, ChatFormComponent, NbLayoutModule],
   templateUrl: './chat-showcase.component.html',
   styleUrl: './chat-showcase.component.scss'
 })
+
 export class ChatShowcaseComponent implements AfterViewInit {
   messages: WritableSignal<IChatMessage[]> = signal([]);
   droppedFiles: any[] = [];
@@ -50,6 +51,7 @@ export class ChatShowcaseComponent implements AfterViewInit {
       text: event.message,
       type: this.droppedFiles.length > 0 ? 'file' : 'text',
       files: this.droppedFiles,
+      // user: { name: event?.user.name, avatar: event?.user.avatar },
     });
 
     this.addMessage(this.messageSchema.getMessage());
@@ -123,7 +125,7 @@ export class ChatShowcaseComponent implements AfterViewInit {
     ).subscribe((response: any) => {
       console.log("JiraListener response==>", response)
       if (Object.keys(response).length > 0) {
-        this.handleServerResponse(response);
+        this.updateMessagesFromExtension(response);
       }
     });
   }
@@ -177,5 +179,15 @@ export class ChatShowcaseComponent implements AfterViewInit {
   /** Reusable signal updater */
   private addMessage(message: IChatMessage): void {
     this.messages.update(current => [...new Set([...current, message])]);
+  }
+
+  private updateMessagesFromExtension(response: any) {
+    const appProjectName = this.appObject?.data?.extraConfig?.projectName;
+    if (!appProjectName) {
+      return;
+    }
+    if (response.projectName === appProjectName) {
+      this.sendMessage(response);
+    }
   }
 }

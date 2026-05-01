@@ -1,7 +1,7 @@
 import { inject, Injectable, OnDestroy } from '@angular/core';
 import { StorageService } from './storage.service';
 import { SocketService } from './socket.service';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +15,8 @@ export class JiraGraberService implements OnDestroy {
   private socketSubscription?: Subscription;
   private serverReplySubscription?: Subscription;
   private readonly jiraSocketNamespace: string = '/jiraId';
+  private jiraResponseSubject = new BehaviorSubject<any>({});
+  public jiraResponse$ = this.jiraResponseSubject.asObservable();
 
   constructor() {
     const storedStatus = this.storageService.getItem('user');
@@ -38,7 +40,7 @@ export class JiraGraberService implements OnDestroy {
 
     const serverReply$ = this.socketService.on('receiveJiraEvent', this.jiraSocketNamespace);
     this.serverReplySubscription = serverReply$.subscribe((response: any) => {
-      console.log("JiraGraberService response =>", response);
+      this.jiraResponseSubject.next(response);
     });
   }
 
