@@ -26,7 +26,6 @@ export class ChatShowcaseComponent implements AfterViewInit {
   private messageSchema: MessageSchema;
   private appObject: any;
 
-  // Modern consistent injection
   private readonly chatShowcaseService = inject(ChatShowcaseService);
   private readonly socketService = inject(SocketService);
   private readonly progressControlService = inject(ProgressControlService);
@@ -69,7 +68,6 @@ export class ChatShowcaseComponent implements AfterViewInit {
       payload.chat_history = this.appObject.data.messages;
     }
 
-    console.log('Payload sent to server:', payload);
     this.socketService.sendMessage(this.chatSource, payload);
   }
 
@@ -77,31 +75,27 @@ export class ChatShowcaseComponent implements AfterViewInit {
     this.droppedFiles = event;
   }
 
-  // --- Private Helper Methods ---
 
   private initSocketListener(): void {
-    this.socketService?.socketStatus.pipe(
+    const serverReply$ = this.socketService?.on(this.chatSource);
+
+    if (!serverReply$) {
+      return;
+    }
+
+    serverReply$.pipe(
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe((message) => {
-      if (!message.connected) return;
-
-      const serverReply$ = this.socketService?.on(this.chatSource);
-      if (!serverReply$ || this.socketService?.socketStatus.closed) return;
-
-      serverReply$.pipe(
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe({
-        next: (response: any) => {
-          console.log('Received chatSource from server:', response);
-          this.handleServerResponse(response);
-        },
-        error: (error) => {
-          console.error('Received chatSource error from server:', error);
-          const serverMessage = new MessageSchema();
-          serverMessage.setServerMessage(error);
-          this.addMessage(serverMessage.getMessage());
-        }
-      });
+    ).subscribe({
+      next: (response: any) => {
+        console.log('Received chatSource from server:', response);
+        this.handleServerResponse(response);
+      },
+      error: (error) => {
+        console.error('Received chatSource error from server:', error);
+        const serverMessage = new MessageSchema();
+        serverMessage.setServerMessage(error);
+        this.addMessage(serverMessage.getMessage());
+      }
     });
   }
 
@@ -130,7 +124,6 @@ export class ChatShowcaseComponent implements AfterViewInit {
     });
   }
 
-  /** Eliminates duplicated processing logic between Socket and Jira subscriptions */
   private handleServerResponse(response: any): void {
     const serverMessage = new MessageSchema();
     serverMessage.setServerMessage(response);
@@ -138,7 +131,6 @@ export class ChatShowcaseComponent implements AfterViewInit {
 
     this.addMessage(serverMessage.getMessage());
 
-    // Note: 'supervisorMesssage' has 3 's'. Kept as is in case it's dictated by the backend.
     if (response.data?.supervisorMesssage?.length) {
       response.data.uiMessages = this.messages();
       this.applyExtraConfig(response, serverMessage);
@@ -176,7 +168,6 @@ export class ChatShowcaseComponent implements AfterViewInit {
     }
   }
 
-  /** Reusable signal updater */
   private addMessage(message: IChatMessage): void {
     this.messages.update(current => [...new Set([...current, message])]);
   }
