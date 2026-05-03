@@ -1,0 +1,26 @@
+<div class="fixed bottom-4 right-4 z-50 flex flex-col items-end font-sans bot-placeholder">
+  @if (isOpen()) {
+  <nb-chat title="CodeSage" size="small" class="clippit-bot">
+    <nb-chat-message *ngFor="let msg of messages" [type]="msg.type" [message]="msg.text" [reply]="msg.reply"
+      [sender]="msg.user.name" [date]="msg.date" [files]="msg.files" [quote]="msg.quote" [latitude]="msg.latitude"
+      [longitude]="msg.longitude" [avatar]="msg.user.avatar">
+    </nb-chat-message>
+    <nb-chat-form (send)="sendMessage($event)" [dropFiles]="true">
+    </nb-chat-form>
+  </nb-chat>
+  }
+  <div (click)="toggleChat()" [class.clippy-idle]="shouldAnimate()"
+    class="relative cursor-pointer group w-20 h-20 flex items-end justify-center hover:scale-105 transition-transform">
+    @if (assistanceGifUrl() && assistanceGifUrl() !== '') {
+    <div class="progress-container">
+      <div class="progress-gif">
+        <img [src]="assistanceGifUrl()" />
+      </div>
+    </div>
+    }
+    <div
+      class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+      Click for help!
+    </div>
+  </div>
+</div>

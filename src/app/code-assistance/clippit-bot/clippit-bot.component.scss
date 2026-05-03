@@ -1,0 +1,70 @@
+@use '../../../themes/styles/themes' as *;
+
+.clippit-bot {
+  // background: transparent !important;
+  // border: none !important;
+  // box-shadow: none !important;
+  background-color: var(--background-basic-color-2) !important;
+  // padding: inherit !important;
+  // margin-bottom: 0px !important;
+  overflow-y: hidden !important;
+  border-radius: 20px !important;
+  border-color: var(--border-basic-color-4) !important;
+}
+
+@keyframes bounce-clippy {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(-2deg); }
+}
+
+.clippy-idle {
+    animation: bounce-clippy 2s infinite ease-in-out;
+    transform-origin: bottom center;
+}
+
+/* Message Bubbles */
+.msg-user {
+    background-color: #dcf8c6; /* WhatsApp-ish green */
+    border-bottom-right-radius: 0;
+}
+
+.msg-bot {
+    background-color: #ffffff;
+    border-bottom-left-radius: 0;
+    border: 1px solid #e5e7eb;
+}
+
+/* Custom Scrollbar for Webkit */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.bot-placeholder {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 9990 !important;
+}
+
+.progress-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.progress-gif {
+  justify-content: center;
+  align-items: center;
+}

@@ -1,14 +1,12 @@
 <div class="chat-wrapper">
-
   <nb-chat style="overflow-y: auto;">
     @for (msg of messages(); track msg) {
-      <nb-chat-message [type]="msg.type" [message]="msg.text" [reply]="msg.reply"
-        [sender]="msg.user.name" [date]="msg.date" [files]="msg.files" [quote]="msg.quote" [latitude]="msg.latitude"
-        [longitude]="msg.longitude" [avatar]="msg.user.avatar">
-      </nb-chat-message>
+    <nb-chat-message [type]="msg.type" [message]="msg.text" [reply]="msg.reply" [sender]="msg.user.name"
+      [date]="msg.date" [files]="msg.files" [quote]="msg.quote" [latitude]="msg.latitude" [longitude]="msg.longitude"
+      [avatar]="msg.user.avatar">
+    </nb-chat-message>
     }
   </nb-chat>
-  <app-chat-form (send)="sendMessage($event)" [dropFiles]="true"
-  (fileOverEvent)="fileOverEvent($event)"></app-chat-form>
-
+  <app-chat-form (send)="sendMessage($event)" [dropFiles]="true" (fileOverEvent)="fileOverEvent($event)">
+  </app-chat-form>
 </div>

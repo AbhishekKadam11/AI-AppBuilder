@@ -19,6 +19,7 @@ import { BrowserWindowComponent } from '../browser-window/browser-window.compone
 import { ApiService } from '../services/api.service';
 import { StorageService } from '../services/storage.service';
 import { WebContainerService } from '../services/web-container.service';
+import { ClippitBotComponent } from '../code-assistance/clippit-bot/clippit-bot.component';
 
 type FileEvent = {
   data: string;
@@ -33,7 +34,7 @@ type ISocketMessages = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NbLayoutModule, NbSidebarModule, NbIconModule, NbMenuModule, NbActionsModule, HeaderComponent, DirectoryListComponent, WindowComponent, FooterComponent, NbPopoverModule, NbButtonModule, NbContextMenuModule, RouterModule],
+  imports: [NbLayoutModule, NbSidebarModule, NbIconModule, NbMenuModule, NbActionsModule, HeaderComponent, DirectoryListComponent, WindowComponent, FooterComponent, NbPopoverModule, NbButtonModule, NbContextMenuModule, RouterModule, ClippitBotComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
