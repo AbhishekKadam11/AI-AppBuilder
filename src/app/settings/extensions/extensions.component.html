@@ -1,9 +1,9 @@
 <nb-card>
   <nb-card-header>Extensions Settings</nb-card-header>
   <nb-card-body>
-    <div class="flex flex-wrap gap-4 justify-center">
+    <div class="flex flex-wrap gap-4">
       @for (statusCard of statusCards || []; track statusCard) {
-        <div class="flex-1">
+        <div class="w-full sm:w-1/2 md:w-1/4 p-2">
           <app-status-card [title]="statusCard.title" [type]="statusCard.type" [description]="statusCard.description"
             [status]="statusCard.status" [on]="statusCard.active" (statusChanged)="statusCard.active = $event">
             <nb-icon class="svg-icon" [ngStyle]="statusCard.iconStyle" ></nb-icon>

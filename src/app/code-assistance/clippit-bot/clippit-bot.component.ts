@@ -1,8 +1,12 @@
-import { Component, signal, computed, afterNextRender } from '@angular/core';
+import { Component, signal, computed, afterNextRender, WritableSignal, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NbChatModule, NbIconModule, NbLayoutModule } from '@nebular/theme';
 import { ChatFormComponent } from '../../chat-showcase/chat-form/chat-form.component';
+import { IClippitMessage } from '../../core/common';
+import { SocketService } from '../../services/socket.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MessageSchema } from '../../core/message-schema';
 
 // Interface for message structure
 interface Message {
@@ -24,17 +28,12 @@ export class ClippitBotComponent {
   userInput = '';
   isTyping = signal(false);
   assistanceGifUrl = signal<string>('');
-  messages!: any[];
-  // Initial message
-  // messages = signal<Message[]>([
-  //   {
-  //     sender: 'bot',
-  //     text: "It looks like you're trying to build an Angular app. Would you like some help?",
-  //     id: 0
-  //   }
-  // ]);
+  messages: WritableSignal<IClippitMessage[]> = signal([]);
+  private readonly clippitSource = 'clippitSource';
 
-  // Computed signal to check if we should animate (only when closed)
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly socketService = inject(SocketService);
+
   shouldAnimate = computed(() => !this.isOpen());
 
   constructor() {
@@ -44,6 +43,34 @@ export class ClippitBotComponent {
     });
     this.assistanceGifUrl.set('assets/images/robot_assistant.gif');
   }
+
+  ngAfterViewInit() {
+    this.initSocketListener();
+  }
+
+  private initSocketListener() {
+    const serverReply$ = this.socketService?.on(this.clippitSource);
+
+    if (!serverReply$) {
+      return;
+    }
+
+    serverReply$.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (response: any) => {
+        console.log('Received chatSource from server:', response);
+        // this.handleServerResponse(response);
+      },
+      error: (error) => {
+        console.error('Received chatSource error from server:', error);
+        const serverMessage = new MessageSchema();
+        serverMessage.setServerMessage(error);
+        this.addMessage(serverMessage.getMessage());
+      }
+    });
+  }
+
 
   // --- Actions ---
 
@@ -67,17 +94,20 @@ export class ClippitBotComponent {
       };
     });
 
-    this.messages.push({
-      text: event.message,
-      date: new Date(),
-      reply: true,
-      type: files.length ? 'file' : 'text',
-      files: files,
-      user: {
-        name: 'Jonh Doe',
-        avatar: 'https://i.gifer.com/no.gif',
-      },
-    });
+    //@ts-ignore
+    this.addMessage(this.messages());
+
+    // this.messages.push({
+    //   text: event.message,
+    //   date: new Date(),
+    //   reply: true,
+    //   type: files.length ? 'file' : 'text',
+    //   files: files,
+    //   user: {
+    //     name: 'Jonh Doe',
+    //     avatar: 'https://i.gifer.com/no.gif',
+    //   },
+    // });
     // const botReply = this.chatShowcaseService.reply(event.message);
     // if (botReply) {
     //   setTimeout(() => { this.messages.push(botReply) }, 500);
@@ -109,5 +139,9 @@ export class ClippitBotComponent {
     if (container) {
       container.scrollTop = container.scrollHeight;
     }
+  }
+
+  private addMessage(message: IClippitMessage): void {
+    this.messages.update(current => [...new Set([...current, message])]);
   }
 }
