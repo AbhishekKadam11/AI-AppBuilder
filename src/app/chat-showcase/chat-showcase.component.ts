@@ -117,7 +117,6 @@ export class ChatShowcaseComponent implements AfterViewInit {
     this.jiraGraberService.jiraResponse$.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe((response: any) => {
-      console.log("JiraListener response==>", response)
       if (Object.keys(response).length > 0) {
         this.updateMessagesFromExtension(response);
       }

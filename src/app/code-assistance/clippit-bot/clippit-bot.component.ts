@@ -2,11 +2,11 @@ import { Component, signal, computed, afterNextRender, WritableSignal, inject, D
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NbChatModule, NbIconModule, NbLayoutModule } from '@nebular/theme';
-import { ChatFormComponent } from '../../chat-showcase/chat-form/chat-form.component';
 import { IClippitMessage } from '../../core/common';
 import { SocketService } from '../../services/socket.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageSchema } from '../../core/message-schema';
+import { AppWorkflowService } from '../../services/app-workflow.service';
 
 // Interface for message structure
 interface Message {
@@ -29,10 +29,15 @@ export class ClippitBotComponent {
   isTyping = signal(false);
   assistanceGifUrl = signal<string>('');
   messages: WritableSignal<IClippitMessage[]> = signal([]);
-  private readonly clippitSource = 'clippitSource';
-
+  droppedFiles: any[] = [];
+  private appObject: any;
+  private readonly codeBuddy = 'codeBuddy';
+  private readonly chatSource = 'chatSource';
+  private readonly socketNamespace = '/angular-code-assistant';
   private readonly destroyRef = inject(DestroyRef);
   private readonly socketService = inject(SocketService);
+  private readonly appWorkflowService = inject(AppWorkflowService);
+  private messageSchema: MessageSchema;
 
   shouldAnimate = computed(() => !this.isOpen());
 
@@ -42,16 +47,20 @@ export class ClippitBotComponent {
       this.scrollToBottom();
     });
     this.assistanceGifUrl.set('assets/images/robot_assistant.gif');
+    this.messageSchema = new MessageSchema();
   }
 
   ngAfterViewInit() {
     this.initSocketListener();
+    this.socketService.connectSocket(this.socketNamespace);
+    this.initAppWorkflowListener();
   }
 
   private initSocketListener() {
-    const serverReply$ = this.socketService?.on(this.clippitSource);
+    const serverReply$ = this.socketService?.on(this.chatSource);
 
     if (!serverReply$) {
+       console.log('no serverReply$');
       return;
     }
 
@@ -59,11 +68,11 @@ export class ClippitBotComponent {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (response: any) => {
-        console.log('Received chatSource from server:', response);
-        // this.handleServerResponse(response);
+        console.log('Received codeBuddy from server:', response);
+        this.handleServerResponse(response);
       },
       error: (error) => {
-        console.error('Received chatSource error from server:', error);
+        console.error('Received codeBuddy error from server:', error);
         const serverMessage = new MessageSchema();
         serverMessage.setServerMessage(error);
         this.addMessage(serverMessage.getMessage());
@@ -86,31 +95,51 @@ export class ClippitBotComponent {
   }
 
   sendMessage(event: any) {
-    const files = !event.files ? [] : event.files.map((file: any) => {
-      return {
-        url: file.src,
-        type: file.type,
-        icon: 'file-text-outline',
-      };
+    this.messageSchema.setMessage({
+      text: event.message,
+      type: this.droppedFiles.length > 0 ? 'file' : 'text',
+      files: this.droppedFiles
     });
 
-    //@ts-ignore
-    this.addMessage(this.messages());
+    this.addMessage(this.messageSchema.getMessage());
+    this.droppedFiles = [];
 
-    // this.messages.push({
-    //   text: event.message,
-    //   date: new Date(),
-    //   reply: true,
-    //   type: files.length ? 'file' : 'text',
-    //   files: files,
-    //   user: {
-    //     name: 'Jonh Doe',
-    //     avatar: 'https://i.gifer.com/no.gif',
-    //   },
-    // });
-    // const botReply = this.chatShowcaseService.reply(event.message);
-    // if (botReply) {
-    //   setTimeout(() => { this.messages.push(botReply) }, 500);
+    const payload: any = { data: this.messages() };
+    if (payload.data.length === 0) {
+      payload.thread_id = new Date().getTime();
+    }
+
+    const appExtraConfig = this.appObject?.data?.extraConfig;
+    if (appExtraConfig?.projectName) {
+      payload.projectName = appExtraConfig.projectName;
+      payload.path = appExtraConfig.routePath;
+      // create own chat history for assistant
+      // payload.chat_history = this.appObject.data.messages;
+    }
+
+    this.socketService.sendMessage(this.chatSource, payload, this.socketNamespace);
+  }
+
+  private initAppWorkflowListener(): void {
+    this.appWorkflowService.appObject$.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((appDetails: any) => this.appObject = appDetails);
+  }
+
+
+  private handleServerResponse(response: any): void {
+    console.log('Received codeBuddy from server:', response);
+    const serverMessage = new MessageSchema();
+    serverMessage.setServerMessage(response);
+    serverMessage.setComponentMessage(response);
+
+    this.addMessage(serverMessage.getMessage());
+
+    // if (response.data?.supervisorMesssage?.length) {
+    //   response.data.uiMessages = this.messages();
+    //   // this.applyExtraConfig(response, serverMessage);
+    //   console.log('response.data.extraConfig', response.data.extraConfig);
+    //   this.appWorkflowService.processState('appRecived', response); // Note: 'appRecived' typo kept
     // }
   }
 

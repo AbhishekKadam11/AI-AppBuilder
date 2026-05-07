@@ -23,7 +23,6 @@ export class JiraGraberService implements OnDestroy {
     if (storedStatus) {
       const userPreferences = JSON.parse(storedStatus);
       this.jiraStatus = userPreferences.active_extensions?.includes('jira') || false;
-      console.log("JiraGraberService jiraStatus =>", this.jiraStatus);
     }
     this.socketService.connectSocket('/jiraId');
     this.initJiraSocketInstance()
@@ -35,7 +34,7 @@ export class JiraGraberService implements OnDestroy {
     }
 
     this.socketSubscription = this.socketService.socketStatus.subscribe((message) => {
-      console.log("JiraGraberService message =>", message);
+      // console.log("JiraGraberService message =>", message);
     });
 
     const serverReply$ = this.socketService.on('receiveJiraEvent', this.jiraSocketNamespace);
