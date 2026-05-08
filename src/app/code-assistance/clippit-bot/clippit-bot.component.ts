@@ -7,6 +7,7 @@ import { SocketService } from '../../services/socket.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageSchema } from '../../core/message-schema';
 import { AppWorkflowService } from '../../services/app-workflow.service';
+import { Subscription } from 'rxjs';
 
 // Interface for message structure
 interface Message {
@@ -34,6 +35,8 @@ export class ClippitBotComponent {
   private readonly codeBuddy = 'codeBuddy';
   private readonly chatSource = 'chatSource';
   private readonly socketNamespace = '/angular-code-assistant';
+  private socketSubscription?: Subscription;
+  private serverReplySubscription?: Subscription;
   private readonly destroyRef = inject(DestroyRef);
   private readonly socketService = inject(SocketService);
   private readonly appWorkflowService = inject(AppWorkflowService);
@@ -57,18 +60,16 @@ export class ClippitBotComponent {
   }
 
   private initSocketListener() {
-    const serverReply$ = this.socketService?.on(this.chatSource);
+    const serverReply$ = this.socketService?.on(this.chatSource, this.socketNamespace);
 
     if (!serverReply$) {
-       console.log('no serverReply$');
       return;
     }
 
-    serverReply$.pipe(
+   this.serverReplySubscription = serverReply$.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (response: any) => {
-        console.log('Received codeBuddy from server:', response);
         this.handleServerResponse(response);
       },
       error: (error) => {
@@ -130,9 +131,7 @@ export class ClippitBotComponent {
   private handleServerResponse(response: any): void {
     console.log('Received codeBuddy from server:', response);
     const serverMessage = new MessageSchema();
-    serverMessage.setServerMessage(response);
-    serverMessage.setComponentMessage(response);
-
+    serverMessage.setClippitMessage(response);
     this.addMessage(serverMessage.getMessage());
 
     // if (response.data?.supervisorMesssage?.length) {
@@ -141,26 +140,6 @@ export class ClippitBotComponent {
     //   console.log('response.data.extraConfig', response.data.extraConfig);
     //   this.appWorkflowService.processState('appRecived', response); // Note: 'appRecived' typo kept
     // }
-  }
-
-  // --- Helpers ---
-
-  private generateAIResponse(input: string): string {
-    const lowerInput = input.toLowerCase();
-    const responses = [
-      "I can definitely help with that!",
-      "Are you sure you want to format that drive?",
-      "It looks like you're writing a letter.",
-      "Have you tried restarting the server?",
-      "That's a great question for an AI.",
-      "I'm just a paperclip, but I believe in you!"
-    ];
-
-    if (lowerInput.includes('hello') || lowerInput.includes('hi')) return "Hello there! Ready to code?";
-    if (lowerInput.includes('angular')) return "Angular Signals make state management so easy!";
-    if (lowerInput.includes('help')) return "I am listening. What do you need?";
-
-    return responses[Math.floor(Math.random() * responses.length)];
   }
 
   private scrollToBottom() {
@@ -172,5 +151,10 @@ export class ClippitBotComponent {
 
   private addMessage(message: IClippitMessage): void {
     this.messages.update(current => [...new Set([...current, message])]);
+  }
+
+  ngOnDestroy(): void {
+    // this.socketSubscription?.unsubscribe();
+    this.serverReplySubscription?.unsubscribe();
   }
 }

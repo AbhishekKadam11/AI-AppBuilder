@@ -44,3 +44,16 @@ export type IData = {
   label: string;
   icon: string;
 };
+
+export type IClippitMessage = {
+   text: any;
+   date: Date;
+   reply: boolean;
+   type: string;
+   files: NbChatMessageFile[];
+   user: {
+      name: string;
+      avatar: string;
+   };
+   quote: string;
+};

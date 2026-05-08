@@ -99,4 +99,21 @@ export class MessageSchema {
     }
   }
 
+  setClippitMessage(response: any) {
+    console.log('Received message from server:', response);
+    if (response.data && response.data.messages.length !== 0) {
+      this.text = response.data && response.data.messages[response.data.messages.length - 1].kwargs.content
+    } else {
+      this.text = 'Unable to process your request, kindly refresh the page and try again.';
+    }
+    this.date = response.date;
+    this.reply = false;
+    this.type = "text";
+    this.files = [];
+    this.user = response?.data.user || { name: 'AI', avatar: 'assets/images/bot.png' };
+    this.quote = response?.quote;
+    this.latitude = response?.latitude;
+    this.longitude = response?.longitude;
+  }
+
 }
