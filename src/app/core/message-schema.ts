@@ -102,7 +102,7 @@ export class MessageSchema {
   setClippitMessage(response: any) {
     console.log('Received message from server:', response);
     if (response.data && response.data.messages.length !== 0) {
-      this.text = response.data && response.data.messages[response.data.messages.length - 1].kwargs.content
+      this.text = response.data && response.data.messages[response.data.messages.length - 1].kwargs.content.answer
     } else {
       this.text = 'Unable to process your request, kindly refresh the page and try again.';
     }

@@ -8,6 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageSchema } from '../../core/message-schema';
 import { AppWorkflowService } from '../../services/app-workflow.service';
 import { Subscription } from 'rxjs';
+import { WebContainerService } from '../../services/web-container.service';
 
 // Interface for message structure
 interface Message {
@@ -40,7 +41,11 @@ export class ClippitBotComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly socketService = inject(SocketService);
   private readonly appWorkflowService = inject(AppWorkflowService);
+  private readonly webContainerService = inject(WebContainerService);
   private messageSchema: MessageSchema;
+  private subscriptions: Subscription = new Subscription();
+  private readonly directoryManager: string = 'DirectoryManager';
+  private directorySubscription: Subscription | undefined;
 
   shouldAnimate = computed(() => !this.isOpen());
 
@@ -66,7 +71,7 @@ export class ClippitBotComponent {
       return;
     }
 
-   this.serverReplySubscription = serverReply$.pipe(
+    this.serverReplySubscription = serverReply$.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (response: any) => {
@@ -133,13 +138,18 @@ export class ClippitBotComponent {
     const serverMessage = new MessageSchema();
     serverMessage.setClippitMessage(response);
     this.addMessage(serverMessage.getMessage());
-
-    // if (response.data?.supervisorMesssage?.length) {
-    //   response.data.uiMessages = this.messages();
-    //   // this.applyExtraConfig(response, serverMessage);
-    //   console.log('response.data.extraConfig', response.data.extraConfig);
-    //   this.appWorkflowService.processState('appRecived', response); // Note: 'appRecived' typo kept
-    // }
+    debugger;
+    const lastMessage = response.data && response.data.messages && response.data.messages.length > 0 ? response.data.messages : [];
+    if (lastMessage && lastMessage[lastMessage.length - 1].kwargs && lastMessage[lastMessage.length - 1].kwargs.content) {
+      const message = lastMessage[lastMessage.length - 1].kwargs.content;
+      if (message.modifiedCode && message.modifiedCode.length > 0) {
+        const fileDetails = message.modifiedCode[message.modifiedCode.length - 1];
+        const filePath = this.extractFromSrc(fileDetails.filePath);
+        const changes = fileDetails.changes;
+        this.webContainerService.webContainerWriteFileContent(filePath, fileDetails.content);
+        this.saveToRemote(filePath, fileDetails.content);
+      }
+    }
   }
 
   private scrollToBottom() {
@@ -151,6 +161,32 @@ export class ClippitBotComponent {
 
   private addMessage(message: IClippitMessage): void {
     this.messages.update(current => [...new Set([...current, message])]);
+  }
+
+  saveToRemote(filePath: string, fileContent: string) {
+    this.subscriptions.add(
+      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
+        if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
+          console.log('Saving file to remote:', appDetails.data.extraConfig.projectName + '/' + filePath);
+          const messages = { "action": "save", "path": appDetails.data.extraConfig.projectName + '/' + filePath, content: fileContent };
+          this.socketService.sendMessage(this.directoryManager, messages);
+          const serverReply$ = this.socketService?.on(this.directoryManager);
+          if (serverReply$) {
+            this.directorySubscription = serverReply$.subscribe((response: any) => {
+              console.log('Received directorySubscription save action from server:', response);
+            });
+          }
+        }
+      })
+    );
+  }
+
+  private extractFromSrc(fullPath: string): string {
+    const srcIndex = fullPath.indexOf('src');
+    if (srcIndex === -1) {
+      throw new Error("The string 'src' was not found in the path.");
+    }
+    return fullPath.substring(srcIndex).replace(/\\/g, '/');
   }
 
   ngOnDestroy(): void {
