@@ -1,7 +1,7 @@
 import { Component, signal, computed, afterNextRender, WritableSignal, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NbChatModule, NbIconModule, NbLayoutModule } from '@nebular/theme';
+import { NbButtonModule, NbChatModule, NbIconModule, NbLayoutModule } from '@nebular/theme';
 import { IClippitMessage } from '../../core/common';
 import { SocketService } from '../../services/socket.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -20,7 +20,7 @@ interface Message {
 @Component({
   selector: 'app-clippit-bot',
   standalone: true,
-  imports: [CommonModule, FormsModule, NbChatModule, NbIconModule, NbLayoutModule],
+  imports: [CommonModule, FormsModule, NbChatModule, NbIconModule, NbLayoutModule, NbButtonModule],
   templateUrl: './clippit-bot.component.html',
   styleUrls: ['./clippit-bot.component.scss']
 })
@@ -62,6 +62,7 @@ export class ClippitBotComponent {
     this.initSocketListener();
     this.socketService.connectSocket(this.socketNamespace);
     this.initAppWorkflowListener();
+    // this.chatActions('modify', { filePath: '/', changes: [], content: "113" });
   }
 
   private initSocketListener() {
@@ -146,8 +147,9 @@ export class ClippitBotComponent {
         const fileDetails = message.modifiedCode[message.modifiedCode.length - 1];
         const filePath = this.extractFromSrc(fileDetails.filePath);
         const changes = fileDetails.changes;
-        this.webContainerService.webContainerWriteFileContent(filePath, fileDetails.content);
-        this.saveToRemote(filePath, fileDetails.content);
+        this.chatActions('modify', { filePath, changes, content: fileDetails.content });
+        // this.webContainerService.webContainerWriteFileContent(filePath, fileDetails.content);
+        // this.saveToRemote(filePath, fileDetails.content);
       }
     }
   }
@@ -179,6 +181,50 @@ export class ClippitBotComponent {
         }
       })
     );
+  }
+
+  chatActions(action: string, payload?: any) {
+    switch (action) {
+      case 'modify':
+        // Handle code modification logic here
+        console.log('Modifying code with payload:', payload);
+        payload.buttonLabel = 'Apply Changes';
+        this.promptActions('Do you want it to modify the code for you?', payload);
+        break;
+      default:
+        console.warn('Unknown action:', action);
+    }
+  }
+
+  promptActions(prompt: string, payload?: any) {
+    // Handle prompt actions here
+    console.log('Prompt action triggered with prompt:', prompt);
+    this.addMessage({
+      text: prompt, //`Do you want it to modify the code for you?`,
+      type: 'button',
+      customMessageData: payload, //{ text: "test", buttonLabel: 'Apply Changes' },
+      user: { name: 'System', avatar: 'assets/images/system.png' },
+      date: new Date(),
+      reply: false,
+      files: [],
+      quote: ''
+    });
+  }
+
+  executeButtonAction(payload: any) {
+    // Example action for button click
+    console.log('Button clicked with payload:', payload);
+    this.webContainerService.webContainerWriteFileContent(payload.filePath, payload.content);
+    this.saveToRemote(payload.filePath, payload.content);
+     this.addMessage({
+      text: "Code has been modified", //`Do you want it to modify the code for you?`,
+      type: 'text',
+      user: { name: 'System', avatar: 'assets/images/system.png' },
+      date: new Date(),
+      reply: false,
+      files: [],
+      quote: ''
+    });
   }
 
   private extractFromSrc(fullPath: string): string {

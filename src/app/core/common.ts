@@ -6,18 +6,18 @@ export type TreeNode<T> = {
 };
 
 export interface IChatMessage {
-   text: any;
-   date: Date;
-   reply: boolean;
-   type: string;
-   files: NbChatMessageFile[];
-   user: {
-      name: string;
-      avatar: string;
-   };
-   quote: string;
-   latitude: number;
-   longitude: number;
+  text: any;
+  date: Date;
+  reply: boolean;
+  type: string;
+  files: NbChatMessageFile[];
+  user: {
+    name: string;
+    avatar: string;
+  };
+  quote: string;
+  latitude: number;
+  longitude: number;
 }
 
 type IAttribute = { type: string; label: string; icon: string, url: string };
@@ -46,14 +46,15 @@ export type IData = {
 };
 
 export type IClippitMessage = {
-   text: any;
-   date: Date;
-   reply: boolean;
-   type: string;
-   files: NbChatMessageFile[];
-   user: {
-      name: string;
-      avatar: string;
-   };
-   quote: string;
+  text: any;
+  date: Date;
+  reply: boolean;
+  type: string;
+  files: NbChatMessageFile[];
+  user: {
+    name: string;
+    avatar: string;
+  };
+  quote: string;
+  customMessageData?: any;
 };
