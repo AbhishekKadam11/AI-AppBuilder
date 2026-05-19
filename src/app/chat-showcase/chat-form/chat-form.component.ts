@@ -10,11 +10,11 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
-import { NbButtonModule, NbComponentOrCustomStatus, NbIconModule, NbInputModule } from '@nebular/theme';
+import { NbButtonModule, NbComponentOrCustomStatus, NbIconModule, NbInputModule, NbPopoverModule } from '@nebular/theme';
 
 @Component({
   selector: 'app-chat-form',
-  imports: [NbIconModule, NbInputModule, NbButtonModule, FormsModule],
+  imports: [NbIconModule, NbInputModule, NbButtonModule, FormsModule, NbPopoverModule,],
   standalone: true,
   templateUrl: './chat-form.component.html',
   styleUrl: './chat-form.component.scss',
