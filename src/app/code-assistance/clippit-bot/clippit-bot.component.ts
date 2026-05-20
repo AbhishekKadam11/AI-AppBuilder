@@ -1,7 +1,7 @@
-import { Component, signal, computed, afterNextRender, WritableSignal, inject, DestroyRef } from '@angular/core';
+import { Component, signal, computed, afterNextRender, WritableSignal, inject, DestroyRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NbButtonModule, NbChatModule, NbIconModule, NbLayoutModule } from '@nebular/theme';
+import { NbButtonModule, NbChatModule, NbIconModule, NbLayoutModule, NbPopoverDirective, NbPopoverModule } from '@nebular/theme';
 import { IClippitMessage } from '../../core/common';
 import { SocketService } from '../../services/socket.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -9,6 +9,7 @@ import { MessageSchema } from '../../core/message-schema';
 import { AppWorkflowService } from '../../services/app-workflow.service';
 import { Subscription } from 'rxjs';
 import { WebContainerService } from '../../services/web-container.service';
+import { ChatFormComponent } from '../../chat-showcase/chat-form/chat-form.component';
 
 // Interface for message structure
 interface Message {
@@ -20,10 +21,11 @@ interface Message {
 @Component({
   selector: 'app-clippit-bot',
   standalone: true,
-  imports: [CommonModule, FormsModule, NbChatModule, NbIconModule, NbLayoutModule, NbButtonModule],
+  imports: [CommonModule, FormsModule, NbChatModule, NbIconModule, NbLayoutModule, NbButtonModule, NbPopoverModule, ChatFormComponent],
   templateUrl: './clippit-bot.component.html',
   styleUrls: ['./clippit-bot.component.scss']
 })
+
 export class ClippitBotComponent {
   // --- State using Signals ---
   isOpen = signal(false);
@@ -46,6 +48,7 @@ export class ClippitBotComponent {
   private subscriptions: Subscription = new Subscription();
   private readonly directoryManager: string = 'DirectoryManager';
   private directorySubscription: Subscription | undefined;
+  @ViewChild(NbPopoverDirective) popover!: NbPopoverDirective;
 
   shouldAnimate = computed(() => !this.isOpen());
 
@@ -63,6 +66,7 @@ export class ClippitBotComponent {
     this.socketService.connectSocket(this.socketNamespace);
     this.initAppWorkflowListener();
     // this.chatActions('modify', { filePath: '/', changes: [], content: "113" });
+    this.popover?.show();
   }
 
   private initSocketListener() {

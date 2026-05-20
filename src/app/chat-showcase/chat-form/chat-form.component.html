@@ -20,7 +20,7 @@
     (mouseenter)="inputHover = true" (mouseleave)="inputHover = false" [(ngModel)]="message"
     (ngModelChange)="onModelChange($event)" [class.with-button]="showButton" type="textarea" maxlength="5000"
     placeholder="{{ fileOver ? dropFilePlaceholder : messagePlaceholder }}" (keyup.enter)="sendMessage()"
-    nbPopover="Hint Mode" nbPopoverTrigger="hint" nbPopoverPlacement="bottom"
+    [nbPopover]="popover.message" [nbPopoverTrigger]="popover.trigger" [nbPopoverPlacement]="popover.placement"
     />
   <button nbButton ghost class="floating-attach-btn" (click)="fileInput.click()">
     <nb-icon icon="attach-2-outline"></nb-icon>

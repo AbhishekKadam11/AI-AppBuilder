@@ -12,6 +12,12 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { NbButtonModule, NbComponentOrCustomStatus, NbIconModule, NbInputModule, NbPopoverModule } from '@nebular/theme';
 
+interface IPopoverConfig {
+  message?: string | '';
+  trigger?: string | 'hint';
+  placement?: string | '';
+}
+
 @Component({
   selector: 'app-chat-form',
   imports: [NbIconModule, NbInputModule, NbButtonModule, FormsModule, NbPopoverModule,],
@@ -20,6 +26,7 @@ import { NbButtonModule, NbComponentOrCustomStatus, NbIconModule, NbInputModule,
   styleUrl: './chat-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+
 export class ChatFormComponent {
   status: NbComponentOrCustomStatus = 'basic';
   inputFocus: boolean = false;
@@ -88,6 +95,9 @@ export class ChatFormComponent {
   @Output() onInputChange = new EventEmitter<string>();
 
   @HostBinding('class.file-over') fileOver = false;
+
+  // @Input() popover!: IPopoverConfig;
+  @Input() popover!: any;
 
   constructor(protected cd: ChangeDetectorRef, protected domSanitizer: DomSanitizer) { }
 

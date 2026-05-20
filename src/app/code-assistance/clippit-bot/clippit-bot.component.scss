@@ -1,8 +1,14 @@
 @use '../../../themes/styles/themes' as *;
 
-
 nb-chat {
   width: 500px;
+}
+
+.chat-wrapper {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  overflow-y: unset;
 }
 
 .clippit-bot {
