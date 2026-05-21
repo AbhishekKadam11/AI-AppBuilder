@@ -7,15 +7,23 @@ import {
   HostListener,
   Input,
   Output,
+  TemplateRef,
+  ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
-import { NbButtonModule, NbComponentOrCustomStatus, NbIconModule, NbInputModule, NbPopoverModule } from '@nebular/theme';
+import { NbButtonModule, NbComponentOrCustomStatus, NbIconModule, NbInputModule, NbPopoverDirective, NbPopoverModule } from '@nebular/theme';
 
-interface IPopoverConfig {
-  message?: string | '';
-  trigger?: string | 'hint';
-  placement?: string | '';
+interface PopoverConfig {
+  content?: string | TemplateRef<any>;
+  placement?: 'top' | 'bottom' | 'left' | 'right';
+  trigger?: 'click' | 'hover' | 'hint';
+  title?: string;
+  icon?: string;
+  showArrow?: boolean;
+  adaptivePosition?: boolean;
+  offset?: number;
+  customClass?: string;
 }
 
 @Component({
@@ -96,8 +104,18 @@ export class ChatFormComponent {
 
   @HostBinding('class.file-over') fileOver = false;
 
-  // @Input() popover!: IPopoverConfig;
-  @Input() popover!: any;
+  @Input() popoverConfig?: PopoverConfig;
+
+  @ViewChild(NbPopoverDirective) popover!: NbPopoverDirective;
+
+  // Example configurations
+  defaultPopoverConfig: PopoverConfig = {
+    content: 'Default help text for this field',
+    placement: 'right',
+    trigger: 'hint',
+    showArrow: true,
+    icon: 'info-outline'
+  };
 
   constructor(protected cd: ChangeDetectorRef, protected domSanitizer: DomSanitizer) { }
 
@@ -200,7 +218,7 @@ export class ChatFormComponent {
     const files = event.target.files;
     if (files) {
       for (const file of files) {
-          this.addFileToChat(file);
+        this.addFileToChat(file);
       }
     }
   }
@@ -223,5 +241,13 @@ export class ChatFormComponent {
       this.cd.detectChanges();
     };
     reader.readAsDataURL(file);
+  }
+
+  get activePopoverConfig(): PopoverConfig {
+    return this.popoverConfig || this.defaultPopoverConfig;
+  }
+
+  hasPopover(): boolean {
+    return !!this.popoverConfig || true; // Always show at least default popover
   }
 }
