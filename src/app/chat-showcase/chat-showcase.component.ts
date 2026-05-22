@@ -33,6 +33,12 @@ export class ChatShowcaseComponent implements AfterViewInit {
   private readonly jiraGraberService = inject(JiraGraberService);
   private readonly destroyRef = inject(DestroyRef);
 
+  badgeConfig = {
+    content: '',
+    status: 'info',
+    disabled: true
+  };
+
   constructor() {
     this.messageSchema = new MessageSchema();
   }
@@ -45,7 +51,7 @@ export class ChatShowcaseComponent implements AfterViewInit {
 
   sendMessage(event: any) {
     this.progressControlService.showProgressGif('reseacrhing'); // Note: Check if 'reseacrhing' is a typo
-
+    this.badgeConfig = { content: 'Reseacrhing...', status: 'info', disabled: false }; // Note: Check if 'Reseacrhing' is a typo
     this.messageSchema.setMessage({
       text: event.message,
       type: this.droppedFiles.length > 0 ? 'file' : 'text',
@@ -133,9 +139,11 @@ export class ChatShowcaseComponent implements AfterViewInit {
     if (response.data?.supervisorMesssage?.length) {
       response.data.uiMessages = this.messages();
       this.applyExtraConfig(response, serverMessage);
-      console.log('response.data.extraConfig', response.data.extraConfig);
+      // console.log('response.data.extraConfig', response.data.extraConfig);
       this.appWorkflowService.processState('appRecived', response); // Note: 'appRecived' typo kept
     }
+
+    this.badgeConfig = { content: '', status: 'info', disabled: true };
   }
 
   /** Extracts deeply nested extraConfig if/else logic */

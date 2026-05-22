@@ -15,62 +15,32 @@
   }
 </div>
 }
-<div class="message-row">
-  <span>
+<div class="flex flex-col">
+  @if (!badgeConfig.disabled) {
+ <div>
+    <nb-badge [text]="badgeConfig.content" [status]="badgeConfig.status" class="badge-info" ></nb-badge>
+  </div>
+  }
 
-  </span>
-  <input nbInput fullWidth [status]="getInputStatus()" (focus)="inputFocus = true" (blur)="inputFocus = false"
-    (mouseenter)="inputHover = true" (mouseleave)="inputHover = false" [(ngModel)]="message"
-    (ngModelChange)="onModelChange($event)" [class.with-button]="showButton" type="textarea" maxlength="5000"
-    placeholder="{{ fileOver ? dropFilePlaceholder : messagePlaceholder }}" (keyup.enter)="sendMessage()"
-    [nbPopover]="popoverContent" [nbPopoverPlacement]="activePopoverConfig.placement || 'top'"
-    [nbPopoverTrigger]="activePopoverConfig.trigger || 'hint'" [nbPopoverOffset]="activePopoverConfig.offset ?? 8"
-    [nbPopoverClass]="activePopoverConfig.customClass || ''" />
 
-  <!-- Input without popover -->
-  <ng-template #noPopoverInput>
+  <div class="message-row">
     <input nbInput fullWidth [status]="getInputStatus()" (focus)="inputFocus = true" (blur)="inputFocus = false"
       (mouseenter)="inputHover = true" (mouseleave)="inputHover = false" [(ngModel)]="message"
       (ngModelChange)="onModelChange($event)" [class.with-button]="showButton" type="textarea" maxlength="5000"
       placeholder="{{ fileOver ? dropFilePlaceholder : messagePlaceholder }}" (keyup.enter)="sendMessage()" />
-  </ng-template>
-  <button nbButton ghost class="floating-attach-btn" (click)="fileInput.click()">
-    <nb-icon icon="attach-2-outline"></nb-icon>
-  </button>
-  <input #fileInput type="file" style="display: none" (change)="handleFileUpload($event)" multiple accept="*">
-  @if (showButton) {
-  <button nbButton [status]="getButtonStatus()" [class.with-icon]="!buttonTitle" (click)="sendMessage()"
-    class="send-button">
-    @if (!buttonTitle) {
-    <nb-icon [icon]="buttonIcon" pack="nebular-essentials"></nb-icon>
-    } @else {
-    {{ buttonTitle }}
+    <button nbButton ghost class="floating-attach-btn" (click)="fileInput.click()">
+      <nb-icon icon="attach-2-outline"></nb-icon>
+    </button>
+    <input #fileInput type="file" style="display: none" (change)="handleFileUpload($event)" multiple accept="*">
+    @if (showButton) {
+    <button nbButton [status]="getButtonStatus()" [class.with-icon]="!buttonTitle" (click)="sendMessage()"
+      class="send-button">
+      @if (!buttonTitle) {
+      <nb-icon [icon]="buttonIcon" pack="nebular-essentials"></nb-icon>
+      } @else {
+      {{ buttonTitle }}
+      }
+    </button>
     }
-  </button>
-  }
-</div>
-
-
-
-<!-- Popover content template -->
-<ng-template #popoverContent>
-  <div class="popover-content">
-    @if(activePopoverConfig.title) {
-    <h6 class="popover-title">
-      {{ activePopoverConfig.title }}
-    </h6>
-    }
-
-    <!-- Handle string content -->
-    @if(activePopoverConfig.title) {
-    <ng-container>
-      <p class="popover-text">{{ activePopoverConfig.content }}</p>
-    </ng-container>
-    } @else {
-    <ng-container>
-      {{ activePopoverConfig.content }}
-    </ng-container>
-    }
-
   </div>
-</ng-template>
+</div>
