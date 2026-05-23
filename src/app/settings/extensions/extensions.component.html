@@ -1,7 +1,7 @@
 <nb-card>
   <nb-card-header>Extensions Settings</nb-card-header>
   <nb-card-body>
-    <div class="flex flex-wrap gap-4">
+    <div class="flex flex-wrap">
       @for (statusCard of statusCards || []; track statusCard) {
         <div class="w-full sm:w-1/2 md:w-1/4 p-2">
           <app-status-card [title]="statusCard.title" [type]="statusCard.type" [description]="statusCard.description"

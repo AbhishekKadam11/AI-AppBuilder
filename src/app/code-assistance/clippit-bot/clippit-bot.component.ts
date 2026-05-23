@@ -1,4 +1,4 @@
-import { Component, signal, computed, afterNextRender, WritableSignal, inject, DestroyRef, ViewChild } from '@angular/core';
+import { Component, signal, computed, afterNextRender, WritableSignal, inject, DestroyRef, ViewChild, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NbButtonModule, NbChatModule, NbIconModule, NbLayoutModule, NbPopoverDirective, NbPopoverModule } from '@nebular/theme';
@@ -10,6 +10,7 @@ import { AppWorkflowService } from '../../services/app-workflow.service';
 import { Subscription } from 'rxjs';
 import { WebContainerService } from '../../services/web-container.service';
 import { ChatFormComponent } from '../../chat-showcase/chat-form/chat-form.component';
+import { StorageService } from '../../services/storage.service';
 
 // Interface for message structure
 interface Message {
@@ -44,12 +45,13 @@ export class ClippitBotComponent {
   private readonly socketService = inject(SocketService);
   private readonly appWorkflowService = inject(AppWorkflowService);
   private readonly webContainerService = inject(WebContainerService);
+  private readonly storageService = inject(StorageService);
   private messageSchema: MessageSchema;
   private subscriptions: Subscription = new Subscription();
   private readonly directoryManager: string = 'DirectoryManager';
   private directorySubscription: Subscription | undefined;
   @ViewChild(NbPopoverDirective) popover!: NbPopoverDirective;
-
+  isExtensionEnabled: WritableSignal<boolean> = signal(false);
   shouldAnimate = computed(() => !this.isOpen());
 
   constructor() {
@@ -57,6 +59,7 @@ export class ClippitBotComponent {
     afterNextRender(() => {
       this.scrollToBottom();
     });
+    this.extensionStatus();
     this.assistanceGifUrl.set('assets/images/robot_assistant.gif');
     this.messageSchema = new MessageSchema();
   }
@@ -67,6 +70,14 @@ export class ClippitBotComponent {
     this.initAppWorkflowListener();
     // this.chatActions('modify', { filePath: '/', changes: [], content: "113" });
     this.popover?.show();
+  }
+
+  private extensionStatus() {
+    const storedStatus = this.storageService.getItem('user');
+    if (storedStatus) {
+      const userPreferences = JSON.parse(storedStatus);
+      this.isExtensionEnabled.set(userPreferences.active_extensions?.includes('codeBuddy') || false);
+    }
   }
 
   private initSocketListener() {

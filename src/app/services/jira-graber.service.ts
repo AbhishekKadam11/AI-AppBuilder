@@ -19,13 +19,18 @@ export class JiraGraberService implements OnDestroy {
   public jiraResponse$ = this.jiraResponseSubject.asObservable();
 
   constructor() {
+    this.extensionStatus();
+    this.socketService.connectSocket('/jiraId');
+    this.initJiraSocketInstance()
+  }
+
+
+  extensionStatus() {
     const storedStatus = this.storageService.getItem('user');
     if (storedStatus) {
       const userPreferences = JSON.parse(storedStatus);
       this.jiraStatus = userPreferences.active_extensions?.includes('jira') || false;
     }
-    this.socketService.connectSocket('/jiraId');
-    this.initJiraSocketInstance()
   }
 
   initJiraSocketInstance() {

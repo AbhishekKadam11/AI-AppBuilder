@@ -30,7 +30,7 @@
   </nb-layout-column>
 
   <nb-layout-footer class="footer">
-    <div class="stacked-window nb-global-scroll flex-shrink-0">
+    <div class="stacked-window nb-global-scroll shrink-0">
       @for (window of windowService.getWindows()(); track window.id; let i = $index) {
         @if (window.isMinimized()) {
           <app-window [window]="window" [index]="i" [style.--window-index]="i"></app-window>
