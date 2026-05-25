@@ -17,13 +17,12 @@
 }
 <div class="flex flex-col">
   @if (!badgeConfig.disabled) {
- <div>
-    <nb-badge [text]="badgeConfig.content" [status]="badgeConfig.status" class="badge-info" ></nb-badge>
+  <div>
+    <nb-badge [text]="badgeConfig.content" [status]="badgeConfig.status" class="badge-info"></nb-badge>
   </div>
   }
 
-
-  <div class="message-row">
+  <!-- <div class="message-row">
     <input nbInput fullWidth [status]="getInputStatus()" (focus)="inputFocus = true" (blur)="inputFocus = false"
       (mouseenter)="inputHover = true" (mouseleave)="inputHover = false" [(ngModel)]="message"
       (ngModelChange)="onModelChange($event)" [class.with-button]="showButton" type="textarea" maxlength="5000"
@@ -42,5 +41,20 @@
       }
     </button>
     }
+  </div> -->
+  <div class="chat-input-wrapper" >
+    <textarea nbInput fullWidth rows="1" [(ngModel)]="message" [status]="getInputStatus()" (focus)="inputFocus = true"
+      (blur)="inputFocus = false" (mouseenter)="inputHover = true" (mouseleave)="inputHover = false"
+      (ngModelChange)="onModelChange($event)" [class.with-button]="showButton"
+      placeholder="{{ fileOver ? dropFilePlaceholder : messagePlaceholder }}" class="chat-textarea"
+      (keydown)="handleKeyDown($event)" #textarea>
+  </textarea>
+    <button nbButton ghost class="floating-attach-btn" (click)="fileInput.click()">
+      <nb-icon icon="attach-2-outline"></nb-icon>
+    </button>
+    <input #fileInput type="file" style="display: none" (change)="handleFileUpload($event)" multiple accept="*">
+    <button nbButton status="primary" shape="round" size="small" class="send-btn" (click)="sendMessage()">
+      <nb-icon icon="arrow-upward-outline"></nb-icon>
+    </button>
   </div>
 </div>

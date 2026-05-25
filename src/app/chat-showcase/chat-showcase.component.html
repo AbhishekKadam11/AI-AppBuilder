@@ -7,6 +7,6 @@
     </nb-chat-message>
     }
   </nb-chat>
-  <app-chat-form (send)="sendMessage($event)" [dropFiles]="true" (fileOverEvent)="fileOverEvent($event)" [badgeConfig]="badgeConfig">
+  <app-chat-form (send)="sendMessage($event)" [dropFiles]="true" (fileOverEvent)="fileOverEvent($event)" [badgeConfig]="badgeConfig" ngSkipHydration>
   </app-chat-form>
 </div>

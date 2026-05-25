@@ -1,13 +1,14 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   HostBinding,
   HostListener,
   Input,
   Output,
-  TemplateRef,
   ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -92,9 +93,21 @@ export class ChatFormComponent {
 
   @HostBinding('class.file-over') fileOver = false;
 
+  /**
+   * badgeConfig is used to configure the badge that appears when files are dropped into the chat form. It includes the content of the badge, its status (which determines its color), and whether it is disabled or not.
+   * @type {content: string; status: NbComponentOrCustomStatus; disabled?: boolean}
+   */
   @Input() badgeConfig: { content: string; status: NbComponentOrCustomStatus; disabled?: boolean } = { content: '', status: 'info', disabled: true };
 
-  constructor(protected cd: ChangeDetectorRef, protected domSanitizer: DomSanitizer) { }
+  @ViewChild('textarea')
+  textarea!: ElementRef<HTMLTextAreaElement>;
+
+  constructor(protected cd: ChangeDetectorRef, protected domSanitizer: DomSanitizer) {
+    afterNextRender(() => {
+      this.autoResize();
+    });
+  }
+
 
   @HostListener('drop', ['$event'])
   onDrop(event: any) {
@@ -148,11 +161,35 @@ export class ChatFormComponent {
     }
   }
 
+  handleKeyDown(event: KeyboardEvent) {
+
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.sendMessage();
+    }
+
+    requestAnimationFrame(() => {
+      this.autoResize();
+    });
+  }
+
+  autoResize() {
+    if (!this.textarea) return;
+
+    const textarea = this.textarea.nativeElement;
+
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
+
   sendMessage() {
     if (this.droppedFiles.length || String(this.message).trim().length) {
       this.send.emit({ message: this.message, files: this.droppedFiles });
       this.message = '';
       this.droppedFiles = [];
+      requestAnimationFrame(() => {
+        this.autoResize();
+      });
     }
   }
 

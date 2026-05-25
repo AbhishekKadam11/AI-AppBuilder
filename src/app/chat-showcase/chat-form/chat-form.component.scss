@@ -2,3 +2,56 @@
 .badge-info {
   position: relative !important;
 }
+
+.chat-input-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+
+  background: #2b2d31;
+  border: 1px solid #444;
+  border-radius: 24px;
+
+  padding: 12px 14px;
+
+  width: 100%;
+
+  transition: border-color 0.2s ease;
+
+  &:focus-within {
+    border-color: #6ea8fe;
+  }
+}
+
+.chat-textarea {
+  flex: 1;
+
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+
+  resize: none;
+  overflow-y: auto;
+
+  color: white;
+  font-size: 16px;
+  line-height: 1.5;
+
+  min-height: 24px;
+  max-height: 200px;
+
+  padding: 0 !important;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.send-btn {
+  min-width: 40px !important;
+  width: 40px;
+  height: 40px;
+  padding: 0 !important;
+
+  border-radius: 50%;
+}
