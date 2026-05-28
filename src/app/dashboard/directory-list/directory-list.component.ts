@@ -224,13 +224,13 @@ export class DirectoryListComponent {
     this.subscriptions.add(
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
         if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
+          setTimeout(() => this.sendRequestToRename(row), 50);
           this.messages = { "action": "rename", "path": appDetails.data.extraConfig.projectName, "content": row };
           this.socketService.sendMessage(this.directoryManager, this.messages);
           const serverReply$ = this.socketService?.on(this.directoryManager);
           if (serverReply$) {
             this.directorySubscription = serverReply$.subscribe((response: any) => {
               console.log('Received directorySubscription rename replay from server:', response);
-              this.sendRequestToRename(appDetails.data.extraConfig.projectName, row);
             });
           }
         }
@@ -242,8 +242,8 @@ export class DirectoryListComponent {
     })
   }
 
-  sendRequestToRename(projectName: string, row: any) {
-    this.webContainerService.renameWebContainerFile(projectName, row).then(() => {
+  sendRequestToRename(row: any) {
+    this.webContainerService.renameWebContainerFile(row).then(() => {
       console.log('File renamed successfully');
     }).catch((error) => {
       console.error('Error renaming file:', error);
@@ -302,6 +302,8 @@ export class DirectoryListComponent {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    this.directorySubscription?.unsubscribe();
+    this.webContainerSubscription?.unsubscribe();
   }
 }
 

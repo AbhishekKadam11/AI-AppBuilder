@@ -234,7 +234,7 @@ export class FileTreeNodeComponent {
           if (serverReply$) {
             this.directorySubscription = serverReply$.subscribe((response: any) => {
               console.log('Received directorySubscription rename replay from server:', response);
-              this.sendRequestToRename(appDetails.data.extraConfig.projectName, row);
+              this.sendRequestToRename(row);
             });
           }
         }
@@ -246,8 +246,8 @@ export class FileTreeNodeComponent {
     })
   }
 
-  sendRequestToRename(projectName: string, row: any) {
-    this.webContainerService.renameWebContainerFile(projectName, row).then(() => {
+  sendRequestToRename(row: any) {
+    this.webContainerService.renameWebContainerFile(row).then(() => {
       console.log('File renamed successfully');
     }).catch((error) => {
       console.error('Error renaming file:', error);
