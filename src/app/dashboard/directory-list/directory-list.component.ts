@@ -1,15 +1,56 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, HostListener, Output, signal, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { NbCardModule, NbContextMenuModule, NbIconModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverDirective, NbPopoverModule, NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder, NbTreeGridModule, NbCdkMappingModule, NbInputModule, NbFormFieldModule } from '@nebular/theme';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Output,
+  signal,
+  ViewChild,
+  OnDestroy,
+  OnInit,
+  AfterViewInit,
+  inject,
+  DestroyRef
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
+import {
+  NbCardModule,
+  NbContextMenuModule,
+  NbIconModule,
+  NbMenuItem,
+  NbMenuModule,
+  NbMenuService,
+  NbPopoverDirective,
+  NbPopoverModule,
+  NbSortDirection,
+  NbSortRequest,
+  NbTreeGridDataSource,
+  NbTreeGridDataSourceBuilder,
+  NbTreeGridModule,
+  NbInputModule,
+  NbFormFieldModule
+} from '@nebular/theme';
+import { filter, take, shareReplay, switchMap, distinctUntilChanged } from 'rxjs/operators';
+import { BehaviorSubject, Subscription } from 'rxjs';
+
 import { FsIconComponent } from '../fs-icon/fs-icon.component';
 import { SocketService } from '../../services/socket.service';
-import { Subscription } from 'rxjs/internal/Subscription';
 import { AppWorkflowService } from '../../services/app-workflow.service';
 import { WebContainerService } from '../../services/web-container.service';
 import { WindowService } from '../../services/window.service';
 import { CodeEditorComponent } from '../../code-display/code-editor.component';
-import { FormsModule } from '@angular/forms';
+import { DirectoryControlService } from '../../services/directory-control.service';
 
+// Constants
+const DIRECTORY_MANAGER = 'DirectoryManager';
+const REFRESH_DIRECTORY = 'RefreshDirectory';
+const SOCKET_NAMESPACE = '/projectId';
+const MIN_WIDTH_MULTIPLE_COLUMNS = 400;
+const NEXT_COLUMN_STEP = 100;
+
+// Types
 interface TreeNode<T> {
   data: T;
   children?: TreeNode<T>[];
@@ -20,291 +61,384 @@ interface FSEntry {
   name: string;
   kind: string;
   items?: number;
+  path?: string;
+  id?: string;
+}
+
+interface ActiveElement {
+  element: HTMLElement;
+  row: any;
 }
 
 @Component({
   selector: 'app-directory-list',
-  imports: [NbTreeGridModule, NbIconModule, NbCardModule, CommonModule, FsIconComponent, NbMenuModule, NbContextMenuModule, NbPopoverModule, NbCdkMappingModule, NbInputModule, FormsModule, NbFormFieldModule],
+  imports: [
+    NbTreeGridModule,
+    NbIconModule,
+    NbCardModule,
+    CommonModule,
+    FsIconComponent,
+    NbMenuModule,
+    NbContextMenuModule,
+    NbPopoverModule,
+    NbInputModule,
+    FormsModule,
+    NbFormFieldModule
+  ],
   standalone: true,
   templateUrl: './directory-list.component.html',
   styleUrl: './directory-list.component.scss'
 })
+export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy {
+  // Inject services using inject() for better tree-shaking
+  private readonly dataSourceBuilder = inject(NbTreeGridDataSourceBuilder<FSEntry>);
+  private readonly socketService = inject(SocketService);
+  private readonly webContainerService = inject(WebContainerService);
+  private readonly windowService = inject(WindowService);
+  private readonly menuService = inject(NbMenuService);
+  private readonly appWorkflowService = inject(AppWorkflowService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly directoryControlService = inject(DirectoryControlService);
 
-export class DirectoryListComponent {
-  customColumn = 'name';
-  defaultColumns = ['kind', 'items'];
-  allColumns = [this.customColumn];
+  // Column configuration
+  readonly customColumn = 'name';
+  readonly defaultColumns = ['kind', 'items'];
+  readonly allColumns = [this.customColumn];
 
+  // Grid state
   dataSource!: NbTreeGridDataSource<FSEntry>;
-  sortColumn!: string;
+  sortColumn = '';
   sortDirection: NbSortDirection = NbSortDirection.NONE;
-  private readonly directoryManager: string = 'DirectoryManager';
-  private directorySubscription: Subscription | undefined;
-  messages: any = { "action": "getAll", "path": "" };
-  private subscriptions: Subscription = new Subscription();
-  @Output() openFile = new EventEmitter<any>();
-  private readonly webContainerFiles: string = 'WebContainerFiles';
-  private readonly refreshDirectory: string = 'RefreshDirectory';
-  private isWebContainerActive: boolean = false;
-  private appList: any[] = [];
-  private currentMaxZIndex = signal(2000);
-  @ViewChild(NbPopoverDirective)
-  popover!: NbPopoverDirective;
-  @ViewChild('popoverHost', { read: ElementRef })
-  popoverHost!: ElementRef;
-  setReadOnly: boolean = false;
-  @ViewChild('editInput')
-  inputElement!: ElementRef;
-  private activeElements: any[] = [];
-  addNewInputRow: string = '';
-  insertNewRowIndicator: string = '';
-  private webContainerSubscription: Subscription | undefined;
-  private setKind: string = '';
 
+  // UI state
+  @Output() openFile = new EventEmitter<any>();
+  @ViewChild(NbPopoverDirective) popover!: NbPopoverDirective;
+  @ViewChild('popoverHost', { read: ElementRef }) popoverHost!: ElementRef;
+  @ViewChild('editInput') inputElement!: ElementRef;
+
+  setReadOnly = false;
+  addNewInputRow = '';
+  insertNewRowIndicator = '';
+
+  // Private state
+  private currentMaxZIndex = signal(2000);
+  private activeElements: ActiveElement[] = [];
+  private setKind = '';
+  private projectName = '';
+
+  private directorySubscription: Subscription | null = null;
+  private refreshSubscription: Subscription | null = null;
+
+  // Context menu configurations
   contextMenuItems: NbMenuItem[] = [
     { title: 'View Details', icon: 'eye-outline' },
     { title: 'Edit Node', icon: 'edit-outline' },
     { title: 'Delete Node', icon: 'trash-outline' },
   ];
 
-  constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>,
-    private socketService: SocketService,
-    private webContainerService: WebContainerService,
-    private windowService: WindowService,
-    private menuService: NbMenuService,
-    private appWorkflowService: AppWorkflowService) {
+  private readonly directoryMenuItems = [
+    { title: 'Rename', icon: 'edit-outline' },
+    { title: 'Delete', icon: 'trash-outline' },
+    { title: 'Copy', icon: 'copy-outline' },
+    { title: 'Cut', icon: 'scissors-outline' },
+    { title: 'Add Folder', icon: 'folder-outline' },
+    { title: 'Add File', icon: 'file-text-outline' }
+  ];
 
+  private readonly fileMenuItems = [
+    { title: 'Rename', icon: 'edit-outline' },
+    { title: 'Copy', icon: 'copy-outline' },
+    { title: 'Cut', icon: 'scissors-outline' },
+    { title: 'Delete', icon: 'trash-outline' }
+  ];
+
+  ngOnInit(): void {
+    this.setupMenuListeners();
   }
 
-  ngOnInit() {
-    this.menuService.onItemClick().subscribe((menuItem) => {
-      console.log(menuItem);
-      switch (menuItem.item.title) {
-        case 'Rename':
-          this.renameDirectory(menuItem.item.data);
-          break;
-        case 'Delete':
-          console.log('Delete');
-          break;
-        case 'Add Folder':
-          this.addFileAndFolder(menuItem.item.data, 'directory');
-          break;
-        case 'Add File':
-          this.addFileAndFolder(menuItem.item.data, 'file');
-          break;
-      }
-    });
-
+  ngAfterViewInit(): void {
+    this.setupFileSystemSubscription();
   }
 
-  ngAfterViewInit() {
-
-    this.subscriptions.add(
-      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
-        if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
-          this.messages = { "action": "getContainerFiles", "path": appDetails.data.extraConfig.projectName };
-          this.socketService.sendMessage(this.directoryManager, this.messages);
-          const serverReply$ = this.socketService?.on(this.directoryManager);
-          if (serverReply$) {
-            this.directorySubscription = serverReply$.subscribe((response: any) => {
-              console.log('Received directorySubscription from server:', response);
-              const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
-              this.dataSource = this.dataSourceBuilder.create(formatedTree);
-            });
-          }
-        }
-      })
-    );
-
-    //   this.inputElement.changes.subscribe((newList: QueryList<ElementRef>) => {
-    //   // Focus the last added element
-    //   const lastIndex = newList.length - 1;
-    //   if (lastIndex >= 0) {
-    //     newList.toArray()[lastIndex].nativeElement.focus();
-    //   }
-    // });
-  }
-
+  // Public methods
   updateSort(sortRequest: NbSortRequest): void {
     this.sortColumn = sortRequest.column;
     this.sortDirection = sortRequest.direction;
   }
 
   getSortDirection(column: string): NbSortDirection {
-    if (this.sortColumn === column) {
-      return this.sortDirection;
-    }
-    return NbSortDirection.NONE;
+    return this.sortColumn === column ? this.sortDirection : NbSortDirection.NONE;
   }
 
-  getShowOn(index: number) {
-    const minWithForMultipleColumns = 400;
-    const nextColumnStep = 100;
-    return minWithForMultipleColumns + (nextColumnStep * index);
+  getShowOn(index: number): number {
+    return MIN_WIDTH_MULTIPLE_COLUMNS + (NEXT_COLUMN_STEP * index);
   }
 
-  onRowClick(row: any) {
-    if (row && row.data && row.data.kind !== 'directory') {
-      this.webContainerService.webContainerFileContent(row.data.path.replace(/\\/g, '/')).then((fileData: string) => {
-        this.currentMaxZIndex.update(z => z + 1);
-        this.windowService.openWindow({
-          title: row.data.name,
-          contentComponent: CodeEditorComponent, // Pass the component class to render
-          data: { fileDetails: { fileContent: fileData, filePath: row.data.path.replace(/\\/g, '/') } },
-          placeholder: 'h-full w-full col-start-1 col-end-2 row-start-1 row-span-2',
-          isMaximized: signal(true),
-          zIndex: signal(this.currentMaxZIndex())
-        });
-      }, error => {
-        console.log('onRowClick error', error);
-      });
-    }
+  onRowClick(row: any): void {
+    if (!row?.data || row.data.kind === 'directory') return;
+    this.openFileInEditor(row);
   }
 
-  openOnRightClick(event: MouseEvent, popover: any, row: any) {
-    if (row.kind === 'directory') {
-      this.contextMenuItems = [
-        { title: 'Rename', icon: 'edit-outline', data: row },
-        { title: 'Delete', icon: 'trash-outline', data: row },
-        { title: 'Copy', icon: 'copy-outline', data: row },
-        { title: 'Cut', icon: 'scissors-outline', data: row },
-        { title: 'Add Folder', icon: 'folder-outline', data: row },
-        { title: 'Add File', icon: 'file-text-outline', data: row }
-      ]
-    } else if (row.kind === 'file') {
-      this.contextMenuItems = [
-        { title: 'Rename', icon: 'edit-outline', data: row },
-        { title: 'Copy', icon: 'copy-outline', data: row },
-        { title: 'Cut', icon: 'scissors-outline', data: row },
-        { title: 'Delete', icon: 'trash-outline', data: row }
-      ]
-    }
+  openOnRightClick(event: MouseEvent, popover: NbPopoverDirective, row: FSEntry): void {
     event.preventDefault();
+    this.contextMenuItems = row.kind === 'directory'
+      ? this.directoryMenuItems.map(item => ({ ...item, data: row }))
+      : this.fileMenuItems.map(item => ({ ...item, data: row }));
+
     this.onDocumentClick(event);
     popover.show();
     this.popover = popover;
   }
 
   @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    if (this.popover && this.popover.isShown) {
-      const clickedInside = this.popoverHost.nativeElement.contains(event.target);
-      if (!clickedInside) {
-        this.popover.hide();
-      }
+  onDocumentClick(event: MouseEvent): void {
+    if (this.popover?.isShown && !this.popoverHost?.nativeElement.contains(event.target)) {
+      this.popover.hide();
     }
-    // this.insertNewRowIndicator = '';
   }
 
-  renameDirectory(row: any) {
+  renameDirectory(row: any): void {
     row.setReadOnly = !row.setReadOnly;
     const element = document.getElementById(row.name);
+
     if (element) {
       setTimeout(() => {
         element.focus();
-        if (this.activeElements.indexOf(element) === -1) {
-          this.activeElements.map(el => {
-            if (el.element !== element) {
-              el.row.setReadOnly = true;
-              el.element.blur();
-              this.activeElements.splice(this.activeElements.indexOf(el), 1);
-            }
-          })
-        }
-        this.activeElements.push({ element, row });
-      }, 0);
+        this.manageActiveElements(element as HTMLElement, row);
+      });
     }
   }
 
-  focusOutInput(row: any) {
-    if (this.activeElements.length === 0) {
-      return;
-    }
+  focusOutInput(row: any): void {
+    if (this.activeElements.length === 0 || !this.projectName) return;
 
-    this.subscriptions.add(
-      this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
-        if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
-          setTimeout(() => this.sendRequestToRename(row), 50);
-          this.messages = { "action": "rename", "path": appDetails.data.extraConfig.projectName, "content": row };
-          this.socketService.sendMessage(this.directoryManager, this.messages);
-          const serverReply$ = this.socketService?.on(this.directoryManager);
-          if (serverReply$) {
-            this.directorySubscription = serverReply$.subscribe((response: any) => {
-              console.log('Received directorySubscription rename replay from server:', response);
-            });
-          }
-        }
-      })
-    );
-    this.activeElements.map(el => {
-      el.row.setReadOnly = true;
-      el.element.blur();
-    })
+    this.sendRenameRequest(row);
+    this.blurAllActiveElements();
   }
 
-  sendRequestToRename(row: any) {
-    this.webContainerService.renameWebContainerFile(row).then(() => {
-      console.log('File renamed successfully');
-    }).catch((error) => {
-      console.error('Error renaming file:', error);
-    });
+  trackByFn(_index: number, item: any): string {
+    return item.data?.id;
   }
 
-  trackByFn(index: number, item: any) {
-    return item.data.id;
-  }
-
-  addFileAndFolder(row: any, kind: string) {
+  addFileAndFolder(row: any, kind: string): void {
     this.insertNewRowIndicator = row.name;
     this.setKind = kind;
   }
 
-  addNewDirectoryRow(row: any) {
+  addNewDirectoryRow(row: any): void {
+    if (!this.addNewInputRow.trim()) return;
+
     const newRow = {
       name: this.addNewInputRow,
       kind: this.setKind,
       path: row.data.path,
-    }
+    };
+
     this.insertNewRowIndicator = '';
-    const setAction = this.setKind === 'file' ? 'AddFile' : 'AddFolder';
-    this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
-      if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
-        this.messages = { "action": setAction, "path": appDetails.data.extraConfig.projectName, "content": newRow };
-        this.socketService.sendMessage(this.directoryManager, this.messages);
-        const serverReply$ = this.socketService?.on(this.refreshDirectory);
-        if (serverReply$) {
-          this.directorySubscription = serverReply$.subscribe((response: any) => {
-            console.log('Received add new file from server:', response);
-            this.updateFileSystem(appDetails);
-          });
-        }
-      }
-    })
+    const action = this.setKind === 'file' ? 'AddFile' : 'AddFolder';
+
+    this.sendAddRequest(action, newRow);
   }
 
-  updateFileSystem(appObject: any) {
-    this.messages = { "action": "getContainerFiles", "path": appObject.data.extraConfig.projectName };
-    this.socketService.sendMessage(this.directoryManager, this.messages);
-    const webContainerFiles$ = this.socketService?.on(this.directoryManager);
-    if (webContainerFiles$) {
-      this.webContainerSubscription = webContainerFiles$.subscribe((response: any) => {
-        console.log('Received updateFileSystem from server:', response);
-        if (response && response.data && response.data[appObject.data.extraConfig.projectName]) {
-          const formatedTree: TreeNode<FSEntry>[] = this.webContainerService.transformToNebularTree(response.data);
-          this.dataSource = this.dataSourceBuilder.create(formatedTree);
-          this.webContainerService.mountFiles(response.data[appObject.data.extraConfig.projectName]['directory']);
-        } else {
-          console.log('Unable to receive webContainerFiles from server: Invalid response data');
+  ngOnDestroy(): void {
+    // Clean up subscriptions manually
+    this.cleanupSubscriptions();
+  }
+
+  // Private methods
+  private setupMenuListeners(): void {
+    this.menuService.onItemClick()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ item }) => {
+        this.handleMenuItemClick(item);
+      });
+  }
+
+  private handleMenuItemClick(item: NbMenuItem): void {
+    const actions: Record<string, () => void> = {
+      'Rename': () => this.renameDirectory(item.data),
+      'Delete': () => console.log('Delete'),
+      'Add Folder': () => this.addFileAndFolder(item.data, 'directory'),
+      'Add File': () => this.addFileAndFolder(item.data, 'file'),
+    };
+
+    actions[item.title]?.();
+  }
+
+  private setupFileSystemSubscription(): void {
+    this.appWorkflowService.appObject$
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        filter((appDetails: any) => !!appDetails?.data?.extraConfig?.projectName),
+        filter(() => !this.socketService?.socketStatus?.closed)
+      )
+      .subscribe((appDetails: any) => {
+        this.projectName = appDetails.data.extraConfig.projectName;
+        // this.loadDirectoryContents(this.projectName);
+        //  this.directoryControlService.loadDirectoryContents(this.projectName);
+        this.directoryControlService.directoryData$.pipe(
+          takeUntilDestroyed(this.destroyRef)
+        ).subscribe((response: any) => response !== null && this.updateDataSource(response));
+
+      });
+  }
+
+  private loadDirectoryContents(projectName: string): void {
+    // CRITICAL FIX: Clean up previous subscription before creating new one
+    this.cleanupSubscriptions();
+
+    const message = { action: 'getContainerFiles', path: projectName };
+    this.socketService.sendMessage(DIRECTORY_MANAGER, message);
+
+    const serverReply$ = this.socketService?.on(DIRECTORY_MANAGER);
+    if (serverReply$) {
+      this.directorySubscription = serverReply$.subscribe((response: any) => {
+        console.log('directory-list- Received directorySubscription from server:', response);
+        if (response?.data) {
+          this.updateDataSource(response.data);
         }
       });
     }
   }
 
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-    this.directorySubscription?.unsubscribe();
-    this.webContainerSubscription?.unsubscribe();
+  private cleanupSubscriptions(): void {
+    // Unsubscribe from existing subscriptions to prevent duplicates
+    if (this.directorySubscription) {
+      this.directorySubscription.unsubscribe();
+      this.directorySubscription = null;
+    }
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+      this.refreshSubscription = null;
+    }
+  }
+
+  private updateDataSource(data: any): void {
+    const formatedTree = this.webContainerService.transformToNebularTree(data);
+    this.dataSource = this.dataSourceBuilder.create(formatedTree);
+  }
+
+  private openFileInEditor(row: any): void {
+    const filePath = row.data.path.replace(/\\/g, '/');
+
+    this.webContainerService.webContainerFileContent(filePath)
+      .then((fileData: string) => {
+        this.currentMaxZIndex.update(z => z + 1);
+        this.windowService.openWindow({
+          title: row.data.name,
+          contentComponent: CodeEditorComponent,
+          data: {
+            fileDetails: {
+              fileContent: fileData,
+              filePath: filePath
+            }
+          },
+          placeholder: 'h-full w-full col-start-1 col-end-2 row-start-1 row-span-2',
+          isMaximized: signal(true),
+          zIndex: signal(this.currentMaxZIndex())
+        });
+      })
+      .catch(error => {
+        console.error('onRowClick error', error);
+      });
+  }
+
+  private manageActiveElements(element: HTMLElement, row: any): void {
+    this.activeElements = this.activeElements.filter(el => {
+      if (el.element !== element) {
+        el.row.setReadOnly = true;
+        el.element.blur();
+        return false;
+      }
+      return true;
+    });
+
+    this.activeElements.push({ element, row });
+  }
+
+  private sendRenameRequest(row: any): void {
+    if (!this.projectName) return;
+
+    // Use take(1) to automatically unsubscribe after first emission
+    this.appWorkflowService.appObject$
+      .pipe(
+        take(1),
+        filter((appDetails: any) => !!appDetails?.data?.extraConfig?.projectName),
+        filter(() => !this.socketService?.socketStatus?.closed)
+      )
+      .subscribe((appDetails: any) => {
+        const message = {
+          action: 'rename',
+          path: appDetails.data.extraConfig.projectName,
+          content: row
+        };
+
+        this.socketService.sendMessage(DIRECTORY_MANAGER, message, SOCKET_NAMESPACE);
+      });
+  }
+
+  private sendAddRequest(action: string, newRow: any): void {
+    this.appWorkflowService.appObject$
+      .pipe(
+        take(1),
+        filter((appDetails: any) => !!appDetails?.data?.extraConfig?.projectName),
+        filter(() => !this.socketService?.socketStatus?.closed)
+      )
+      .subscribe((appDetails: any) => {
+        const message = {
+          action,
+          path: appDetails.data.extraConfig.projectName,
+          content: newRow
+        };
+
+        this.socketService.sendMessage(DIRECTORY_MANAGER, message);
+
+        // Clean up previous refresh subscription
+        if (this.refreshSubscription) {
+          this.refreshSubscription.unsubscribe();
+        }
+
+        const refreshReply$ = this.socketService?.on(REFRESH_DIRECTORY);
+        if (refreshReply$) {
+          this.refreshSubscription = refreshReply$.subscribe((response: any) => {
+            console.log('Received add new file from server:', response);
+            this.updateFileSystem(appDetails);
+          });
+        }
+      });
+  }
+
+  private blurAllActiveElements(): void {
+    this.activeElements.forEach(el => {
+      el.row.setReadOnly = true;
+      el.element.blur();
+    });
+    this.activeElements = [];
+  }
+
+  private updateFileSystem(appObject: any): void {
+    if (!appObject?.data?.extraConfig?.projectName) return;
+
+    // Clean up previous directory subscription before creating new one
+    this.cleanupSubscriptions();
+
+    const projectName = appObject.data.extraConfig.projectName;
+    const message = { action: 'getContainerFiles', path: projectName };
+
+    this.socketService.sendMessage(DIRECTORY_MANAGER, message);
+
+    const webContainerFiles$ = this.socketService?.on(DIRECTORY_MANAGER);
+    if (webContainerFiles$) {
+      this.directorySubscription = webContainerFiles$.subscribe((response: any) => {
+        console.log('Received updateFileSystem from server:', response);
+
+        if (response?.data?.[projectName]) {
+          this.updateDataSource(response.data);
+          this.webContainerService.mountFiles(response.data[projectName].directory);
+        } else {
+          console.warn('Unable to receive webContainerFiles from server: Invalid response data');
+        }
+      });
+    }
   }
 }
-
-

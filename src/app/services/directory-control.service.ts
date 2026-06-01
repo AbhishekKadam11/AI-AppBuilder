@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { SocketService } from './socket.service';
 
 const DIRECTORY_MANAGER = 'DirectoryManager';
@@ -13,7 +13,7 @@ export class DirectoryControlService {
   private readonly socketService = inject(SocketService);
 
   private directorySubscription: Subscription | null = null;
-  directoryDataSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+  directoryDataSubject: Subject<any> = new Subject<any>();
   public directoryData$ = this.directoryDataSubject.asObservable();
 
   constructor() { }

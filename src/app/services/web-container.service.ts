@@ -48,10 +48,10 @@ export class WebContainerService {
       this.outputSubject.next('WebContainer booted successfully.');
       await this.mountFiles(files);
       this.progressControlService.showProgressGif('dependency');
-      //  await this.runCommands(['npm', 'install', '--legacy-peer-deps']);
+      await this.runCommands(['npm', 'install', '--legacy-peer-deps']);
       this.listenForServerReady();
       this.progressControlService.showProgressGif('templating');
-      // await this.runCommands(['npm', 'run', 'start']);
+      await this.runCommands(['npm', 'run', 'start']);
     } catch (error) {
       console.error('Failed to boot and run WebContainer:', error);
       this.outputSubject.next(`Error: ${error}`);
@@ -215,7 +215,7 @@ export class WebContainerService {
     if (!this.webcontainerInstance) {
       return Promise.reject(new Error('WebContainer not initialized.'));
     }
-    
+
     const normalizedPath = file.path.replace(/\\/g, '/');
     const pathSegments = normalizedPath.split('/');
     pathSegments[pathSegments.length - 1] = file.name;

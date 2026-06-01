@@ -10,7 +10,6 @@ import {
   effect,
   signal,
   ViewChild,
-  Signal,
   SecurityContext
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -22,6 +21,7 @@ import { WebContainerService } from '../services/web-container.service';
 import { SocketService } from '../services/socket.service';
 import { ProgressControlService } from '../services/progress-control.service';
 import { AppWorkflowService } from '../services/app-workflow.service';
+import { DirectoryControlService } from '../services/directory-control.service';
 
 // Define interfaces for better type safety
 interface AppDetails {
@@ -36,7 +36,7 @@ interface AppDetails {
 }
 
 interface SocketResponse {
-  data?: Record<string, { directory: any }>;
+  [projectName: string]: { directory: any } ;
 }
 
 @Component({
@@ -84,6 +84,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   private appWorkflowService = inject(AppWorkflowService);
   private sanitizer = inject(DomSanitizer);
   private destroyRef = inject(DestroyRef);
+  private readonly directoryControlService = inject(DirectoryControlService);
 
   constructor() {
     // Effect: Automatically triggers initialization when appObject changes
@@ -164,21 +165,14 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     const projectName = app.data?.extraConfig?.projectName || app.appName;
     if (!projectName) return;
 
-    const message = { action: "getContainerFiles", path: projectName };
-    this.socketService.sendMessage(this.directoryManager, message);
-
-    const webContainerFiles$ = this.socketService?.on(this.directoryManager);
-    if (webContainerFiles$) {
-      webContainerFiles$
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((response: SocketResponse) => {
-          this.handleWebContainerResponse(response, projectName);
-        });
-    }
+    this.directoryControlService.loadDirectoryContents(projectName);
+    this.directoryControlService.directoryData$.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((response: any) => this.handleWebContainerResponse(response, projectName));
   }
 
   private handleWebContainerResponse(response: SocketResponse, projectName: string): void {
-    const directory = response?.data?.[projectName]?.['directory'];
+    const directory = response[projectName]?.['directory'];
 
     if (!directory) {
       console.warn('Directory not found in response for:', projectName);
