@@ -274,31 +274,10 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
       )
       .subscribe((appDetails: any) => {
         this.projectName = appDetails.data.extraConfig.projectName;
-        // this.loadDirectoryContents(this.projectName);
-        //  this.directoryControlService.loadDirectoryContents(this.projectName);
         this.directoryControlService.directoryData$.pipe(
           takeUntilDestroyed(this.destroyRef)
-        ).subscribe((response: any) => response !== null && this.updateDataSource(response));
-
+        ).subscribe((response: any) => response !== null && typeof response !== "boolean" && this.updateDataSource(response));
       });
-  }
-
-  private loadDirectoryContents(projectName: string): void {
-    // CRITICAL FIX: Clean up previous subscription before creating new one
-    this.cleanupSubscriptions();
-
-    const message = { action: 'getContainerFiles', path: projectName };
-    this.socketService.sendMessage(DIRECTORY_MANAGER, message);
-
-    const serverReply$ = this.socketService?.on(DIRECTORY_MANAGER);
-    if (serverReply$) {
-      this.directorySubscription = serverReply$.subscribe((response: any) => {
-        console.log('directory-list- Received directorySubscription from server:', response);
-        if (response?.data) {
-          this.updateDataSource(response.data);
-        }
-      });
-    }
   }
 
   private cleanupSubscriptions(): void {
@@ -372,7 +351,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
           path: appDetails.data.extraConfig.projectName,
           content: row
         };
-
+        this.webContainerService.renameWebContainerFile(row);
         this.socketService.sendMessage(DIRECTORY_MANAGER, message, SOCKET_NAMESPACE);
       });
   }
