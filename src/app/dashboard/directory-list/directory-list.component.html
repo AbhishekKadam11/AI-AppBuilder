@@ -30,7 +30,7 @@
               <div>
                 <input nbInput class="directory-item" [(ngModel)]="row.data[customColumn]"
                   [attr.readonly]="row.data.setReadOnly ? row.data.setReadOnly : null" [id]="row.data[customColumn]"
-                  [attr.data-index]="row.data[customColumn]" (focusout)="focusOutInput(row.data)"
+                  [attr.data-index]="row.data[customColumn]" (focusout)="focusOutInput(row.data)" (keydown.enter)="focusOutInput(row.data)"
                   [ngClass]="{'input-heighlighter': !row.data.setReadOnly}" />
                 </div>
               </div>

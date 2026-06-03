@@ -197,7 +197,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  renameDirectory(row: any): void {
+  rowHasFocus(row: any): void {
     row.setReadOnly = !row.setReadOnly;
     const element = document.getElementById(row.name);
 
@@ -212,7 +212,8 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   focusOutInput(row: any): void {
     if (this.activeElements.length === 0 || !this.projectName) return;
 
-    this.sendRenameRequest(row);
+    this.sendActionRequest('rename', row);
+
     this.blurAllActiveElements();
   }
 
@@ -237,7 +238,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     this.insertNewRowIndicator = '';
     const action = this.setKind === 'file' ? 'AddFile' : 'AddFolder';
 
-    this.sendAddRequest(action, newRow);
+    this.sendActionRequest(action, newRow);
   }
 
   ngOnDestroy(): void {
@@ -256,10 +257,10 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private handleMenuItemClick(item: NbMenuItem): void {
     const actions: Record<string, () => void> = {
-      'Rename': () => this.renameDirectory(item.data),
-      'Delete': () => console.log('Delete'),
-      'Add Folder': () => this.addFileAndFolder(item.data, 'directory'),
-      'Add File': () => this.addFileAndFolder(item.data, 'file'),
+      'Rename': () => this.rowHasFocus(item.data),
+      'Delete': () => this.sendActionRequest('delete', item.data),
+      'Add Folder': () => this.sendActionRequest('add', item.data),
+      'Add File': () => this.sendActionRequest('add', item.data),
     };
 
     actions[item.title]?.();
@@ -335,10 +336,29 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     this.activeElements.push({ element, row });
   }
 
-  private sendRenameRequest(row: any): void {
-    if (!this.projectName) return;
+  // private sendRenameRequest(row: any): void {
+  //   if (!this.projectName) return;
 
-    // Use take(1) to automatically unsubscribe after first emission
+  //   // Use take(1) to automatically unsubscribe after first emission
+  //   this.appWorkflowService.appObject$
+  //     .pipe(
+  //       take(1),
+  //       filter((appDetails: any) => !!appDetails?.data?.extraConfig?.projectName),
+  //       filter(() => !this.socketService?.socketStatus?.closed)
+  //     )
+  //     .subscribe((appDetails: any) => {
+  //       const message = {
+  //         action: 'rename',
+  //         path: appDetails.data.extraConfig.projectName,
+  //         content: row
+  //       };
+  //       // this.webContainerService.renameWebContainerFile(row);
+  //       this.socketService.sendMessage(DIRECTORY_MANAGER, message, SOCKET_NAMESPACE);
+  //     });
+  // }
+
+  private sendActionRequest(action: string, newRow: any): void {
+    console.log(`sendActionRequest - Action: ${action}, Row:`, newRow);
     this.appWorkflowService.appObject$
       .pipe(
         take(1),
@@ -346,44 +366,27 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
         filter(() => !this.socketService?.socketStatus?.closed)
       )
       .subscribe((appDetails: any) => {
-        const message = {
-          action: 'rename',
-          path: appDetails.data.extraConfig.projectName,
-          content: row
-        };
-        this.webContainerService.renameWebContainerFile(row);
-        this.socketService.sendMessage(DIRECTORY_MANAGER, message, SOCKET_NAMESPACE);
-      });
-  }
-
-  private sendAddRequest(action: string, newRow: any): void {
-    this.appWorkflowService.appObject$
-      .pipe(
-        take(1),
-        filter((appDetails: any) => !!appDetails?.data?.extraConfig?.projectName),
-        filter(() => !this.socketService?.socketStatus?.closed)
-      )
-      .subscribe((appDetails: any) => {
+        console.log('sendActionRequest - App Details:', appDetails);
         const message = {
           action,
           path: appDetails.data.extraConfig.projectName,
           content: newRow
         };
+ this.webContainerService.renameWebContainerFile(newRow);
+        this.socketService.sendMessage(DIRECTORY_MANAGER, message, SOCKET_NAMESPACE);
 
-        this.socketService.sendMessage(DIRECTORY_MANAGER, message);
+        // // Clean up previous refresh subscription
+        // if (this.refreshSubscription) {
+        //   this.refreshSubscription.unsubscribe();
+        // }
 
-        // Clean up previous refresh subscription
-        if (this.refreshSubscription) {
-          this.refreshSubscription.unsubscribe();
-        }
-
-        const refreshReply$ = this.socketService?.on(REFRESH_DIRECTORY);
-        if (refreshReply$) {
-          this.refreshSubscription = refreshReply$.subscribe((response: any) => {
-            console.log('Received add new file from server:', response);
-            this.updateFileSystem(appDetails);
-          });
-        }
+        // const refreshReply$ = this.socketService?.on(REFRESH_DIRECTORY);
+        // if (refreshReply$) {
+        //   this.refreshSubscription = refreshReply$.subscribe((response: any) => {
+        //     console.log('Received add new file from server:', response);
+        //     this.updateFileSystem(appDetails);
+        //   });
+        // }
       });
   }
 
@@ -419,5 +422,10 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
         }
       });
     }
+  }
+
+  deleteNode(row: any): void {
+    if (!this.projectName) return;
+    this.sendActionRequest('delete', row);
   }
 }
