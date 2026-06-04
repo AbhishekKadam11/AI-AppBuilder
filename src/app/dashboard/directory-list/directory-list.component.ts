@@ -212,8 +212,8 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   focusOutInput(row: any): void {
     if (this.activeElements.length === 0 || !this.projectName) return;
 
+    this.webContainerActions('rename', row);
     this.sendActionRequest('rename', row);
-
     this.blurAllActiveElements();
   }
 
@@ -336,26 +336,26 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     this.activeElements.push({ element, row });
   }
 
-  // private sendRenameRequest(row: any): void {
-  //   if (!this.projectName) return;
+  private sendRenameRequest(row: any): void {
+    if (!this.projectName) return;
 
-  //   // Use take(1) to automatically unsubscribe after first emission
-  //   this.appWorkflowService.appObject$
-  //     .pipe(
-  //       take(1),
-  //       filter((appDetails: any) => !!appDetails?.data?.extraConfig?.projectName),
-  //       filter(() => !this.socketService?.socketStatus?.closed)
-  //     )
-  //     .subscribe((appDetails: any) => {
-  //       const message = {
-  //         action: 'rename',
-  //         path: appDetails.data.extraConfig.projectName,
-  //         content: row
-  //       };
-  //       // this.webContainerService.renameWebContainerFile(row);
-  //       this.socketService.sendMessage(DIRECTORY_MANAGER, message, SOCKET_NAMESPACE);
-  //     });
-  // }
+    // Use take(1) to automatically unsubscribe after first emission
+    this.appWorkflowService.appObject$
+      .pipe(
+        take(1),
+        filter((appDetails: any) => !!appDetails?.data?.extraConfig?.projectName),
+        filter(() => !this.socketService?.socketStatus?.closed)
+      )
+      .subscribe((appDetails: any) => {
+        const message = {
+          action: 'rename',
+          path: appDetails.data.extraConfig.projectName,
+          content: row
+        };
+        // this.webContainerService.renameWebContainerFile(row);
+        this.socketService.sendMessage(DIRECTORY_MANAGER, message, SOCKET_NAMESPACE);
+      });
+  }
 
   private sendActionRequest(action: string, newRow: any): void {
     console.log(`sendActionRequest - Action: ${action}, Row:`, newRow);
@@ -372,7 +372,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
           path: appDetails.data.extraConfig.projectName,
           content: newRow
         };
- this.webContainerService.renameWebContainerFile(newRow);
+
         this.socketService.sendMessage(DIRECTORY_MANAGER, message, SOCKET_NAMESPACE);
 
         // // Clean up previous refresh subscription
@@ -427,5 +427,22 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   deleteNode(row: any): void {
     if (!this.projectName) return;
     this.sendActionRequest('delete', row);
+  }
+
+  webContainerActions(action: string, row: any): void {
+    switch (action) {
+      case 'rename':
+        this.webContainerService.renameWebContainerFile(row);
+        break;
+      case 'delete':
+        this.deleteNode(row);
+        break;
+      case 'add folder':
+      case 'add file':
+        this.addNewDirectoryRow(row);
+        break;
+      default:
+        console.warn('Unknown action:', action);
+    }
   }
 }

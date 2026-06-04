@@ -168,7 +168,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     this.directoryControlService.loadDirectoryContents(projectName);
     this.directoryControlService.directoryData$.pipe(
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe((response: any) => this.handleWebContainerResponse(response, projectName));
+    ).subscribe((response: any) => typeof response !== "boolean" && this.handleWebContainerResponse(response, projectName));
   }
 
   private handleWebContainerResponse(response: SocketResponse, projectName: string): void {
