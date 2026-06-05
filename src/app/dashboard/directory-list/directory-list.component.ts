@@ -197,6 +197,18 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
+   private handleMenuItemClick(item: NbMenuItem): void {
+    const actions: Record<string, () => void> = {
+      'Rename': () => this.rowHasFocus(item.data),
+      'Delete': () => this.sendActionRequest('delete', item.data),
+      'Add Folder': () => this.webContainerActions('AddFolder', item.data),
+      // 'Add Folder': () => this.addFileAndFolder(item.data, 'directory'),
+      'Add File': () => this.webContainerActions('AddFile', item.data),
+    };
+
+    actions[item.title]?.();
+  }
+
   rowHasFocus(row: any): void {
     row.setReadOnly = !row.setReadOnly;
     const element = document.getElementById(row.name);
@@ -211,7 +223,6 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   focusOutInput(row: any): void {
     if (this.activeElements.length === 0 || !this.projectName) return;
-
     this.webContainerActions('rename', row);
     this.sendActionRequest('rename', row);
     this.blurAllActiveElements();
@@ -255,16 +266,6 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
       });
   }
 
-  private handleMenuItemClick(item: NbMenuItem): void {
-    const actions: Record<string, () => void> = {
-      'Rename': () => this.rowHasFocus(item.data),
-      'Delete': () => this.sendActionRequest('delete', item.data),
-      'Add Folder': () => this.sendActionRequest('add', item.data),
-      'Add File': () => this.sendActionRequest('add', item.data),
-    };
-
-    actions[item.title]?.();
-  }
 
   private setupFileSystemSubscription(): void {
     this.appWorkflowService.appObject$
@@ -359,6 +360,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private sendActionRequest(action: string, newRow: any): void {
     console.log(`sendActionRequest - Action: ${action}, Row:`, newRow);
+
     this.appWorkflowService.appObject$
       .pipe(
         take(1),
@@ -437,9 +439,11 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
       case 'delete':
         this.deleteNode(row);
         break;
-      case 'add folder':
-      case 'add file':
-        this.addNewDirectoryRow(row);
+      case 'AddFolder':
+        this.addFileAndFolder(row, 'directory');
+        break;
+      case 'AddFile':
+        this.addFileAndFolder(row, 'file');
         break;
       default:
         console.warn('Unknown action:', action);
