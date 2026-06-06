@@ -201,9 +201,9 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     const actions: Record<string, () => void> = {
       'Rename': () => this.rowHasFocus(item.data),
       'Delete': () => this.sendActionRequest('delete', item.data),
-      'Add Folder': () => this.webContainerActions('AddFolder', item.data),
+      'Add Folder': () => this.sendActionRequest('AddFolder', item.data),
       // 'Add Folder': () => this.addFileAndFolder(item.data, 'directory'),
-      'Add File': () => this.webContainerActions('AddFile', item.data),
+      'Add File': () => this.sendActionRequest('AddFile', item.data),
     };
 
     actions[item.title]?.();
@@ -223,7 +223,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   focusOutInput(row: any): void {
     if (this.activeElements.length === 0 || !this.projectName) return;
-    this.webContainerActions('rename', row);
+    // this.webContainerActions('rename', row);
     this.sendActionRequest('rename', row);
     this.blurAllActiveElements();
   }
@@ -249,6 +249,14 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     this.insertNewRowIndicator = '';
     const action = this.setKind === 'file' ? 'AddFile' : 'AddFolder';
 
+    // this.webContainerService.createDirectoryInWebContainer(row.data.path, this.addNewInputRow).then((result) => {
+    //   console.log(`${this.setKind} created successfully in web container:`, result);
+    //     // this.sendActionRequest(action, newRow);
+    //     this.updateDataSource({[this.projectName]:result});
+    //   })
+    //   .catch(error => {
+    //     console.error(`Error creating ${this.setKind} in web container:`, error);
+    //   });
     this.sendActionRequest(action, newRow);
   }
 
@@ -378,17 +386,17 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
         this.socketService.sendMessage(DIRECTORY_MANAGER, message, SOCKET_NAMESPACE);
 
         // // Clean up previous refresh subscription
-        // if (this.refreshSubscription) {
-        //   this.refreshSubscription.unsubscribe();
-        // }
+        if (this.refreshSubscription) {
+          this.refreshSubscription.unsubscribe();
+        }
 
-        // const refreshReply$ = this.socketService?.on(REFRESH_DIRECTORY);
-        // if (refreshReply$) {
-        //   this.refreshSubscription = refreshReply$.subscribe((response: any) => {
-        //     console.log('Received add new file from server:', response);
-        //     this.updateFileSystem(appDetails);
-        //   });
-        // }
+        const refreshReply$ = this.socketService?.on(REFRESH_DIRECTORY);
+        if (refreshReply$) {
+          this.refreshSubscription = refreshReply$.subscribe((response: any) => {
+            console.log('Received add new file from server:', response);
+            this.updateFileSystem(appDetails);
+          });
+        }
       });
   }
 
@@ -431,22 +439,22 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     this.sendActionRequest('delete', row);
   }
 
-  webContainerActions(action: string, row: any): void {
-    switch (action) {
-      case 'rename':
-        this.webContainerService.renameWebContainerFile(row);
-        break;
-      case 'delete':
-        this.deleteNode(row);
-        break;
-      case 'AddFolder':
-        this.addFileAndFolder(row, 'directory');
-        break;
-      case 'AddFile':
-        this.addFileAndFolder(row, 'file');
-        break;
-      default:
-        console.warn('Unknown action:', action);
-    }
-  }
+  // webContainerActions(action: string, row: any): void {
+  //   switch (action) {
+  //     case 'rename':
+  //       this.webContainerService.renameWebContainerFile(row);
+  //       break;
+  //     case 'delete':
+  //       this.deleteNode(row);
+  //       break;
+  //     case 'AddFolder':
+  //       this.addFileAndFolder(row, 'directory');
+  //       break;
+  //     case 'AddFile':
+  //       this.addFileAndFolder(row, 'file');
+  //       break;
+  //     default:
+  //       console.warn('Unknown action:', action);
+  //   }
+  // }
 }
