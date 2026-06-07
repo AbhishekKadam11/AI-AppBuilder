@@ -70,6 +70,12 @@ interface ActiveElement {
   row: any;
 }
 
+// interface Category {
+//   id: string;
+//   name: string;
+//   subCategories?: Category[];
+// }
+
 @Component({
   selector: 'app-directory-list',
   imports: [
@@ -128,6 +134,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private directorySubscription: Subscription | null = null;
   private refreshSubscription: Subscription | null = null;
+  private treeNodes: TreeNode<FSEntry>[] = [];
 
   // Context menu configurations
   contextMenuItems: NbMenuItem[] = [
@@ -223,7 +230,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   focusOutInput(row: any): void {
     if (this.activeElements.length === 0 || !this.projectName) return;
-    // this.webContainerActions('rename', row);
+
     this.sendActionRequest('rename', row);
     this.blurAllActiveElements();
   }
@@ -304,7 +311,60 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private updateDataSource(data: any): void {
     const formatedTree = this.webContainerService.transformToNebularTree(data);
+    console.log('Formatted tree data:', formatedTree);
+    //  this.treeNodes = this.mapToNodes(formatedTree);
     this.dataSource = this.dataSourceBuilder.create(formatedTree);
+  }
+
+ /** Refresh data while preserving expand/collapse state */
+  refresh(): void {
+    // 1. Collect IDs of currently expanded nodes
+    const expandedIds = new Set<string>();
+    this.collectExpandedIds(this.treeNodes, expandedIds);
+
+    // 2. Fetch fresh data
+    // this.api.getCategories().subscribe(data => {
+    //   // 3. Build new tree nodes and restore expanded state
+    //   this.treeNodes = this.mapToNodes(data, expandedIds);
+
+    //   // 4. Update the data source (do NOT recreate it unless you have to)
+    //   if (this.dataSource && (this.dataSource as any).setData) {
+    //     // ✅ Preferred: keeps the current data-source instance
+    //     (this.dataSource as any).setData(this.treeNodes);
+    //   } else {
+    //     // Fallback for very old versions where setData doesn't exist
+    //     this.dataSource = this.dataSourceBuilder.create(this.treeNodes);
+    //   }
+    // });
+  }
+
+   private mapToNodes(
+    items: TreeNode<FSEntry>[],
+    expandedIds?: Set<string>,
+  ): TreeNode<FSEntry>[] {
+    return items.map(item => {
+      const children = item.children
+        ? this.mapToNodes(item.children, expandedIds)
+        : undefined;
+
+      return {
+        data: item.data,
+        children,
+        expanded: expandedIds ? expandedIds.has(item.data.id ?? item.data.name) : false,
+      };
+    });
+  }
+
+  /** Recursively collect IDs of nodes that are currently expanded */
+  private collectExpandedIds(nodes: TreeNode<FSEntry>[], ids: Set<string>): void {
+    for (const node of nodes) {
+      if (node.expanded) {
+        ids.add(node.data.name);
+      }
+      if (node.children) {
+        this.collectExpandedIds(node.children, ids);
+      }
+    }
   }
 
   private openFileInEditor(row: any): void {
@@ -385,7 +445,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
 
         this.socketService.sendMessage(DIRECTORY_MANAGER, message, SOCKET_NAMESPACE);
 
-        // // Clean up previous refresh subscription
+        // Clean up previous refresh subscription
         if (this.refreshSubscription) {
           this.refreshSubscription.unsubscribe();
         }
@@ -439,22 +499,8 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     this.sendActionRequest('delete', row);
   }
 
-  // webContainerActions(action: string, row: any): void {
-  //   switch (action) {
-  //     case 'rename':
-  //       this.webContainerService.renameWebContainerFile(row);
-  //       break;
-  //     case 'delete':
-  //       this.deleteNode(row);
-  //       break;
-  //     case 'AddFolder':
-  //       this.addFileAndFolder(row, 'directory');
-  //       break;
-  //     case 'AddFile':
-  //       this.addFileAndFolder(row, 'file');
-  //       break;
-  //     default:
-  //       console.warn('Unknown action:', action);
-  //   }
-  // }
+  preserveExpandedState(row: any): void {
+   console.log('Button clicked, preserving expanded state', row, this.dataSource);
+  }
+
 }
