@@ -135,6 +135,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   private directorySubscription: Subscription | null = null;
   private refreshSubscription: Subscription | null = null;
   private treeNodes: TreeNode<FSEntry>[] = [];
+  private expandedIds = new Set<string>();
 
   // Context menu configurations
   contextMenuItems: NbMenuItem[] = [
@@ -204,7 +205,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-   private handleMenuItemClick(item: NbMenuItem): void {
+  private handleMenuItemClick(item: NbMenuItem): void {
     const actions: Record<string, () => void> = {
       'Rename': () => this.rowHasFocus(item.data),
       'Delete': () => this.sendActionRequest('delete', item.data),
@@ -312,11 +313,21 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   private updateDataSource(data: any): void {
     const formatedTree = this.webContainerService.transformToNebularTree(data);
     console.log('Formatted tree data:', formatedTree);
-    //  this.treeNodes = this.mapToNodes(formatedTree);
-    this.dataSource = this.dataSourceBuilder.create(formatedTree);
+
+    this.collectExpandedIds(this.treeNodes, this.expandedIds);
+    this.treeNodes = this.mapToNodes(formatedTree, this.expandedIds);
+    console.log('Mapped tree nodes:', this.treeNodes);
+    // this.dataSource = this.dataSourceBuilder.create(this.treeNodes);
+    if (this.dataSource && (this.dataSource as any).setData) {
+
+      (this.dataSource as any).setData(this.treeNodes);
+    } else {
+      // this.treeNodes = this.mapToNodes(formatedTree);
+      this.dataSource = this.dataSourceBuilder.create(this.treeNodes);
+    }
   }
 
- /** Refresh data while preserving expand/collapse state */
+  /** Refresh data while preserving expand/collapse state */
   refresh(): void {
     // 1. Collect IDs of currently expanded nodes
     const expandedIds = new Set<string>();
@@ -338,11 +349,11 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     // });
   }
 
-   private mapToNodes(
+  private mapToNodes(
     items: TreeNode<FSEntry>[],
     expandedIds?: Set<string>,
   ): TreeNode<FSEntry>[] {
-    return items.map(item => {
+    const nodes = items.map(item => {
       const children = item.children
         ? this.mapToNodes(item.children, expandedIds)
         : undefined;
@@ -353,6 +364,8 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
         expanded: expandedIds ? expandedIds.has(item.data.id ?? item.data.name) : false,
       };
     });
+    console.log('mapToNodes - Mapped nodes:', nodes);
+    return nodes;
   }
 
   /** Recursively collect IDs of nodes that are currently expanded */
@@ -454,6 +467,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
         if (refreshReply$) {
           this.refreshSubscription = refreshReply$.subscribe((response: any) => {
             console.log('Received add new file from server:', response);
+
             this.updateFileSystem(appDetails);
           });
         }
@@ -471,7 +485,6 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   private updateFileSystem(appObject: any): void {
     if (!appObject?.data?.extraConfig?.projectName) return;
 
-    // Clean up previous directory subscription before creating new one
     this.cleanupSubscriptions();
 
     const projectName = appObject.data.extraConfig.projectName;
@@ -485,6 +498,9 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
         console.log('Received updateFileSystem from server:', response);
 
         if (response?.data?.[projectName]) {
+          // const expandedIds = new Set<string>();
+          // this.collectExpandedIds(this.treeNodes, expandedIds);
+          // this.treeNodes = this.mapToNodes(response.data, expandedIds);
           this.updateDataSource(response.data);
           this.webContainerService.mountFiles(response.data[projectName].directory);
         } else {
@@ -497,10 +513,6 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   deleteNode(row: any): void {
     if (!this.projectName) return;
     this.sendActionRequest('delete', row);
-  }
-
-  preserveExpandedState(row: any): void {
-   console.log('Button clicked, preserving expanded state', row, this.dataSource);
   }
 
 }
