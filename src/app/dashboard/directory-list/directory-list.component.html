@@ -10,7 +10,7 @@
     <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(customColumn)" *nbTreeGridHeaderCellDef>
       {{customColumn}}
     </th>
-    <td nbTreeGridCell *nbTreeGridCellDef="let row; let i = dataIndex" (dblclick)="onRowClick(row)">
+    <td nbTreeGridCell *nbTreeGridCellDef="let row; let i = dataIndex" (dblclick)="onRowdblClick(row)" (click)="onRowClick(row)">
       <div style="display: flex; align-items: center; gap: 10px;" #popoverHost [nbPopover]="popoverContent"
         nbPopoverTrigger="noop" #popover="nbPopover" nbPopoverPlacement="bottom"
         (contextmenu)="openOnRightClick($event, popover, row.data)">

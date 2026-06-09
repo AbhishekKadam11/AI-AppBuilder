@@ -182,7 +182,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     return MIN_WIDTH_MULTIPLE_COLUMNS + (NEXT_COLUMN_STEP * index);
   }
 
-  onRowClick(row: any): void {
+  onRowdblClick(row: any): void {
     if (!row?.data || row.data.kind === 'directory') return;
     this.openFileInEditor(row);
   }
@@ -314,7 +314,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     const formatedTree = this.webContainerService.transformToNebularTree(data);
     console.log('Formatted tree data:', formatedTree);
 
-    this.collectExpandedIds(this.treeNodes, this.expandedIds);
+    // this.collectExpandedIds(this.treeNodes, this.expandedIds);
     this.treeNodes = this.mapToNodes(formatedTree, this.expandedIds);
     console.log('Mapped tree nodes:', this.treeNodes);
     // this.dataSource = this.dataSourceBuilder.create(this.treeNodes);
@@ -370,6 +370,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   /** Recursively collect IDs of nodes that are currently expanded */
   private collectExpandedIds(nodes: TreeNode<FSEntry>[], ids: Set<string>): void {
+    debugger;
     for (const node of nodes) {
       if (node.expanded) {
         ids.add(node.data.name);
@@ -496,11 +497,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     if (webContainerFiles$) {
       this.directorySubscription = webContainerFiles$.subscribe((response: any) => {
         console.log('Received updateFileSystem from server:', response);
-
         if (response?.data?.[projectName]) {
-          // const expandedIds = new Set<string>();
-          // this.collectExpandedIds(this.treeNodes, expandedIds);
-          // this.treeNodes = this.mapToNodes(response.data, expandedIds);
           this.updateDataSource(response.data);
           this.webContainerService.mountFiles(response.data[projectName].directory);
         } else {
@@ -513,6 +510,21 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   deleteNode(row: any): void {
     if (!this.projectName) return;
     this.sendActionRequest('delete', row);
+  }
+
+  onRowClick(row: any): void {
+    if (!row?.data || row.data.kind === 'file') return;
+
+    row.expanded = !row.expanded;
+    this.treeNodes = this.treeNodes.map(node => this.updateNodeExpansion(node, row));
+    this.collectExpandedIds(this.treeNodes, this.expandedIds);
+  }
+
+  private updateNodeExpansion(node: TreeNode<FSEntry>, targetRow: any): TreeNode<FSEntry> {
+    if (node.data.name === targetRow.data.name) {
+      return { ...node, expanded: targetRow.expanded };
+    }
+    return { ...node, children: node.children?.map(child => this.updateNodeExpansion(child, targetRow)) };
   }
 
 }
