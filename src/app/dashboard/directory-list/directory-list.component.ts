@@ -70,12 +70,6 @@ interface ActiveElement {
   row: any;
 }
 
-// interface Category {
-//   id: string;
-//   name: string;
-//   subCategories?: Category[];
-// }
-
 @Component({
   selector: 'app-directory-list',
   imports: [
@@ -312,12 +306,8 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private updateDataSource(data: any): void {
     const formatedTree = this.webContainerService.transformToNebularTree(data);
-    console.log('Formatted tree data:', formatedTree);
-
-    // this.collectExpandedIds(this.treeNodes, this.expandedIds);
     this.treeNodes = this.mapToNodes(formatedTree, this.expandedIds);
     console.log('Mapped tree nodes:', this.treeNodes);
-    // this.dataSource = this.dataSourceBuilder.create(this.treeNodes);
     if (this.dataSource && (this.dataSource as any).setData) {
 
       (this.dataSource as any).setData(this.treeNodes);
@@ -325,28 +315,6 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
       // this.treeNodes = this.mapToNodes(formatedTree);
       this.dataSource = this.dataSourceBuilder.create(this.treeNodes);
     }
-  }
-
-  /** Refresh data while preserving expand/collapse state */
-  refresh(): void {
-    // 1. Collect IDs of currently expanded nodes
-    const expandedIds = new Set<string>();
-    this.collectExpandedIds(this.treeNodes, expandedIds);
-
-    // 2. Fetch fresh data
-    // this.api.getCategories().subscribe(data => {
-    //   // 3. Build new tree nodes and restore expanded state
-    //   this.treeNodes = this.mapToNodes(data, expandedIds);
-
-    //   // 4. Update the data source (do NOT recreate it unless you have to)
-    //   if (this.dataSource && (this.dataSource as any).setData) {
-    //     // ✅ Preferred: keeps the current data-source instance
-    //     (this.dataSource as any).setData(this.treeNodes);
-    //   } else {
-    //     // Fallback for very old versions where setData doesn't exist
-    //     this.dataSource = this.dataSourceBuilder.create(this.treeNodes);
-    //   }
-    // });
   }
 
   private mapToNodes(
