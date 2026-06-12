@@ -293,7 +293,6 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private cleanupSubscriptions(): void {
-    // Unsubscribe from existing subscriptions to prevent duplicates
     if (this.directorySubscription) {
       this.directorySubscription.unsubscribe();
       this.directorySubscription = null;
@@ -307,12 +306,10 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   private updateDataSource(data: any): void {
     const formatedTree = this.webContainerService.transformToNebularTree(data);
     this.treeNodes = this.mapToNodes(formatedTree, this.expandedIds);
-    console.log('Mapped tree nodes:', this.treeNodes);
+    // console.log('Mapped tree nodes:', this.treeNodes);
     if (this.dataSource && (this.dataSource as any).setData) {
-
       (this.dataSource as any).setData(this.treeNodes);
     } else {
-      // this.treeNodes = this.mapToNodes(formatedTree);
       this.dataSource = this.dataSourceBuilder.create(this.treeNodes);
     }
   }
@@ -320,25 +317,26 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   private mapToNodes(
     items: TreeNode<FSEntry>[],
     expandedIds?: Set<string>,
+    isRootLevel: boolean = true,
   ): TreeNode<FSEntry>[] {
-    const nodes = items.map(item => {
+    return items.map((item, index) => {
       const children = item.children
-        ? this.mapToNodes(item.children, expandedIds)
+        ? this.mapToNodes(item.children, expandedIds, false)
         : undefined;
+
+      const isFirstRootNode = isRootLevel && index === 0;
+      const idOrName = item.data.id ?? item.data.name;
 
       return {
         data: item.data,
         children,
-        expanded: expandedIds ? expandedIds.has(item.data.id ?? item.data.name) : false,
+        expanded: isFirstRootNode || (expandedIds ? expandedIds.has(idOrName) : false),
       };
     });
-    console.log('mapToNodes - Mapped nodes:', nodes);
-    return nodes;
   }
 
   /** Recursively collect IDs of nodes that are currently expanded */
   private collectExpandedIds(nodes: TreeNode<FSEntry>[], ids: Set<string>): void {
-    debugger;
     for (const node of nodes) {
       if (node.expanded) {
         ids.add(node.data.name);
@@ -418,7 +416,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
         filter(() => !this.socketService?.socketStatus?.closed)
       )
       .subscribe((appDetails: any) => {
-        console.log('sendActionRequest - App Details:', appDetails);
+        // console.log('sendActionRequest - App Details:', appDetails);
         const message = {
           action,
           path: appDetails.data.extraConfig.projectName,
