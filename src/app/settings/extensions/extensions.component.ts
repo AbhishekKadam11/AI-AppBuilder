@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { NbButtonModule, NbCardModule, NbIconModule, NbThemeService, NbToastrService } from '@nebular/theme';
 import { StatusCardComponent } from '../../common/status-card/status-card.component';
 import { CommonModule } from '@angular/common';
@@ -6,6 +6,7 @@ import { takeWhile } from 'rxjs/internal/operators/takeWhile';
 import { ApiService } from '../../services/api.service';
 import { themes } from '../../common/header/header.component';
 import { StorageService } from '../../services/storage.service';
+import { AppWorkflowService } from '../../services/app-workflow.service';
 
 interface CardSettings {
   title: string;
@@ -33,6 +34,8 @@ export class ExtensionsComponent implements OnDestroy {
   apiPath = 'userPreferences/extensions';
   userPreferences!: any;
 
+  private readonly appWorkflowService = inject(AppWorkflowService);
+
   constructor(private themeService: NbThemeService, private apiService: ApiService, private toastrService: NbToastrService, private storageService: StorageService) {
     this.apiService.get(this.apiPath).subscribe((response: any) => {
       this.commonStatusCardsSet = response;
@@ -56,7 +59,7 @@ export class ExtensionsComponent implements OnDestroy {
   ngOnDestroy() {
   }
   save() {
-    // console.log("post statusCards ", this.statusCards);
+    console.log("post statusCards ", this.statusCards);
     this.apiService.post(this.apiPath, { extensions: this.statusCards }).subscribe((response: any) => {
       this.userPreferences = this.statusCards.filter((card: any) => card.active).map((card: any) => card.id);
       this.storeUserExtensionPreference();
@@ -75,6 +78,7 @@ export class ExtensionsComponent implements OnDestroy {
       const userData = JSON.parse(currentUser);
       userData.active_extensions = this.userPreferences;
       this.storageService.setItem('user', JSON.stringify(userData));
+      this.appWorkflowService.storeUserExtensionPreference(this.userPreferences);
     }
     return;
   }

@@ -10,8 +10,8 @@ export class AppWorkflowService {
 
   private appWorkflowSubject = new BehaviorSubject<string>('');
   public appObject$ = this.appWorkflowSubject.asObservable();
-  // private appObjectSubject = new BehaviorSubject<string>('');
-  // public appObject$ = this.appObjectSubject.asObservable();
+  private appExtensionSubject = new BehaviorSubject<any>({});
+  public appExtension$ = this.appExtensionSubject.asObservable();
 
   constructor(private storageService: StorageService, private webContainerService: WebContainerService) { }
 
@@ -25,9 +25,14 @@ export class AppWorkflowService {
     }
   }
 
-  // setAppObjInLocalStorage(appObject: any): void {
-  //   this.storageService.setItem('appObject', JSON.stringify(appObject));
-  // }
+  // App Extension related methods
+  storeUserExtensionPreference(userPreferences?: any) {
+    this.appExtensionSubject.next(userPreferences);
+  }
+
+  fetchUserExtensionPreference() {
+    return this.appExtensionSubject.asObservable();
+  }
 
   saveAppObjInLocalStorage(appDetails: any): void {
     const appObject = this.storageService.getItem('appObject');
