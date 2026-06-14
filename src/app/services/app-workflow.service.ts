@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { StorageService } from './storage.service';
 import { WebContainerService } from './web-container.service';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class AppWorkflowService {
 
   private appWorkflowSubject = new BehaviorSubject<string>('');
   public appObject$ = this.appWorkflowSubject.asObservable();
-  private appExtensionSubject = new BehaviorSubject<any>({});
+  private appExtensionSubject = new Subject<any>();
   public appExtension$ = this.appExtensionSubject.asObservable();
 
   constructor(private storageService: StorageService, private webContainerService: WebContainerService) { }

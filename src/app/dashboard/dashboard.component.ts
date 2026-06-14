@@ -220,18 +220,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.socketService.connectSocket('/projectId');
-    // this.socketSubscription = this.socketService?.socketStatus.subscribe((message) => {
-    //   if (message.connected) {
-    //     this.socketService.sendMessage(this.directoryManager, this.messages);
-    //     const serverReply$ = this.socketService?.on(this.directoryManager);
-    //     if (serverReply$) {
-    //       this.directorySubscription = serverReply$.subscribe((response: any) => {
-    //         console.log('Received directorySubscription from server:', response);
-    //       });
-    //     }
-    //   }
-    // });
-
   }
 
   ngOnInit() {

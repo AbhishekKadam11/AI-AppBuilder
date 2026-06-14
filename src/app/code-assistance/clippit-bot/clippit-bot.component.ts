@@ -1,4 +1,4 @@
-import { Component, signal, computed, afterNextRender, WritableSignal, inject, DestroyRef, ViewChild, Signal } from '@angular/core';
+import { Component, signal, computed, afterNextRender, WritableSignal, inject, DestroyRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NbButtonModule, NbChatModule, NbIconModule, NbLayoutModule, NbPopoverDirective, NbPopoverModule } from '@nebular/theme';
@@ -12,7 +12,6 @@ import { WebContainerService } from '../../services/web-container.service';
 import { ChatFormComponent } from '../../chat-showcase/chat-form/chat-form.component';
 import { StorageService } from '../../services/storage.service';
 
-// Interface for message structure
 interface Message {
   sender: 'user' | 'bot';
   text: string;
@@ -59,9 +58,17 @@ export class ClippitBotComponent {
     afterNextRender(() => {
       this.scrollToBottom();
     });
-    this.extensionStatus();
+
     this.assistanceGifUrl.set('assets/images/robot_assistant.gif');
     this.messageSchema = new MessageSchema();
+
+    const userExtensions = this.appWorkflowService.fetchUserExtensionPreference();
+    userExtensions.subscribe((extensions: any) => {
+      if (extensions) {
+        console.log("fetched user extensions ", extensions);
+        this.isExtensionEnabled.set(extensions.includes('codeBuddy') || false);
+      }
+    });
   }
 
   ngAfterViewInit() {
@@ -70,14 +77,6 @@ export class ClippitBotComponent {
     this.initAppWorkflowListener();
     // this.chatActions('modify', { filePath: '/', changes: [], content: "113" });
     this.popover?.show();
-  }
-
-  private extensionStatus() {
-    const storedStatus = this.storageService.getItem('user');
-    if (storedStatus) {
-      const userPreferences = JSON.parse(storedStatus);
-      this.isExtensionEnabled.set(userPreferences.active_extensions?.includes('codeBuddy') || false);
-    }
   }
 
   private initSocketListener() {
@@ -154,7 +153,6 @@ export class ClippitBotComponent {
     const serverMessage = new MessageSchema();
     serverMessage.setClippitMessage(response);
     this.addMessage(serverMessage.getMessage());
-    debugger;
     const lastMessage = response.data && response.data.messages && response.data.messages.length > 0 ? response.data.messages : [];
     if (lastMessage && lastMessage[lastMessage.length - 1].kwargs && lastMessage[lastMessage.length - 1].kwargs.content) {
       const message = lastMessage[lastMessage.length - 1].kwargs.content;
@@ -231,7 +229,7 @@ export class ClippitBotComponent {
     console.log('Button clicked with payload:', payload);
     this.webContainerService.webContainerWriteFileContent(payload.filePath, payload.content);
     this.saveToRemote(payload.filePath, payload.content);
-     this.addMessage({
+    this.addMessage({
       text: "Code has been modified", //`Do you want it to modify the code for you?`,
       type: 'text',
       user: { name: 'System', avatar: 'assets/images/system.png' },
