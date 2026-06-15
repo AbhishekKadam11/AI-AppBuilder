@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { StorageService } from './storage.service';
 import { WebContainerService } from './web-container.service';
 import { Subject } from 'rxjs';
+import { SafeResourceUrl } from '@angular/platform-browser';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,8 @@ export class AppWorkflowService {
   public appObject$ = this.appWorkflowSubject.asObservable();
   private appExtensionSubject = new Subject<any>();
   public appExtension$ = this.appExtensionSubject.asObservable();
+  private browserUrlSubject = new Subject<any>();
+  public browserUrl$ = this.browserUrlSubject.asObservable();
 
   constructor(private storageService: StorageService, private webContainerService: WebContainerService) { }
 
@@ -33,6 +36,14 @@ export class AppWorkflowService {
 
   fetchUserExtensionPreference() {
     return this.appExtensionSubject.asObservable();
+  }
+
+  storeBrowserUrl(url: SafeResourceUrl) {
+    this.browserUrlSubject.next(url);
+  }
+
+  fetchBrowserUrl() {
+    return this.browserUrlSubject.asObservable();
   }
 
   saveAppObjInLocalStorage(appDetails: any): void {
