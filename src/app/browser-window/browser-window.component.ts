@@ -56,7 +56,6 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
 
   // Internal State
   private appObject = signal<AppDetails | null>(null);
-  // private isWebContainerActive = false;
   private readonly directoryManager = 'DirectoryManager';
 
   // --- Constants & Defaults ---
@@ -70,13 +69,6 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   @Input() set navigationUrl(url: SafeResourceUrl | string) {
     this.appUrl = this.sanitizer.sanitize(SecurityContext.RESOURCE_URL, url);
     this.iframeUrl.set(url);
-  }
-
-  @Input() set browserInstanceData(appDetails: AppDetails | null) {
-    if (appDetails) {
-      console.log('BrowserWindowComponent:Received app details via Input:', appDetails);
-      //   this.appObject.set(appDetails);
-    }
   }
 
   // --- Dependency Injection ---
@@ -100,14 +92,10 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.setupSubscriptions();
-
-    // If appObject wasn't provided via Input, listen to the workflow service
-
   }
 
   ngAfterViewInit(): void {
     // Dragging and resizing logic can be implemented here
-    console.log('BrowserWindowComponent: View initialized, iframe reference:', this.iframeRef);
     this.setupAppObject();
     this.resetWebContainerState();
   }
@@ -165,12 +153,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     }
 
     this.appUrl = baseUrl + path;
-    // this.appWorkflowService.storeBrowserUrl(this.sanitizer.bypassSecurityTrustResourceUrl(this.appUrl));
-    // this.appWorkflowService.fetchBrowserUrl().subscribe(url => this.iframeUrl.set(url));
-    // this.iframeUrl.set(this.appWorkflowService.fetchBrowserUrl());\
-    // this.webContainerService.iframeUrlSubject.next(this.appUrl);
     this.iframeUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.appUrl));
-    //  this.webContainerService.iframeUrl$.pipe(take(1)).subscribe(url => this.iframeUrl.set(this.appUrl as SafeResourceUrl));
   }
 
   private initWebContainer(app: AppDetails): void {
@@ -192,21 +175,18 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    if (!this.webContainerService.isWebContainerBooted) {
+    // if (!this.webContainerService.isWebContainerBooted) {
       this.webContainerService.bootAndRun(directory);
-      // this.isWebContainerActive = true;
-    } else {
-      console.log('WebContainer is already active. Mounting files.');
-      this.webContainerService.mountFiles(directory);
-    }
+    // }
+    // else {
+    //   console.log('WebContainer is already active. Mounting files.');
+    //   this.webContainerService.mountFiles(directory);
+    // }
   }
 
   private resetWebContainerState(): void {
-    console.log('Resetting WebContainer state for new session isWebContainerActive', this.webContainerService.isWebContainerBooted);
-    debugger
     if (this.webContainerService.isWebContainerBooted) {
-      //  this.appWorkflowService.fetchBrowserUrl().subscribe(url =>{console.log("url", url); this.iframeUrl.set(url)});
-      this.webContainerService.iframeUrl$.pipe(take(1)).subscribe(url => this.iframeUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url)));
+      this.webContainerService.iframeUrl$.pipe(take(1)).subscribe(url => this.updateIframeUrl(url));
     }
   }
 
