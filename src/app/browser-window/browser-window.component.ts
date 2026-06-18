@@ -82,9 +82,10 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
 
   constructor() {
     // Effect: Automatically triggers initialization when appObject changes
+    console.log('BrowserWindowComponent constructor called this.appObject()', this.appObject());
     effect(() => {
       const app = this.appObject();
-      if (app && Object.keys(app).length > 0) {
+      if (app != null) {
         this.initWebContainer(app);
       }
     });
@@ -95,17 +96,19 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Dragging and resizing logic can be implemented here
     this.setupAppObject();
     this.resetWebContainerState();
   }
 
   setupAppObject(): void {
+    console.log("current app object in workflow", this.appWorkflowService.currentAppObject());
     if (!this.appObject()) {
       this.appWorkflowService.appObject$
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((appDetails: any) => {
-          if (appDetails?.data?.extraConfig?.projectName && !this.socketService?.socketStatus.closed) {
+          console.log('Received app details from AppWorkflowService:', appDetails);
+          if (appDetails?.data?.extraConfig?.projectName && this.appObject()?.data?.extraConfig?.projectName !== appDetails?.data?.extraConfig?.projectName && !this.socketService?.socketStatus.closed) {
+           console.log('Updating appObject with new project details:', appDetails);
             this.appObject.set(appDetails);
           }
         });
@@ -157,8 +160,10 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   }
 
   private initWebContainer(app: AppDetails): void {
+    console.log('initWebContainer called:', app);
     const projectName = app.data?.extraConfig?.projectName || app.appName;
     if (!projectName) return;
+    // if (this.webContainerService.isWebContainerBooted) return;
 
     this.directoryControlService.loadDirectoryContents(projectName);
     this.directoryControlService.directoryData$.pipe(
@@ -176,7 +181,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     }
 
     // if (!this.webContainerService.isWebContainerBooted) {
-      this.webContainerService.bootAndRun(directory);
+    this.webContainerService.bootAndRun(directory);
     // }
     // else {
     //   console.log('WebContainer is already active. Mounting files.');
