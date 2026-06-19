@@ -84,10 +84,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     // Effect: Automatically triggers initialization when appObject changes
     console.log('BrowserWindowComponent constructor called this.appObject()', this.appObject());
     effect(() => {
-      const app = this.appObject();
-      if (app != null) {
-        this.initWebContainer(app);
-      }
+        this.initWebContainer();
     });
   }
 
@@ -105,9 +102,9 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     if (!this.appObject()) {
       this.appWorkflowService.appObject$
         .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((appDetails: any) => {
+        .subscribe((appDetails: AppDetails) => {
           console.log('Received app details from AppWorkflowService:', appDetails);
-          if (appDetails?.data?.extraConfig?.projectName && this.appObject()?.data?.extraConfig?.projectName !== appDetails?.data?.extraConfig?.projectName && !this.socketService?.socketStatus.closed) {
+          if (appDetails?.data?.extraConfig?.projectName && !this.socketService?.socketStatus.closed) {
            console.log('Updating appObject with new project details:', appDetails);
             this.appObject.set(appDetails);
           }
@@ -159,9 +156,11 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     this.iframeUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.appUrl));
   }
 
-  private initWebContainer(app: AppDetails): void {
-    console.log('initWebContainer called:', app);
-    const projectName = app.data?.extraConfig?.projectName || app.appName;
+  private initWebContainer(): void {
+    console.log('initWebContainer called1:', this.appObject());
+   // if(this.webContainerService.isWebContainerBooted) return;
+
+    const projectName = this.appObject()?.data?.extraConfig?.projectName || this.appObject()?.appName;
     if (!projectName) return;
     // if (this.webContainerService.isWebContainerBooted) return;
 
