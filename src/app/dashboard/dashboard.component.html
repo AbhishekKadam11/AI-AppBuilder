@@ -7,7 +7,7 @@
     <nb-menu [items]="SideItems" tag="sideMenu"></nb-menu>
   </nb-sidebar>
 
-  @if (isExplorerReady) {
+  @if (isExplorerReady()) {
     <nb-sidebar tag="dynamicSidebar">
       <nb-sidebar-header>
         <div class="explorer-header">

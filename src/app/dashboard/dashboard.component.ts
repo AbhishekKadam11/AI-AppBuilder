@@ -52,7 +52,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     { title: 'Download', icon: 'cloud-download-outline' },
     { title: 'Sonar', icon: 'activity-outline' },
   ];
-  isExplorerReady: boolean = false;
+  isExplorerReady = signal(false);
 
   SideItems: NbMenuItem[] = [
     {
@@ -132,7 +132,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
-      this.isExplorerReady = false; // Resets on every route completion
+      this.isExplorerReady.set(false); // Resets on every route completion
     });
 
     // Sidebar menu item click handling
@@ -142,15 +142,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         map(({ item }) => item),
       )
       .subscribe(item => {
-        console.log(`Menu item clicked: ${item}`);
         switch (item.title) {
           case 'Dashboard':
-
-            // this.router.navigate(['/']);
-            // item.selected = true;
+            Object.keys(this.appWorkflowService.currentAppObject()).length > 0 && setTimeout(() => this.makeExplorerReady(), 10);
             break;
           case 'Swimlane':
-
             // this.router.navigate(['/']);
             // item.selected = true;
             break;
@@ -205,13 +201,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     this.subscriptions.add(
       this.appWorkflowService.appObject$.subscribe((appDetails: any) => {
-        if (appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
-          // this.messages = { "action": "getAll", "path": appDetails.projectName };
-          const state = this.router.routerState.snapshot.url;
-          console.log('Router State on appObject$ update:', state);
-          if (state === '/workspace') {
-            this.isExplorerReady = true;
-          }
+        if (Object.keys(appDetails).length > 0 && appDetails && appDetails.data.extraConfig.projectName && !this.socketService?.socketStatus.closed) {
+          this.makeExplorerReady();
         }
       })
     );
@@ -220,6 +211,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.socketService.connectSocket('/projectId');
+
   }
 
   ngOnInit() {
@@ -237,7 +229,15 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   toggleSidebar() {
-    this.sidebarService.toggle(!this.isExplorerReady, 'dynamicSidebar');
+    this.sidebarService.toggle(!this.isExplorerReady(), 'dynamicSidebar');
+  }
+
+  makeExplorerReady() {
+    const state = this.router.routerState.snapshot.url;
+    // if (state === '/workspace') {
+    this.isExplorerReady.set(true);
+    this.toggleSidebar();
+    // }
   }
 
   onFileClick(event: any) {
