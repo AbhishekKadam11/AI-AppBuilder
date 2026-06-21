@@ -106,7 +106,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   readonly allColumns = [this.customColumn];
 
   // Grid state
-  dataSource!: NbTreeGridDataSource<FSEntry>;
+  dataSource: NbTreeGridDataSource<FSEntry> = this.dataSourceBuilder.create([]);
   sortColumn = '';
   sortDirection: NbSortDirection = NbSortDirection.NONE;
 
@@ -159,6 +159,10 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngAfterViewInit(): void {
+    const appObject = this.appWorkflowService.currentActiveDirectory();
+    if (appObject && Object.keys(appObject).length !== 0) {
+      return this.updateDataSource(appObject);
+    }
     this.setupFileSystemSubscription();
   }
 
@@ -250,15 +254,6 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
 
     this.insertNewRowIndicator = '';
     const action = this.setKind === 'file' ? 'AddFile' : 'AddFolder';
-
-    // this.webContainerService.createDirectoryInWebContainer(row.data.path, this.addNewInputRow).then((result) => {
-    //   console.log(`${this.setKind} created successfully in web container:`, result);
-    //     // this.sendActionRequest(action, newRow);
-    //     this.updateDataSource({[this.projectName]:result});
-    //   })
-    //   .catch(error => {
-    //     console.error(`Error creating ${this.setKind} in web container:`, error);
-    //   });
     this.sendActionRequest(action, newRow);
   }
 
@@ -306,7 +301,6 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
   private updateDataSource(data: any): void {
     const formatedTree = this.webContainerService.transformToNebularTree(data);
     this.treeNodes = this.mapToNodes(formatedTree, this.expandedIds);
-    // console.log('Mapped tree nodes:', this.treeNodes);
     if (this.dataSource && (this.dataSource as any).setData) {
       (this.dataSource as any).setData(this.treeNodes);
     } else {
@@ -416,7 +410,7 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
         filter(() => !this.socketService?.socketStatus?.closed)
       )
       .subscribe((appDetails: any) => {
-        // console.log('sendActionRequest - App Details:', appDetails);
+
         const message = {
           action,
           path: appDetails.data.extraConfig.projectName,
@@ -433,8 +427,6 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
         const refreshReply$ = this.socketService?.on(REFRESH_DIRECTORY);
         if (refreshReply$) {
           this.refreshSubscription = refreshReply$.subscribe((response: any) => {
-            console.log('Received add new file from server:', response);
-
             this.updateFileSystem(appDetails);
           });
         }
@@ -462,7 +454,6 @@ export class DirectoryListComponent implements OnInit, AfterViewInit, OnDestroy 
     const webContainerFiles$ = this.socketService?.on(DIRECTORY_MANAGER);
     if (webContainerFiles$) {
       this.directorySubscription = webContainerFiles$.subscribe((response: any) => {
-        console.log('Received updateFileSystem from server:', response);
         if (response?.data?.[projectName]) {
           this.updateDataSource(response.data);
           this.webContainerService.mountFiles(response.data[projectName].directory);

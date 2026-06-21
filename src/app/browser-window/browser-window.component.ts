@@ -81,11 +81,6 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   private readonly directoryControlService = inject(DirectoryControlService);
 
   constructor() {
-    // Effect: Automatically triggers initialization when appObject changes
-    console.log('BrowserWindowComponent constructor called this.appObject()', this.appObject());
-    effect(() => {
-        this.initWebContainer();
-    });
   }
 
   ngOnInit(): void {
@@ -98,14 +93,11 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   }
 
   setupAppObject(): void {
-    console.log("current app object in workflow", this.appWorkflowService.currentAppObject());
     if (!this.appObject()) {
       this.appWorkflowService.appObject$
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((appDetails: AppDetails) => {
-          console.log('Received app details from AppWorkflowService:', appDetails);
           if (appDetails?.data?.extraConfig?.projectName && !this.socketService?.socketStatus.closed) {
-           console.log('Updating appObject with new project details:', appDetails);
             this.appObject.set(appDetails);
           }
         });
@@ -117,7 +109,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
     this.webContainerService.iframeUrl$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(url => {
-        if (url) {
+        if (url !== "") {
           this.updateIframeUrl(url);
         }
       });
@@ -140,7 +132,7 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
   }
 
   private updateIframeUrl(baseUrl: string): void {
-    const app = this.appObject();
+    const app = this.appWorkflowService.currentAppObject();
     if (!app) return;
 
     let path = '';
@@ -154,38 +146,6 @@ export class BrowserWindowComponent implements OnInit, AfterViewInit {
 
     this.appUrl = baseUrl + path;
     this.iframeUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.appUrl));
-  }
-
-  private initWebContainer(): void {
-    console.log('initWebContainer called1:', this.appObject());
-   // if(this.webContainerService.isWebContainerBooted) return;
-
-    const projectName = this.appObject()?.data?.extraConfig?.projectName || this.appObject()?.appName;
-    if (!projectName) return;
-    // if (this.webContainerService.isWebContainerBooted) return;
-
-    this.directoryControlService.loadDirectoryContents(projectName);
-    this.directoryControlService.directoryData$.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe((response: any) => typeof response !== "boolean" && this.handleWebContainerResponse(response, projectName));
-
-  }
-
-  private handleWebContainerResponse(response: SocketResponse, projectName: string): void {
-    const directory = response[projectName]?.['directory'];
-
-    if (!directory) {
-      console.warn('Directory not found in response for:', projectName);
-      return;
-    }
-
-    // if (!this.webContainerService.isWebContainerBooted) {
-    this.webContainerService.bootAndRun(directory);
-    // }
-    // else {
-    //   console.log('WebContainer is already active. Mounting files.');
-    //   this.webContainerService.mountFiles(directory);
-    // }
   }
 
   private resetWebContainerState(): void {
