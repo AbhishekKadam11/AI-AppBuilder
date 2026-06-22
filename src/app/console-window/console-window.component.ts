@@ -20,6 +20,8 @@ export class ConsoleWindowComponent {
   private serverLogSubscription: Subscription | undefined;
   private socketSubscription: Subscription | undefined;
   messages: any = { "action": "", "path": "" };
+  private readonly samelineChars = new Set(['/', '-', '\\', '|', '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']);
+  private lastLogWasSameline = false;
 
   constructor(private webContainerService: WebContainerService, private socketService: SocketService) {
     this.appendLog = this.appendLog.bind(this);
@@ -31,16 +33,28 @@ export class ConsoleWindowComponent {
 
 
   private appendLog(log: string): void {
-    const samelineWords = ['/', '-', '\\', '|', '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+
+    if (!log || log.trim() === '') {
+      return;
+    }
+
+    const trimmed = log.trim();
+    const isSameline = this.samelineChars.has(trimmed.charAt(0));
     const timestamp = `[${new Date().toISOString()}]`;
-    if (samelineWords.includes(log.trim().charAt(0))) {
-      // Handle carriage return: overwrite the last line
-      // console.log('sameline log:', log);
-      this.samelineLogs = log != undefined ? `[client] ${timestamp}: ${log.trim()}` : '';
-    } else {
-      if (log != undefined && log.trim() != '') {
-        this.collectionLogs.push(`[client] ${timestamp}: ${log}`);
+
+    if (isSameline) {
+      const entry = `[client] ${timestamp}: ${trimmed}`;
+
+      if (this.lastLogWasSameline && this.collectionLogs.length > 0) {
+        this.collectionLogs[this.collectionLogs.length - 1] = entry;
+      } else {
+        this.collectionLogs.push(entry);
+        this.lastLogWasSameline = true;
       }
+    } else {
+      const entry = `[client] ${timestamp}: ${log}`;
+      this.collectionLogs.push(entry);
+      this.lastLogWasSameline = false;
     }
   }
 
