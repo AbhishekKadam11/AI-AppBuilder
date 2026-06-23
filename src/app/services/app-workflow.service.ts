@@ -3,7 +3,6 @@ import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { StorageService } from './storage.service';
 import { WebContainerService } from './web-container.service';
 import { Subject } from 'rxjs';
-import { SafeResourceUrl } from '@angular/platform-browser';
 import { DirectoryControlService } from './directory-control.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -34,6 +33,8 @@ export class AppWorkflowService {
   public appExtension$ = this.appExtensionSubject.asObservable();
   private browserUrlSubject = new Subject<any>();
   public browserUrl$ = this.browserUrlSubject.asObservable();
+  private appLoggingSubject = new BehaviorSubject<string[]>([]);
+  public appLogging$ = this.appLoggingSubject.asObservable();
 
   private readonly webContainerService = inject(WebContainerService);
   private readonly directoryControlService = inject(DirectoryControlService);
@@ -129,5 +130,15 @@ export class AppWorkflowService {
 
   currentActiveDirectory(): any {
     return this.directoryControlService.directoryDataSubject.getValue();
+  }
+
+  storeAppLogging(log: string[]): void {
+    const existingLogs = this.appLoggingSubject.getValue() || [];
+    const newLogs = Array.from(new Set([...existingLogs, ...log])); // Merge and remove duplicates
+    this.appLoggingSubject.next(newLogs);
+  }
+
+  currentAppLogging(): any {
+    return this.appLoggingSubject.getValue();
   }
 }
