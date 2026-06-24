@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { NbButtonModule, NbCardModule, NbIconModule, NbLayoutModule } from '@nebular/theme';
 import { WebContainerService } from '../services/web-container.service';
 import { AutoScrollDirective } from '../services/auto-scroll.directive';
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs/internal/Subscription';
+import { AppWorkflowService } from '../services/app-workflow.service';
 
 @Component({
   selector: 'app-console-window',
@@ -19,18 +20,26 @@ export class ConsoleWindowComponent {
   private readonly userLogService: string = 'UserLogService';
   private serverLogSubscription: Subscription | undefined;
   private socketSubscription: Subscription | undefined;
+  private subscriptions: Subscription = new Subscription();
   messages: any = { "action": "", "path": "" };
   private readonly samelineChars = new Set(['/', '-', '\\', '|', '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']);
   private lastLogWasSameline = false;
+  private appWorkflowService = inject(AppWorkflowService);
 
   constructor(private webContainerService: WebContainerService, private socketService: SocketService) {
-    this.appendLog = this.appendLog.bind(this);
+    //this.appendLog = this.appendLog.bind(this);
     this.webContainerService.output$.subscribe(log => {
-      this.appendLog(log);
+       this.appendLog(log);
     });
     this.fetchServerLogs();
+    this.initAppSetup();
   }
 
+  initAppSetup(): void {
+    if (this.appWorkflowService.currentAppLogging().length > 0) {
+      this.collectionLogs = this.appWorkflowService.currentAppLogging();
+    }
+  }
 
   private appendLog(log: string): void {
 
@@ -56,6 +65,7 @@ export class ConsoleWindowComponent {
       this.collectionLogs.push(entry);
       this.lastLogWasSameline = false;
     }
+    this.appWorkflowService.storeAppLogging(this.collectionLogs);
   }
 
   private fetchServerLogs(): void {
@@ -76,3 +86,4 @@ export class ConsoleWindowComponent {
   }
 
 }
+

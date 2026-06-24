@@ -65,7 +65,6 @@ export class ClippitBotComponent {
     const userExtensions = this.appWorkflowService.fetchUserExtensionPreference();
     userExtensions.subscribe((extensions: any) => {
       if (extensions) {
-        console.log("fetched user extensions ", extensions);
         this.isExtensionEnabled.set(extensions.includes('codeBuddy') || false);
       }
     });

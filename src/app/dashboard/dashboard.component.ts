@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, signal } from '@angular/core';
+import { Component, OnInit, AfterViewInit, signal, inject } from '@angular/core';
 import { NbActionsModule, NbButtonModule, NbContextMenuModule, NbIconModule, NbLayoutModule, NbMenuItem, NbMenuModule, NbMenuService, NbPopoverModule, NbPosition, NbSidebarModule, NbSidebarService } from '@nebular/theme';
 import { Subject } from 'rxjs/internal/Subject';
 import { filter } from 'rxjs/internal/operators/filter';
@@ -12,7 +12,7 @@ import { AppWorkflowService } from '../services/app-workflow.service';
 import { WindowService } from '../services/window.service';
 import { WindowComponent } from '../window/window/window.component';
 import { FooterComponent } from "../common/footer/footer.component";
-import { NavigationEnd, Router, RouterModule, RouterState } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterModule } from '@angular/router';
 import { ConsoleWindowComponent } from '../console-window/console-window.component';
 import { ChatShowcaseComponent } from '../chat-showcase/chat-showcase.component';
 import { BrowserWindowComponent } from '../browser-window/browser-window.component';
@@ -116,6 +116,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   private destroy$ = new Subject<void>();
   private socketSubscription!: Subscription;
   private subscriptions: Subscription = new Subscription();
+  private route = inject(ActivatedRoute);
 
   constructor(
     private router: Router,
@@ -144,7 +145,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       .subscribe(item => {
         switch (item.title) {
           case 'Dashboard':
-            Object.keys(this.appWorkflowService.currentAppObject()).length > 0 && setTimeout(() => this.makeExplorerReady(), 10);
+            Object.keys(this.appWorkflowService.currentAppObject()).length > 0 && setTimeout(() => this.makeExplorerReady(), 0);
             break;
           case 'Swimlane':
             // this.router.navigate(['/']);
@@ -233,11 +234,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   makeExplorerReady() {
-    const state = this.router.routerState.snapshot.url;
-    // if (state === '/workspace') {
-    this.isExplorerReady.set(true);
-    this.toggleSidebar();
-    // }
+    const segments = this.route.snapshot.url;
+    const pathSegments = segments.map(segment => segment.path).shift();
+    if (pathSegments === 'workspace' && !this.isExplorerReady()) {
+      this.isExplorerReady.set(true);
+      this.toggleSidebar();
+    }
   }
 
   onFileClick(event: any) {
@@ -313,7 +315,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   //Temporary function api call to sve log preferences
   savePreferences() {
-    // console.log(this.userPreferences)
     const userData = this.storageService.getItem('user');
     if (userData) {
       const userPreferences = JSON.parse(userData).preferences;
