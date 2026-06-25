@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NbActionsModule, NbIconLibraries, NbIconModule, NbJSThemesRegistry, NbMediaBreakpointsService, NbMenuService, NbOptionModule, NbSelectModule, NbSidebarService, NbThemeService, NbUserModule } from '@nebular/theme';
+import { NbActionsModule, NbIconLibraries, NbIconModule, NbJSThemesRegistry, NbLayoutModule, NbMediaBreakpointsService, NbMenuService, NbOptionModule, NbSelectModule, NbSidebarService, NbThemeService, NbUserModule } from '@nebular/theme';
 import { UserData } from '../../../app/core/users';
 import { map, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -27,7 +27,7 @@ export const themes = [
 
 @Component({
   selector: 'app-header',
-  imports: [NbIconModule, NbActionsModule, NbSelectModule, NbUserModule, NbOptionModule],
+  imports: [NbIconModule, NbActionsModule, NbSelectModule, NbUserModule, NbOptionModule, NbLayoutModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })

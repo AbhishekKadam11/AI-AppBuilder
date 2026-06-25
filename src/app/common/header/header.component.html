@@ -1,35 +1,43 @@
-<div class="header-container">
-  <div class="logo-container">
-    <a class="logo" href="/">AI-<span>Appbuilder</span></a>
-  </div>
+<!-- <nb-layout>
+  <nb-layout-column> -->
+    <div class="header-container">
+      <div class="logo-container">
+        <a class="logo" href="/">AI-<span>Appbuilder</span></a>
+      </div>
 
-  <div class="menu-selection">
-    <nb-select [selected]="selectedApp" placeholder="Create New App" (selectedChange)="changeAppObj($event)" status="primary">
-      @for (app of appList; track app) {
-        <nb-option [value]="app"> {{ app.data.extraConfig.projectName }}</nb-option>
-      }
-    </nb-select>
-  </div>
-</div>
+      <div class="menu-selection">
+        
+        <nb-select [selected]="selectedApp" placeholder="Create New App" (selectedChange)="changeAppObj($event)"
+          status="primary">
+          @for (app of appList; track app) {
+          <nb-option [value]="app"> {{ app.data.extraConfig.projectName }}</nb-option>
+          }
+        </nb-select>
+      </div>
+    </div>
 
-<div class="header-container">
-  <div class="menu-selection">
-    <nb-select [selected]="currentTheme" (selectedChange)="changeTheme($event)" status="primary">
-      @for (theme of themes; track theme) {
-        <nb-option [value]="theme.value"> {{ theme.name }}</nb-option>
-      }
-    </nb-select>
-  </div>
-  <nb-actions size="small">
+    <div class="header-container">
+      <div class="menu-selection">
 
-    <nb-action class="control-item">
-      <!-- <nb-search type="rotate-layout"></nb-search> -->
-    </nb-action>
-    <nb-action class="control-item" icon="email-outline"></nb-action>
-    <nb-action class="control-item" icon="bell-outline"></nb-action>
-    <nb-action class="user-action">
-      <nb-user [onlyPicture]="userPictureOnly" [name]="user?.name" [picture]="user?.picture">
-      </nb-user>
-    </nb-action>
-  </nb-actions>
-</div>
+        <nb-select [selected]="currentTheme" (selectedChange)="changeTheme($event)" status="primary">
+          @for (theme of themes; track theme) {
+          <nb-option [value]="theme.value"> {{ theme.name }}</nb-option>
+          }
+        </nb-select>
+
+      </div>
+      <nb-actions size="small">
+
+        <nb-action class="control-item">
+          <!-- <nb-search type="rotate-layout"></nb-search> -->
+        </nb-action>
+        <nb-action class="control-item" icon="email-outline"></nb-action>
+        <nb-action class="control-item" icon="bell-outline"></nb-action>
+        <nb-action class="user-action">
+          <nb-user [onlyPicture]="userPictureOnly" [name]="user?.name" [picture]="user?.picture">
+          </nb-user>
+        </nb-action>
+      </nb-actions>
+    </div>
+  <!-- </nb-layout-column>
+</nb-layout> -->
