@@ -1,17 +1,20 @@
-<nb-layout withScroll="false" class="app-container">
-
+<!-- <nb-layout withScroll="false" class="app-container"> -->
+<!-- <div class="sidebar-container"> -->
   @if (isExplorerReady) {
-    <nb-sidebar tag="settingDynamicSidebar">
+ <nb-layout-column >
+    <nb-sidebar tag="settingDynamicSidebar" style="position: static;">
       <!-- <nb-sidebar-header>
       <div class="explorer-header">
       </div>
     </nb-sidebar-header> -->
     <nb-menu [items]="SideItems" tag="settingSideMenu"></nb-menu>
   </nb-sidebar>
+</nb-layout-column>
 }
 
 <nb-layout-column>
   <router-outlet />
+  <!-- </div> -->
 </nb-layout-column>
 
-</nb-layout>
+<!-- </nb-layout> -->
