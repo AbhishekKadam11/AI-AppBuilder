@@ -1,20 +1,14 @@
-<!-- <nb-layout withScroll="false" class="app-container"> -->
-<!-- <div class="sidebar-container"> -->
-  @if (isExplorerReady) {
- <nb-layout-column >
-    <nb-sidebar tag="settingDynamicSidebar" style="position: static;">
-      <!-- <nb-sidebar-header>
-      <div class="explorer-header">
-      </div>
-    </nb-sidebar-header> -->
-    <nb-menu [items]="SideItems" tag="settingSideMenu"></nb-menu>
-  </nb-sidebar>
-</nb-layout-column>
-}
+<div class="setting-container">
+  <div class="sidebar-container">
+    @if (isExplorerReady) {
+    <nb-card class="setting-sidebar-card">
+      <nb-sidebar tag="settingDynamicSidebar" style="position: static;">
+        <nb-menu [items]="SideItems" tag="settingSideMenu"></nb-menu>
+      </nb-sidebar>
+    </nb-card>
+    }
+  </div>
 
-<nb-layout-column>
-  <router-outlet />
-  <!-- </div> -->
-</nb-layout-column>
-
-<!-- </nb-layout> -->
+  <div class="setting-page-container">
+    <router-outlet />
+  </div>

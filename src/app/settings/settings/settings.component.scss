@@ -1,0 +1,32 @@
+.setting-container {
+  display: flex;
+  height: 100%;
+}
+
+.sidebar-container {
+  height: 100%;
+  display: block;
+  position: sticky;
+  width: var(--sidebar-width);
+  background-color: var(--sidebar-background-color);
+  box-shadow: var(--sidebar-shadow);
+  color: var(--sidebar-text-color);
+  font-family: var(--sidebar-text-font-family);
+  font-size: var(--sidebar-text-font-size);
+  font-weight: var(--sidebar-text-font-weight);
+  line-height: var(--sidebar-text-line-height);
+}
+
+.setting-sidebar-card {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  margin: 0px;
+}
+
+.setting-page-container {
+  order: 1;
+  flex: 1 0;
+  min-width: 0;
+  padding: var(--layout-padding);
+}
