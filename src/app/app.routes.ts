@@ -6,10 +6,11 @@ import { ExtensionsComponent } from './settings/extensions/extensions.component'
 import { PreferencesComponent } from './settings/preferences/preferences.component';
 import { AnalyticsComponent } from './analytics/analytics.component';
 import { SwimlaneDashboardComponent } from './swimlane/swimlane-dashboard/swimlane-dashboard.component';
+import { authGuard } from './auth/auth.guard';
 
 export const routes: Routes = [
   {
-    path: 'workspace', component: DashboardComponent, title: 'Dashboard',
+    path: 'workspace', component: DashboardComponent, title: 'Dashboard', canActivate: [authGuard],
     children: [
       {
         path: 'settings', component: SettingsComponent, title: 'Settings',
