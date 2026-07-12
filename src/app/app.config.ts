@@ -1,8 +1,9 @@
-import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, PLATFORM_ID, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { isPlatformBrowser } from '@angular/common';
 import { NbMenuModule, NbSidebarModule, NbThemeModule, NbToastrModule, NbWindowModule, } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { UserData } from './core/users';
@@ -15,8 +16,14 @@ import { AuthService } from './auth/auth.service';
 import { lastValueFrom } from 'rxjs';
 import { authInterceptor } from './auth/auth.interceptor';
 
-function initializeAuth(authService: AuthService) {
-  return () => lastValueFrom(authService.checkSessionStatus()).catch(() => null);
+function initializeAuth(authService: AuthService, platformId: Object) {
+  return () => {
+    if (!isPlatformBrowser(platformId)) {
+      return Promise.resolve();
+    }
+
+    return lastValueFrom(authService.checkSessionStatus()).catch(() => null);
+  };
 }
 
 export const appConfig: ApplicationConfig = {
@@ -45,7 +52,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAuth,
-      deps: [AuthService],
+      deps: [AuthService, PLATFORM_ID],
       multi: true
     }
   ]

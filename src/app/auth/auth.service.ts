@@ -17,13 +17,20 @@ export class AuthService {
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID); // Inject the platform context
   private backendUrl = environment.apiUrl;
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  public currentUser = signal<UserProfile | null>(null);
+  public currentUser = signal<any | null>(null);
   public isAuthenticated = signal<boolean>(false);
   public isLoaded = signal<boolean>(false);
 
   checkSessionStatus(): Observable<UserProfile | null> {
-    return this.http.get<UserProfile>(`${this.backendUrl}/auth/user`).pipe(
+    if (!this.isBrowser) {
+      return of(null);
+    }
+
+    return this.http.get<UserProfile | null>(`${this.backendUrl}/auth/user`, {
+      withCredentials: true
+    }).pipe(
       tap((user) => {
         this.currentUser.set(user);
         this.isAuthenticated.set(!!user);
