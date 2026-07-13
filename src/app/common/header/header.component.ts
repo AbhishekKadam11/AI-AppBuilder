@@ -1,10 +1,12 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NbActionsModule, NbIconLibraries, NbIconModule, NbJSThemesRegistry, NbLayoutModule, NbMediaBreakpointsService, NbMenuService, NbOptionModule, NbSelectModule, NbSidebarService, NbThemeService, NbUserModule } from '@nebular/theme';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { NbActionsModule, NbContextMenuModule, NbIconLibraries, NbIconModule, NbJSThemesRegistry, NbLayoutModule, NbMediaBreakpointsService, NbMenuService, NbOptionModule, NbSelectModule, NbSidebarService, NbThemeService, NbUserModule } from '@nebular/theme';
 import { UserData } from '../../../app/core/users';
-import { map, takeUntil } from 'rxjs/operators';
+import { filter, map, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { StorageService } from '../../services/storage.service';
 import { AppWorkflowService } from '../../services/app-workflow.service';
+import { Router } from '@angular/router';
+import { AuthService } from '../../auth/auth.service';
 
 export const themes = [
   {
@@ -27,7 +29,7 @@ export const themes = [
 
 @Component({
   selector: 'app-header',
-  imports: [NbIconModule, NbActionsModule, NbSelectModule, NbUserModule, NbOptionModule, NbLayoutModule],
+  imports: [NbIconModule, NbActionsModule, NbSelectModule, NbUserModule, NbOptionModule, NbLayoutModule, NbContextMenuModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
@@ -37,10 +39,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   userPictureOnly: boolean = false;
   user: any;
   currentTheme = 'default';
-  userMenu = [{ title: 'Profile' }, { title: 'Log out' }];
+  userMenu = [{ title: 'Profile', id: 'profile' }, { title: 'Log out', id: 'logout' }];
   appList: any[] = [];
   selectedApp: string = '';
   themes: any[] = [];
+  private readonly authService = inject(AuthService);
 
   constructor(private sidebarService: NbSidebarService,
     private menuService: NbMenuService,
@@ -51,6 +54,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private appWorkflowService: AppWorkflowService,
     private nbThemesRegistry: NbJSThemesRegistry,
     private iconsLibrary: NbIconLibraries,
+    private nbMenuService: NbMenuService,
+    private router: Router,
     private breakpointService: NbMediaBreakpointsService) {
   }
 
@@ -86,6 +91,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
     });
 
     this.appList = this.appWorkflowService.fetchAppObjFromLocalStorage();
+
+      this.nbMenuService.onItemClick()
+      .pipe(
+        filter(({ tag }) => tag === 'header-user-menu'),
+        map(({ item: { title } }) => title),
+      )
+      .subscribe(title => {
+        switch (title) {
+          case 'Log out':
+            this.authService.logout();
+            break;
+          case 'Profile':
+            this.router.navigate(['/workspace/settings/preferences']);
+            break;
+        }
+      });
   }
 
   ngOnDestroy() {
