@@ -5,14 +5,21 @@ import { WebContainerService } from './web-container.service';
 import { Subject } from 'rxjs';
 import { DirectoryControlService } from './directory-control.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ApiService } from './api.service';
+import { NbToastrService } from '@nebular/theme';
 
 interface AppDetails {
   appName?: string;
-  data?: {
-    extraConfig?: {
+  data: {
+    extraConfig: {
       projectName?: string;
       routePath?: string;
     };
+    messages: Array<any>
+    supervisorMesssage: Array<any>
+    uiMessages: Array<any>
+    next: string
+    chat_history: Array<any>
   };
   dataSource?: Array<{ component?: string }>;
 }
@@ -39,6 +46,10 @@ export class AppWorkflowService {
   private readonly webContainerService = inject(WebContainerService);
   private readonly directoryControlService = inject(DirectoryControlService);
   private destroyRef = inject(DestroyRef);
+  private apiService = inject(ApiService);
+  private toastrService = inject(NbToastrService);
+
+  private readonly apiPath = 'addAppData';
 
   constructor(private storageService: StorageService) { }
 
@@ -62,7 +73,7 @@ export class AppWorkflowService {
     return this.appExtensionSubject.asObservable();
   }
 
-  saveAppObjInLocalStorage(appDetails: any): void {
+  saveAppObjInLocalStorage(appDetails: AppDetails): void {
     const appObject = this.storageService.getItem('appObject');
     if (appObject) {
       const appList = JSON.parse(appObject);
@@ -77,6 +88,16 @@ export class AppWorkflowService {
     } else {
       this.storageService.setItem('appObject', JSON.stringify([appDetails]));
     }
+  }
+
+  saveAppObjInCloud(appDetails: AppDetails) {
+    const payload = { "app_name": appDetails.data.extraConfig.projectName, "app_data": appDetails.data };
+    this.apiService.post(this.apiPath, payload).subscribe((response: any) => {
+      this.toastrService.show('Success', `User app save successfully`, { status: 'success' });
+    }, (error: any) => {
+      console.log(error);
+      this.toastrService.show('Failed', `Unable to save user app`, { status: 'danger' });
+    });
   }
 
   fetchAppObjFromLocalStorage() {
