@@ -133,14 +133,13 @@ export class ChatShowcaseComponent implements AfterViewInit {
     const serverMessage = new MessageSchema();
     serverMessage.setServerMessage(response);
     serverMessage.setComponentMessage(response);
-
     this.addMessage(serverMessage.getMessage());
 
     if (response.data?.supervisorMesssage?.length) {
       response.data.uiMessages = this.messages();
       this.applyExtraConfig(response, serverMessage);
       // console.log('response.data.extraConfig', response.data.extraConfig);
-      this.appWorkflowService.processState('appRecived', response); // Note: 'appRecived' typo kept
+      this.appWorkflowService.processState('appRecived', response);
     }
 
     this.badgeConfig = { content: '', status: 'info', disabled: true };

@@ -7,6 +7,7 @@ import { DirectoryControlService } from './directory-control.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from './api.service';
 import { NbToastrService } from '@nebular/theme';
+import { environment } from "../../environments/environment";
 
 interface AppDetails {
   appName?: string;
@@ -50,6 +51,7 @@ export class AppWorkflowService {
   private toastrService = inject(NbToastrService);
 
   private readonly apiPath = 'addAppData';
+  private readonly dbStoreEnabled = environment.dbStoreEnabled;
 
   constructor(private storageService: StorageService) { }
 
@@ -57,11 +59,18 @@ export class AppWorkflowService {
     // this.appWorkflowSubject.next(state);
     switch (fact) {
       case 'appRecived':
-        this.saveAppObjInLocalStorage(appObject);
+        this.storeAppObject(appObject);
         this.appWorkflowSubject.next(appObject);
         this.initDirectoryManager(appObject);
         break;
     }
+  }
+
+  storeAppObject(appObject: AppDetails): void {
+    if (this.dbStoreEnabled) {
+      return this.saveAppObjInCloud(appObject);
+    }
+    return this.saveAppObjInLocalStorage(appObject);
   }
 
   // App Extension related methods

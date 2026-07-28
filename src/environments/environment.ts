@@ -3,4 +3,5 @@ export const environment = {
   apiUrl: 'http://localhost:8000',
   socketUrl: 'http://localhost:8001',
   activeSocketNamespace: ['/projectId', '/jiraId'],
+  dbStoreEnabled: true
 };
