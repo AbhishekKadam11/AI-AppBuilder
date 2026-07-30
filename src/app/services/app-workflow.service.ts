@@ -2,7 +2,7 @@ import { DestroyRef, inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { StorageService } from './storage.service';
 import { WebContainerService } from './web-container.service';
-import { Subject } from 'rxjs';
+import { firstValueFrom, map, Observable, Subject } from 'rxjs';
 import { DirectoryControlService } from './directory-control.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from './api.service';
@@ -50,10 +50,12 @@ export class AppWorkflowService {
   private apiService = inject(ApiService);
   private toastrService = inject(NbToastrService);
 
-  private readonly apiPath = 'addAppData';
+  private readonly apiPath = 'appdata';
   private readonly dbStoreEnabled = environment.dbStoreEnabled;
 
-  constructor(private storageService: StorageService) { }
+  constructor(private storageService: StorageService) {
+    console.log("this.dbStoreEnabled", this.dbStoreEnabled);
+  }
 
   processState(fact: string, appObject: AppDetails): void {
     // this.appWorkflowSubject.next(state);
@@ -99,7 +101,7 @@ export class AppWorkflowService {
     }
   }
 
-  saveAppObjInCloud(appDetails: AppDetails) {
+  saveAppObjInCloud(appDetails: AppDetails): void {
     const payload = { "app_name": appDetails.data.extraConfig.projectName, "app_data": appDetails.data };
     this.apiService.post(this.apiPath, payload).subscribe((response: any) => {
       this.toastrService.show('Success', `User app save successfully`, { status: 'success' });
@@ -116,6 +118,15 @@ export class AppWorkflowService {
       return appList;
     }
     return null;
+  }
+
+  async fetchAppObjFromCloud(): Promise<string[]> {
+    const resposne = await firstValueFrom(this.apiService.get(this.apiPath)) as string[];
+    resposne.forEach((item: any) => {
+      item.data = item.app_data;
+      delete item.app_data;
+    });
+    return resposne;
   }
 
   async webContainerCommandRunner(commandArray: string[]): Promise<void> {

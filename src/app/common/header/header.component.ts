@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { NbActionsModule, NbContextMenuModule, NbIconLibraries, NbIconModule, NbJSThemesRegistry, NbLayoutModule, NbMediaBreakpointsService, NbMenuService, NbOptionModule, NbSelectModule, NbSidebarService, NbThemeService, NbUserModule } from '@nebular/theme';
+import { NbActionsModule, NbButtonModule, NbContextMenuModule, NbIconLibraries, NbIconModule, NbJSThemesRegistry, NbLayoutModule, NbMediaBreakpointsService, NbMenuService, NbOptionModule, NbSelectModule, NbSidebarService, NbThemeService, NbUserModule } from '@nebular/theme';
 import { UserData } from '../../../app/core/users';
 import { filter, map, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -7,6 +7,7 @@ import { StorageService } from '../../services/storage.service';
 import { AppWorkflowService } from '../../services/app-workflow.service';
 import { Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
+import { environment } from '../../../environments/environment';
 
 export const themes = [
   {
@@ -29,7 +30,7 @@ export const themes = [
 
 @Component({
   selector: 'app-header',
-  imports: [NbIconModule, NbActionsModule, NbSelectModule, NbUserModule, NbOptionModule, NbLayoutModule, NbContextMenuModule],
+  imports: [NbIconModule, NbActionsModule, NbSelectModule, NbUserModule, NbOptionModule, NbLayoutModule, NbContextMenuModule, NbButtonModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
@@ -44,6 +45,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   selectedApp: string = '';
   themes: any[] = [];
   private readonly authService = inject(AuthService);
+  private readonly dbStoreEnabled = environment.dbStoreEnabled;
 
   constructor(private sidebarService: NbSidebarService,
     private menuService: NbMenuService,
@@ -85,14 +87,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.registerThemeVariables();
     this.themePreference();
 
-     this.iconsLibrary.registerSvgPack('custom-icons', {
+    this.iconsLibrary.registerSvgPack('custom-icons', {
       'angular-logo': '<img src="assets/images/angular_gradient.png" width="24px">',
       'bot-avatar': '<img src="assets/images/bot.png" width="24px">',
     });
 
-    this.appList = this.appWorkflowService.fetchAppObjFromLocalStorage();
+    // this.appList = this.dbStoreEnabled ? await this.appWorkflowService.fetchAppObjFromCloud() : this.appWorkflowService.fetchAppObjFromLocalStorage();
 
-      this.nbMenuService.onItemClick()
+    this.nbMenuService.onItemClick()
       .pipe(
         filter(({ tag }) => tag === 'header-user-menu'),
         map(({ item: { title } }) => title),
@@ -107,6 +109,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
             break;
         }
       });
+
+    this.setupAppList();
+  }
+
+  async setupAppList() {
+    this.appList = this.dbStoreEnabled ? await this.appWorkflowService.fetchAppObjFromCloud() : this.appWorkflowService.fetchAppObjFromLocalStorage();
   }
 
   ngOnDestroy() {
