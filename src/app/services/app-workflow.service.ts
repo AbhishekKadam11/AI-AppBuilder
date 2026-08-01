@@ -54,14 +54,16 @@ export class AppWorkflowService {
   private readonly dbStoreEnabled = environment.dbStoreEnabled;
 
   constructor(private storageService: StorageService) {
-    console.log("this.dbStoreEnabled", this.dbStoreEnabled);
   }
 
   processState(fact: string, appObject: AppDetails): void {
-    // this.appWorkflowSubject.next(state);
     switch (fact) {
       case 'appRecived':
         this.storeAppObject(appObject);
+        this.appWorkflowSubject.next(appObject);
+        this.initDirectoryManager(appObject);
+        break;
+      case 'appInitialized':
         this.appWorkflowSubject.next(appObject);
         this.initDirectoryManager(appObject);
         break;
@@ -120,8 +122,12 @@ export class AppWorkflowService {
     return null;
   }
 
-  async fetchAppObjFromCloud(): Promise<string[]> {
+  async fetchAppObjFromCloud(): Promise<string[] | void> {
     const resposne = await firstValueFrom(this.apiService.get(this.apiPath)) as string[];
+    if (!resposne) {
+      this.toastrService.show('Failed', `Unable to fetch user app`, { status: 'danger' });
+      return;
+    }
     resposne.forEach((item: any) => {
       item.data = item.app_data;
       delete item.app_data;

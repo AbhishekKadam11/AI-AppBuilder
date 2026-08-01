@@ -92,8 +92,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
       'bot-avatar': '<img src="assets/images/bot.png" width="24px">',
     });
 
-    // this.appList = this.dbStoreEnabled ? await this.appWorkflowService.fetchAppObjFromCloud() : this.appWorkflowService.fetchAppObjFromLocalStorage();
-
     this.nbMenuService.onItemClick()
       .pipe(
         filter(({ tag }) => tag === 'header-user-menu'),
@@ -130,7 +128,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   toggleSidebar(): boolean {
     // this.sidebarService.toggle(true, 'menu-sidebar');
     // this.layoutService.changeLayoutSize();
-
     return false;
   }
 
@@ -139,7 +136,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (currentUser) {
       const userTheme = JSON.parse(currentUser);
       this.themeService.changeTheme(userTheme.selectedTheme);
-
     }
     return;
   }
@@ -154,7 +150,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   changeAppObj(appObject: any) {
-    console.log("seleced appObject", appObject);
-    this.appWorkflowService.processState('appRecived', appObject);
+    this.appWorkflowService.processState('appInitialized', appObject);
   }
 }

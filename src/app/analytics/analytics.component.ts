@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { NbButtonModule, NbCardModule, NbIconModule, NbLayoutModule } from '@nebular/theme';
 import { DynamicChartComponent } from './dynamic-chart/dynamic-chart.component';
 import { AppWorkflowService } from '../services/app-workflow.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-analytics',
@@ -13,9 +14,10 @@ import { AppWorkflowService } from '../services/app-workflow.service';
 export class AnalyticsComponent {
 
   appDetails: any = [];
+  private readonly dbStoreEnabled = environment.dbStoreEnabled;
 
   constructor(private appWorkflowService: AppWorkflowService) {
-   const appData = this.appWorkflowService.fetchAppObjFromLocalStorage();
+   const appData = this.dbStoreEnabled ? this.appWorkflowService.fetchAppObjFromCloud() : this.appWorkflowService.fetchAppObjFromLocalStorage();
     if (appData) {
       for(let app of appData) {
         this.appDetails.push({id: app.id, appName: app.data.extraConfig.projectName, metadata: {
