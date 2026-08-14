@@ -217,7 +217,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.progressControlService.showProgressGif('init');
-    this.savePreferences();
   }
 
   ngOnDestroy() {
@@ -311,19 +310,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       isMaximized: signal(true),
       zIndex: signal(100)
     });
-  }
-
-  //Temporary function api call to sve log preferences
-  savePreferences() {
-    const userData = this.storageService.getItem('user');
-    if (userData) {
-      const userPreferences = JSON.parse(userData).preferences;
-      this.apiService.post('userPreferences', { userPreferences }).subscribe((response: any) => {
-        console.log(response);
-      }, (error: any) => {
-        console.error(error);
-      });
-    }
   }
 
 }

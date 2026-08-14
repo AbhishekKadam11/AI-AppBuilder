@@ -4,6 +4,7 @@ import { NbButtonModule, NbCardModule, NbIconModule, NbRadioModule, NbTabsetModu
 import { ApiService } from '../../services/api.service';
 import { FormsModule } from '@angular/forms';
 import { StorageService } from '../../services/storage.service';
+import { environment } from '../../../environments/environment';
 
 type Platforms = 'client' | 'server';
 
@@ -17,7 +18,6 @@ type ICaptureLogs = {
   [K in Platforms]: IUserPreferences
 }
 
-
 @Component({
   selector: 'app-preferences',
   standalone: true,
@@ -29,44 +29,34 @@ type ICaptureLogs = {
 export class PreferencesComponent {
 
   private readonly apiPath = 'userPreferences';
+  private readonly dbStoreEnabled = environment.dbStoreEnabled;
 
   userPreferences!: ICaptureLogs;
 
   constructor(private apiService: ApiService, private toastrService: NbToastrService, private storageService: StorageService) {
-    //add user preferences for fetching from local storage
-    const userPreferences = this.storageService.getItem('user');
-    if (userPreferences) {
-      this.userPreferences = JSON.parse(userPreferences).preferences;
-    }
-
-    this.userPreferences = {
-      client: {
-        logLevel: 'info',
-        captureLogs: true
-      },
-      server: {
-        logLevel: 'info',
-        captureLogs: true
-      }
-    }
-    this.save();
+    this.fetchUserPreferences();
   }
 
   save() {
-    // console.log(this.userPreferences)
-    this.apiService.post(this.apiPath, { userPreferences: this.userPreferences }).subscribe((response: any) => {
-      // console.log(response);
-      this.storeUserPreference();
+    if (this.dbStoreEnabled) {
+      return this.storeUserPreferenceOnRemote();
+    }
+    return this.storeUserPreferenceOnLocal();
+  }
+
+  cancel() {
+  }
+
+  storeUserPreferenceOnRemote() {
+    return this.apiService.post(this.apiPath, { preferences: this.userPreferences }).subscribe((response: any) => {
       this.toastrService.show('success', `User preferences updated successfully`, { status: 'success' });
     }, (error: any) => {
       console.error(error);
       this.toastrService.show('danger', `Unable to update user preferences`, { status: 'danger' });
     });
   }
-  cancel() {
-  }
 
-  storeUserPreference() {
+  storeUserPreferenceOnLocal() {
     const currentUser = this.storageService.getItem('user');
     if (currentUser) {
       const userData = JSON.parse(currentUser);
@@ -74,5 +64,27 @@ export class PreferencesComponent {
       this.storageService.setItem('user', JSON.stringify(userData));
     }
     return;
+  }
+
+  fetchUserPreferences() {
+    if (this.dbStoreEnabled) {
+      return this.fetchUserPreferenceFromRemote();
+    }
+    return this.fetchUserPreferenceFromLocal();
+  }
+
+  fetchUserPreferenceFromRemote() {
+    return this.apiService.get(this.apiPath).subscribe((response: any) => {
+      this.userPreferences = response != null ? response.preferences : { client: {}, server: {} };
+    }, (error: any) => {
+      console.error(error);
+    });
+  }
+
+  fetchUserPreferenceFromLocal() {
+    const userPreferences = this.storageService.getItem('user');
+    if (userPreferences) {
+      this.userPreferences = JSON.parse(userPreferences).preferences;
+    }
   }
 }

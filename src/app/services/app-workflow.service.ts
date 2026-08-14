@@ -43,6 +43,8 @@ export class AppWorkflowService {
   public browserUrl$ = this.browserUrlSubject.asObservable();
   private appLoggingSubject = new BehaviorSubject<string[]>([]);
   public appLogging$ = this.appLoggingSubject.asObservable();
+  private userPreferencesSubject = new BehaviorSubject<any>(null);
+  public userPreferences$ = this.userPreferencesSubject.asObservable();
 
   private readonly webContainerService = inject(WebContainerService);
   private readonly directoryControlService = inject(DirectoryControlService);
@@ -51,9 +53,11 @@ export class AppWorkflowService {
   private toastrService = inject(NbToastrService);
 
   private readonly apiPath = 'appdata';
+  private readonly userPreferencesPath = 'userPreferences';
   private readonly dbStoreEnabled = environment.dbStoreEnabled;
 
   constructor(private storageService: StorageService) {
+    this.setupBackgroundServices();
   }
 
   processState(fact: string, appObject: AppDetails): void {
@@ -187,5 +191,21 @@ export class AppWorkflowService {
 
   currentAppLogging(): any {
     return this.appLoggingSubject.getValue();
+  }
+
+  setupBackgroundServices(): void {
+    this.fetchUserPreferences();
+  }
+
+  fetchUserPreferences(): void {
+    if (this.dbStoreEnabled) {
+      this.apiService.get(this.userPreferencesPath).subscribe((response: any) => {
+      const userPreferences = response != null ? response.preferences : { client: {}, server: {} };
+      console.log('Fetched user preferences from remote:', userPreferences);
+      this.userPreferencesSubject.next(userPreferences);
+    }, (error: any) => {
+      console.error(error);
+    });
+    }
   }
 }
